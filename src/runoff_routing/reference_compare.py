@@ -122,6 +122,11 @@ def compare_cached(left_path: Path, right_path: Path, policy: Tolerance) -> Comp
     if names_a != names_b or len(a) != len(b) or len(a) != left["expected_steps"]:
         return Comparison("fail", ("Report columns or row counts differ",), policy.policy_id, 0)
     differences: list[str] = []
+    for column, name in enumerate(names_a[2:], start=2):
+        peak_a = max(range(len(a)), key=lambda i: a[i][column])
+        peak_b = max(range(len(b)), key=lambda i: b[i][column])
+        if peak_a != peak_b:
+            differences.append(f"{name}: first peak increment differs ({peak_a + 1} vs {peak_b + 1})")
     compared = 0
     for index, (row_a, row_b) in enumerate(zip(a, b, strict=True), start=1):
         if raw_a[index - 1][:2] != raw_b[index - 1][:2]:

@@ -243,3 +243,32 @@ def test_unknown_build_and_loss_two_are_not_claimed_verified(tmp_path: Path, mon
     assert "observed_banner" in data["provenance_gaps"]
     assert "loss_model_2_native_semantics_unverified" in data["provenance_gaps"]
     assert data["hydrograph_check"]["rows"] == 2
+
+
+def test_unsupported_multi_isa_rejected_before_side_effects(tmp_path: Path) -> None:
+    spec_path = _spec(tmp_path)
+    spec = _read(spec_path)
+    spec["effective_settings"]["isa_mapping"] = [1, 2]
+    spec_path.write_text(json.dumps(spec))
+    target = tmp_path / "captures"
+    with pytest.raises(ValueError, match="one explicit ISA"):
+        capture_cmd(spec_path, target, execute=True)
+    assert not target.exists()
+
+
+def test_evidence_inventory_error_preserves_manifest(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    from runoff_routing import reference
+
+    _mock_execution(monkeypatch)
+
+    def deny_inventory(root: Path, excluded: set[Path]) -> list[dict[str, str | int]]:
+        del root, excluded
+        raise PermissionError(13, "Unable to enumerate native directory")
+
+    monkeypatch.setattr(reference, "_files", deny_inventory)
+    manifest = capture_cmd(_spec(tmp_path), tmp_path / "captures", execute=True)
+    assert manifest is not None
+    record = _read(manifest)
+    assert record["outcome"] == "inventory_failed"
+    assert "Unable to enumerate" in record["diagnostics"]["errors"][0]
+    assert (manifest.parent / "stdout.bin").read_bytes().startswith(b"mock stdout")

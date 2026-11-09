@@ -29,6 +29,7 @@ Outcome = Literal[
     "launch_failed",
     "timeout",
     "input_mutated",
+    "inventory_failed",
 ]
 ERROR_LINE = re.compile(r"^\s*(?:error\b|fatal\b|aborted\b|failed\b|unable to\b)", re.IGNORECASE)
 WARNING_LINE = re.compile(r"^\s*warning\b", re.IGNORECASE)
@@ -189,7 +190,7 @@ def _files(root: Path, excluded: set[Path]) -> list[dict[str, str | int]]:
     return [_record(path, root) for path in paths]
 
 
-def _check_report(
+def _check_report(  # noqa: C901 -- explicit diagnostics for all malformed native-table states
     path: Path, expected_prints: dict[str, str], expected_steps: int | None
 ) -> tuple[Outcome, dict[str, Any]]:
     """Conservative cached table check; a non-characterised format is NOT native parity."""
@@ -331,7 +332,9 @@ def _new_root(parent: Path, case_id: str) -> Path:
     return root
 
 
-def capture_cmd(spec_file: Path, parent: Path, *, execute: bool = False) -> Path | None:
+def capture_cmd(  # noqa: C901 -- single-case subprocess/evidence lifecycle, no nested process launching
+    spec_file: Path, parent: Path, *, execute: bool = False
+) -> Path | None:
     """Validate by default. Only execute=True may launch a native process."""
     spec = _load(spec_file)
     if spec["engine_kind"] != "RORB_CMD":
@@ -346,6 +349,13 @@ def capture_cmd(spec_file: Path, parent: Path, *, execute: bool = False) -> Path
     params_raw = spec.get("parameters")
     if not isinstance(params_raw, dict):
         message = "parameters must be an object for the limited CMD writer"
+        raise ValueError(message)
+    allowed = {"kc", "m", "initial_loss_mm", "continuing", "loss_model"}
+    if set(params_raw) != allowed:
+        message = "CMD writer requires exactly kc, m, initial_loss_mm, continuing and loss_model"
+        raise ValueError(message)
+    if spec["effective_settings"].get("isa_mapping") != [1] or spec["effective_settings"].get("burst_mapping") != [1]:
+        message = "CMD writer supports only one explicit ISA and one explicit burst mapping ([1])"
         raise ValueError(message)
     params = Parameters.from_mapping(params_raw)
     timeout = spec.get("timeout_seconds", 1800)
@@ -402,28 +412,44 @@ def capture_cmd(spec_file: Path, parent: Path, *, execute: bool = False) -> Path
         for name in ("stdout.bin", "stderr.bin"):
             manifest["capture"][name] = _record(root / name, root)
         excluded.update({root / "stdout.bin", root / "stderr.bin"})
-        manifest["outputs"] = _files(root, excluded)
-        reports = [root / str(record["path"]) for record in manifest["outputs"] if str(record["path"]).lower().endswith(".out")]
-        logs = [root / str(record["path"]) for record in manifest["outputs"] if str(record["path"]).lower().endswith(".log")]
-        diagnostics = _diagnostics([root / "stdout.bin", root / "stderr.bin", *reports, *logs])
-        manifest["diagnostics"] = diagnostics
-        if outcome == "captured_unverified":
-            if diagnostics["errors"]:
-                outcome = "native_error"
-            elif not reports:
-                outcome = "missing_output"
-            elif len(reports) > 1:
-                outcome = "incomplete_output"
-            else:
-                outcome, manifest["hydrograph_check"] = _check_report(
-                    reports[0], spec["requested_print_locations"], spec["expected_steps"]
-                )
-            if (diagnostics["warnings"] or manifest["provenance_gaps"]) and outcome in ("success", "zero_runoff"):
-                outcome = "captured_unverified"
-        if any(fingerprint(path) != original_hashes[key] for key, path in originals.items()):
+        try:
+            manifest["outputs"] = _files(root, excluded)
+            reports = [
+                root / str(record["path"])
+                for record in manifest["outputs"]
+                if str(record["path"]).lower().endswith(".out")
+            ]
+            logs = [
+                root / str(record["path"])
+                for record in manifest["outputs"]
+                if str(record["path"]).lower().endswith(".log")
+            ]
+            diagnostics = _diagnostics([root / "stdout.bin", root / "stderr.bin", *reports, *logs])
+            manifest["diagnostics"] = diagnostics
+            if outcome == "captured_unverified":
+                if diagnostics["errors"]:
+                    outcome = "native_error"
+                elif not reports:
+                    outcome = "missing_output"
+                elif len(reports) > 1:
+                    outcome = "incomplete_output"
+                else:
+                    outcome, manifest["hydrograph_check"] = _check_report(
+                        reports[0], spec["requested_print_locations"], spec["expected_steps"]
+                    )
+                if (diagnostics["warnings"] or manifest["provenance_gaps"]) and outcome in ("success", "zero_runoff"):
+                    outcome = "captured_unverified"
+        except (OSError, ValueError) as exc:
+            manifest["diagnostics"]["errors"].append(f"Evidence inventory/inspection: {type(exc).__name__}: {exc}")
+            outcome = "inventory_failed"
+        try:
+            if any(fingerprint(path) != original_hashes[key] for key, path in originals.items()):
+                outcome = "input_mutated"
+            if fingerprint(staged_catchment) != original_hashes["catchment"] or fingerprint(staged_storm) != original_hashes["storm"]:
+                outcome = "input_mutated"
+        except OSError as exc:
             outcome = "input_mutated"
-        if fingerprint(staged_catchment) != original_hashes["catchment"] or fingerprint(staged_storm) != original_hashes["storm"]:
-            outcome = "input_mutated"
+            manifest["diagnostics"]["errors"].append(f"Source/staged input inaccessible after run: {exc}")
         manifest["outcome"] = outcome
         _persist(root, manifest)
     return root / "manifest.json"
