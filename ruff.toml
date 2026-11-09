@@ -1,0 +1,46 @@
+# Explicit rule families adapted from ryan-tools/ruff.toml (reviewed 2026-11-09).
+# Keep this version identical to the development dependency in pyproject.toml.
+required-version = "==0.16.6"
+target-version = "py314"
+line-length = 120
+preview = false
+fix = false
+unsafe-fixes = false
+force-exclude = true
+extend-exclude = [".local", "build", "dist"]
+
+[lint]
+select = [
+    # Correctness, common bugs and suspicious constructs.
+    "E", "W", "F", "B", "PLE", "PLW", "RUF",
+    # Modern Python and explicit annotations.
+    "UP", "FURB", "FLY", "SLOT", "ANN",
+    # Imports and package boundaries.
+    "I", "ICN", "INP",
+    # Maintainability and exception handling.
+    "A", "ARG", "BLE", "C4", "C90", "EM", "ERA", "ISC", "N",
+    "PERF", "PIE", "PLC", "RET", "RSE", "SIM", "SLF", "TRY",
+    # Logging, security, paths and general hygiene.
+    "G", "LOG", "S", "EXE", "PTH", "T10", "YTT",
+    # Scientific code and test correctness.
+    "NPY", "PD", "PT",
+]
+ignore = [
+    "E111",   # Ruff formatter owns indentation.
+    "E114",   # Ruff formatter owns comment indentation.
+    "E117",   # Ruff formatter owns indentation.
+    "ISC001", # Conflicts with Ruff formatter string layout.
+    "E501",   # Formatter wraps code; long URLs/messages may remain intact.
+]
+
+[lint.mccabe]
+max-complexity = 10
+
+[lint.per-file-ignores]
+"tests/**/*.py" = [
+    "INP001", # Pytest test files need not be packages.
+    "S101",   # Pytest uses assertions to report failures.
+]
+"repo-scripts/**/*.py" = [
+    "INP001", # Developer entry points are standalone scripts.
+]

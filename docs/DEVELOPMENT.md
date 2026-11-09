@@ -2,11 +2,19 @@
 
 ## Environment and layout
 
-Windows / Python 3.14 is the target. Use the normal user installation; a virtual environment is not mandatory. Install `py -3.14 -m pip install -e ".[dev]"`. The bootstrap deliberately has no numerical, GIS, pandas, Excel or acceleration dependencies. Add only what a selected feature needs; retain exact environment versions in acceptance records. Development tools are initially unpinned; reproducible lock/constraint selection is an S0 follow-up, not an assumed environment guarantee.
+Windows / Python 3.14 is the target. Use the normal user installation; a virtual environment is not mandatory. Install `py -3.14 -m pip install -e ".[dev]"`. The bootstrap deliberately has no numerical, GIS, pandas, Excel or acceleration dependencies. Add only what a selected feature needs; retain exact environment versions in acceptance records. Ruff is pinned to 0.16.6 in both its configuration and the development dependency. Other development tools are initially unpinned; reproducible lock/constraint selection is an S0 follow-up, not an assumed environment guarantee.
 
 Use src/runoff_routing for reusable code, tests for focused tests, repo-scripts for developer tools, docs for contracts and work records, and ignored .local for native/reference evidence. Add numerical submodules only when needed. Do not import ryan-tools as a dependency or copy its large workflow/dependency estate.
 
 Inspired by ryan-tools: Python 3.14 typing, Ruff at 120 columns, strict Pyright, Windows acceptance, installed-wheel checks, safe mapped/UNC paths, coherent batch pushes, focused tests and one authoritative work record. Do not inherit automatic version bumps, bundled wheels, broad GIS dependencies, submodules, recurring audits or release-on-main automation.
+
+## Ruff policy
+
+[`ruff.toml`](../ruff.toml) is the single lint configuration. It adopts all 41 explicit rule families selected in the reviewed ryan-tools configuration, plus annotation checks (`ANN`): 42 families covering correctness, modern Python, imports, naming, security, exceptions, logging, complexity, paths, performance, NumPy/pandas and pytest. Python 3.14 and 120-column formatting are retained. Ruff 0.16.6 is required; upgrades must change the dependency and configuration together and review the resulting diagnostics.
+
+This greenfield package does not inherit ryan-tools' legacy exceptions. Global ignores are limited to formatter overlap/line wrapping. Tests permit assertions and non-package discovery; developer entry points permit non-package discovery. Subprocess exemptions are confined to reviewed fixed-command call sites, with comments; the security family remains enabled elsewhere. Complexity is capped at 10. Broad exceptions, unused suppressions, old NumPy RNG APIs and parser code do not get automatic exemptions.
+
+Lint and format checks are read-only. Preview rules and unsafe fixes are off; use deliberate, reviewed fixes rather than an automatic baseline rewrite. Tests protect the policy itself but are not substitutes for executing Ruff and Pyright. Missing tools or an unrun target environment must not be reported as a passing gate.
 
 ## Local checks
 
@@ -20,6 +28,8 @@ The first command runs repository hygiene, Ruff lint/format checks, strict Pyrig
 The build command is a separate package milestone check. Install the wheel outside the repository, verify import location and exercise the selected public API there. Record source and wheel outcomes separately. The current namespace contains no solver; a build or scaffold test does not establish numerical validity.
 
 Documentation changes require relative-link and factual-claim review. Numerical/parser changes require focused tests plus affected prior-stage regressions and native evidence where the contract changes. Linux checks are useful but never replace Windows/Python 3.14 acceptance. Report every missing tool, failed check and unexpected skip; do not downgrade the target interpreter to manufacture a pass.
+
+The planning/scaffold PR needs these local quality checks and a Windows/Python 3.14 package/install smoke check before acceptance. It does not need to wait for RORB runner, hydrological or Monte Carlo validation: those are separate S0-S7 gates.
 
 ## CI policy during private development
 

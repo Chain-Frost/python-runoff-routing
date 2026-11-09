@@ -13,6 +13,7 @@ Read [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md), [docs/work/README.md](docs/work
 ## Implementation
 
 - Target Windows / Python 3.14. Use built-in generics, `X | None`, explicit public annotations, Ruff formatting (120 columns) and strict Pyright for first-party code.
+- Apply the pinned, comprehensive policy in `ruff.toml`. Fix findings instead of weakening rule families. Any suppression must name the exact rule, use the narrowest scope and explain the behavioural reason. No blanket `noqa`, broad legacy exemptions or unattended unsafe fixes.
 - Keep parsing, the typed domain model, numerical computation, event generation and reporting distinct. Avoid pass-through layers, generic plugin frameworks and unnecessary dependencies.
 - Preserve imported computational order and stable source identities. Graphical layout is not a reason to reorder a model.
 - Recognised input, supported execution and validated equivalence are separate states. Reject unsupported numerical behaviour explicitly.

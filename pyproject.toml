@@ -11,21 +11,13 @@ requires-python = ">=3.14"
 dependencies = []
 
 [project.optional-dependencies]
-dev = ["build", "pytest", "pyright", "ruff"]
+dev = ["build", "pytest", "pyright", "ruff==0.16.6"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
 runoff_routing = ["py.typed"]
-
-[tool.ruff]
-line-length = 120
-target-version = "py314"
-extend-exclude = [".local", "tests/fixtures"]
-
-[tool.ruff.lint]
-select = ["E4", "E7", "E9", "F", "I", "UP"]
 
 [tool.pyright]
 include = ["src", "repo-scripts", "tests"]
