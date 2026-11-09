@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "python-runoff-routing"
+version = "0.0.0.dev0"
+description = "Private independent rainfall-runoff routing development"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["build", "pytest", "pyright", "ruff==0.16.6"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+runoff_routing = ["py.typed"]
+
+[tool.pyright]
+include = ["src", "repo-scripts", "tests"]
+exclude = [".local", "tests/fixtures", "build", "dist"]
+pythonVersion = "3.14"
+pythonPlatform = "Windows"
+typeCheckingMode = "strict"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+  "native: explicitly requested local reference-engine acceptance",
+  "regression: comparison against retained reference evidence",
+  "benchmark: explicitly requested timing and memory measurements",
+]
