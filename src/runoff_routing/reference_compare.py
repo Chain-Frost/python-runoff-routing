@@ -44,19 +44,10 @@ def _report(root: Path, manifest: dict[str, Any]) -> Path:
     return root / str(reports[0])
 
 
-def _table(path: Path) -> tuple[list[str], list[list[str]], list[list[float]]]:
-    text = path.read_text(encoding="utf-8", errors="replace").splitlines()
-    headings = [i for i, line in enumerate(text) if line.split()[:2] == ["Inc", "Time"]]
-    if len(headings) != 1:
-        message = "Report does not contain exactly one Inc/Time table"
-        raise ValueError(message)
-    columns = text[headings[0]].split()
-    if len(columns) < 3 or len(set(columns)) != len(columns):
-        message = "Report has invalid or duplicate hydrograph identifiers"
-        raise ValueError(message)
+def _numeric_rows(lines: list[str], start: int, column_count: int) -> tuple[list[list[str]], list[list[float]]]:
     rows: list[list[float]] = []
     raw_rows: list[list[str]] = []
-    for line in text[headings[0] + 1 :]:
+    for line in lines[start:]:
         tokens = line.split()
         if not tokens:
             if rows:
@@ -68,7 +59,7 @@ def _table(path: Path) -> tuple[list[str], list[list[str]], list[list[float]]]:
             if rows:
                 break
             continue
-        if len(tokens) != len(columns):
+        if len(tokens) != column_count:
             message = "Report contains a partial or extra hydrograph row"
             raise ValueError(message)
         try:
@@ -84,6 +75,20 @@ def _table(path: Path) -> tuple[list[str], list[list[str]], list[list[float]]]:
     if not rows:
         message = "Report contains no hydrograph rows"
         raise ValueError(message)
+    return raw_rows, rows
+
+
+def _table(path: Path) -> tuple[list[str], list[list[str]], list[list[float]]]:
+    text = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    headings = [i for i, line in enumerate(text) if line.split()[:2] == ["Inc", "Time"]]
+    if len(headings) != 1:
+        message = "Report does not contain exactly one Inc/Time table"
+        raise ValueError(message)
+    columns = text[headings[0]].split()
+    if len(columns) < 3 or len(set(columns)) != len(columns):
+        message = "Report has invalid or duplicate hydrograph identifiers"
+        raise ValueError(message)
+    raw_rows, rows = _numeric_rows(text, headings[0] + 1, len(columns))
     return columns, raw_rows, rows
 
 
@@ -95,34 +100,28 @@ def _input_hashes(manifest: dict[str, Any]) -> dict[str, str]:
     }
 
 
-def compare_cached(left_path: Path, right_path: Path, policy: Tolerance) -> Comparison:
-    """Compare pinned same-profile cases, never launch either RORB executable."""
-    problems = [*verify_manifest(left_path), *verify_manifest(right_path)]
-    if problems:
-        return Comparison("invalid_evidence", tuple(problems), policy.policy_id, 0)
-    left: dict[str, Any] = json.loads(left_path.read_text(encoding="utf-8"))
-    right: dict[str, Any] = json.loads(right_path.read_text(encoding="utf-8"))
-    if (left["engine"] != right["engine"] or left["case_id"] != right["case_id"]):
-        return Comparison("not_comparable", ("Engine identities or case IDs differ; GUI/CMD baselines stay separate",), policy.policy_id, 0)
-    if (_input_hashes(left).keys() != {"catchment", "storm"} or _input_hashes(right).keys() != {"catchment", "storm"}):
-        return Comparison("not_comparable", ("Catchment/storm source hashes are required",), policy.policy_id, 0)
+def _compatibility_issue(left: dict[str, Any], right: dict[str, Any]) -> str | None:
+    if left["engine"] != right["engine"] or left["case_id"] != right["case_id"]:
+        return "Engine identities or case IDs differ; GUI/CMD baselines stay separate"
+    if _input_hashes(left).keys() != {"catchment", "storm"} or _input_hashes(right).keys() != {"catchment", "storm"}:
+        return "Catchment/storm source hashes are required"
     if left["effective_settings"] != right["effective_settings"] or _input_hashes(left) != _input_hashes(right):
-        return Comparison("not_comparable", ("Effective settings or original catchment/storm hashes differ",), policy.policy_id, 0)
+        return "Effective settings or original catchment/storm hashes differ"
     if left["requested_print_locations"] != right["requested_print_locations"]:
-        return Comparison("not_comparable", ("Requested print identities differ",), policy.policy_id, 0)
+        return "Requested print identities differ"
     if left["expected_steps"] is None or left["expected_steps"] != right["expected_steps"]:
-        return Comparison("not_comparable", ("Unverified or mismatched expected timestep horizon",), policy.policy_id, 0)
+        return "Unverified or mismatched expected timestep horizon"
     if left["outcome"] not in ("success", "zero_runoff") or right["outcome"] not in ("success", "zero_runoff"):
-        return Comparison("not_comparable", ("One or both captures lack verified complete output",), policy.policy_id, 0)
-    try:
-        names_a, raw_a, a = _table(_report(left_path.parent, left))
-        names_b, raw_b, b = _table(_report(right_path.parent, right))
-    except (KeyError, ValueError) as exc:
-        return Comparison("invalid_evidence", (str(exc),), policy.policy_id, 0)
-    if names_a != names_b or len(a) != len(b) or len(a) != left["expected_steps"]:
-        return Comparison("fail", ("Report columns or row counts differ",), policy.policy_id, 0)
+        return "One or both captures lack verified complete output"
+    return None
+
+
+def _hydrograph_differences(
+    names: list[str], raw_a: list[list[str]], raw_b: list[list[str]],
+    a: list[list[float]], b: list[list[float]], policy: Tolerance,
+) -> tuple[tuple[str, ...], int]:
     differences: list[str] = []
-    for column, name in enumerate(names_a[2:], start=2):
+    for column, name in enumerate(names[2:], start=2):
         peak_a = max(range(len(a)), key=lambda i: a[i][column])
         peak_b = max(range(len(b)), key=lambda i: b[i][column])
         if peak_a != peak_b:
@@ -132,9 +131,30 @@ def compare_cached(left_path: Path, right_path: Path, policy: Tolerance) -> Comp
         if raw_a[index - 1][:2] != raw_b[index - 1][:2]:
             differences.append(f"Row {index}: raw increment/time labels differ")
             continue
-        for name, value_a, value_b in zip(names_a[2:], row_a[2:], row_b[2:], strict=True):
+        for name, value_a, value_b in zip(names[2:], row_a[2:], row_b[2:], strict=True):
             compared += 1
             allowance = max(policy.absolute, policy.relative * max(abs(value_a), abs(value_b), policy.near_zero_floor))
             if abs(value_a - value_b) > allowance:
                 differences.append(f"Row {index} {name}: {value_a} vs {value_b} (limit {allowance})")
-    return Comparison("fail" if differences else "pass", tuple(differences), policy.policy_id, compared)
+    return tuple(differences), compared
+
+
+def compare_cached(left_path: Path, right_path: Path, policy: Tolerance) -> Comparison:
+    """Compare pinned same-profile cases, never launch either RORB executable."""
+    problems = [*verify_manifest(left_path), *verify_manifest(right_path)]
+    if problems:
+        return Comparison("invalid_evidence", tuple(problems), policy.policy_id, 0)
+    left: dict[str, Any] = json.loads(left_path.read_text(encoding="utf-8"))
+    right: dict[str, Any] = json.loads(right_path.read_text(encoding="utf-8"))
+    reason = _compatibility_issue(left, right)
+    if reason is not None:
+        return Comparison("not_comparable", (reason,), policy.policy_id, 0)
+    try:
+        names_a, raw_a, a = _table(_report(left_path.parent, left))
+        names_b, raw_b, b = _table(_report(right_path.parent, right))
+    except (KeyError, ValueError) as exc:
+        return Comparison("invalid_evidence", (str(exc),), policy.policy_id, 0)
+    if names_a != names_b or len(a) != len(b) or len(a) != left["expected_steps"]:
+        return Comparison("fail", ("Report columns or row counts differ",), policy.policy_id, 0)
+    differences, compared = _hydrograph_differences(names_a, raw_a, raw_b, a, b, policy)
+    return Comparison("fail" if differences else "pass", differences, policy.policy_id, compared)

@@ -57,7 +57,7 @@ def test_cmd_read_preserves_raw_bytes_and_isa_order(tmp_path: Path, lumped: bool
     assert doc.parameters.num_bursts == 1
     assert [p.isa for p in doc.parameters.routing] == ([1] if lumped else [1, 2])
     assert [p.isa for p in doc.parameters.losses] == [1, 2]
-    assert doc.parameters.losses[1].initial_loss_mm == Decimal("11")
+    assert doc.parameters.losses[1].initial_loss_mm == Decimal(11)
     assert doc.fields[0].line == 2
     assert doc.fields[-1].raw.startswith("ISA 2")
     assert not any(d.severity == "error" for d in doc.diagnostics)

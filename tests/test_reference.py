@@ -10,6 +10,7 @@ from typing import Any
 
 import pytest
 
+from runoff_routing import reference
 from runoff_routing.reference import Parameters, archive_reference, capture_cmd, render_par, verify_manifest
 from runoff_routing.reference_compare import Tolerance, compare_cached
 
@@ -52,9 +53,10 @@ def _mock_execution(
     if report is None:
         report = "Inc Time Hyd001 Hyd002\n1 0 1 2\n2 1 3 4\nEnd\n"
 
-    def fake_run(*args: object, **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
+    def fake_run(*args: object, **kwargs: object) -> subprocess.CompletedProcess[bytes]:
         del args
         root = kwargs["cwd"]
+        assert isinstance(root, Path)
         assert root.is_dir()
         par = root / "reference.par"
         contents = par.read_text()
@@ -210,7 +212,8 @@ def test_cached_same_profile_comparison_and_timing(tmp_path: Path, monkeypatch: 
     _mock_execution(monkeypatch)
     first = capture_cmd(spec, tmp_path / "captures", execute=True)
     second = capture_cmd(spec, tmp_path / "captures", execute=True)
-    assert first is not None and second is not None
+    assert first is not None
+    assert second is not None
     policy = Tolerance("test-exact", 0, 0)
     assert compare_cached(first, second, policy).status == "pass"
     (second.parent / "native.out").write_text("Inc Time Hyd001 Hyd002\n1 0 1 2\n2 1.5 3 4\nEnd\n")
@@ -257,7 +260,6 @@ def test_unsupported_multi_isa_rejected_before_side_effects(tmp_path: Path) -> N
 
 
 def test_evidence_inventory_error_preserves_manifest(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    from runoff_routing import reference
 
     _mock_execution(monkeypatch)
 

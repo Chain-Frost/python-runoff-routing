@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 from decimal import Decimal
+from itertools import pairwise
 
 from .rorb_documents import Diagnostic, HydrographReport, HydrographRow, Inspection, RorbSource, decimal_number
 
@@ -67,13 +68,20 @@ def _printed_resolution(value: Decimal) -> Decimal:
 def _validate_time(rows: tuple[HydrographRow, ...], timestep: Decimal | None) -> None:
     if timestep is None:
         return
-    for previous, current in zip(rows, rows[1:], strict=False):
+    for previous, current in pairwise(rows):
         precision = (_printed_resolution(previous.time_hours) + _printed_resolution(current.time_hours)
                      + _printed_resolution(timestep)) / 2
         tolerance = min(timestep / 2, precision)
         if abs(current.time_hours - previous.time_hours - timestep) > tolerance:
             message = f"Reported time increment differs from values at line {current.line}"
             raise ValueError(message)
+
+
+def _validate_duration(rows: tuple[HydrographRow, ...], duration: int | None) -> None:
+    if duration is not None and (rows[0].increment != 0 or rows[-1].increment != duration
+                                 or len(rows) != duration + 1):
+        message = "Report hydrograph rows do not cover the full calculation duration"
+        raise ValueError(message)
 
 
 def inspect_output(source: RorbSource) -> Inspection:
@@ -94,10 +102,7 @@ def inspect_output(source: RorbSource) -> Inspection:
         timestep, duration = _extract_metadata(source)
         rows = _read_rows(source, index, len(fields))
         _validate_time(rows, timestep)
-        if duration is not None and (rows[0].increment != 0 or rows[-1].increment != duration
-                                     or len(rows) != duration + 1):
-            message = "Report hydrograph rows do not cover the full calculation duration"
-            raise ValueError(message)
+        _validate_duration(rows, duration)
     except ValueError as exc:
         return Inspection("output_report", "invalid", source,
                           (Diagnostic("output_record", str(exc), "error", index + 1),))
