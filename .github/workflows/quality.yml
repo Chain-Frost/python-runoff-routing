@@ -1,0 +1,47 @@
+name: Windows quality
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows-python-314:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - name: Install development dependencies
+        run: python -m pip install -e ".[dev]"
+      - name: Strict local quality checks (no native engines)
+        run: python repo-scripts/check_local.py
+      - name: Build wheel
+        run: python -m build --wheel
+      - name: Verify installed wheel outside checkout
+        shell: pwsh
+        run: |
+          $target = Join-Path $env:RUNNER_TEMP 'runoff-wheel-smoke'
+          New-Item -ItemType Directory -Path $target -Force | Out-Null
+          $wheel = (Get-ChildItem 'dist/*.whl' | Select-Object -First 1).FullName
+          python -m pip install --no-deps --target "$target" "$wheel"
+          Push-Location $env:RUNNER_TEMP
+          try {
+            $env:PYTHONPATH = $target
+            python -c "import pathlib, runoff_routing; p=pathlib.Path(runoff_routing.__file__).resolve(); root=pathlib.Path(r'$target').resolve(); assert p.is_relative_to(root), p; assert (p.parent / 'py.typed').is_file(); print(p)"
+          } finally {
+            Pop-Location
+          }
