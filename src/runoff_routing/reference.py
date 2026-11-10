@@ -141,8 +141,7 @@ def _load(spec_file: Path) -> dict[str, Any]:
         raise ValueError(message)
     prints = cast("dict[str, object]", raw_prints)
     if any(
-        not re.fullmatch(r"Hyd\d+", key) or not isinstance(value, str) or not value
-        for key, value in prints.items()
+        not re.fullmatch(r"Hyd\d+", key) or not isinstance(value, str) or not value for key, value in prints.items()
     ):
         message = "requested_print_locations must map HydNNN column IDs to actual location identities"
         raise ValueError(message)
