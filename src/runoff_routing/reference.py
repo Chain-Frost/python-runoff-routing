@@ -141,7 +141,7 @@ def _load(spec_file: Path) -> dict[str, Any]:
         raise ValueError(message)
     prints = cast("dict[str, object]", raw_prints)
     if any(
-        not isinstance(key, str) or not re.fullmatch(r"Hyd\d+", key) or not isinstance(value, str) or not value
+        not re.fullmatch(r"Hyd\d+", key) or not isinstance(value, str) or not value
         for key, value in prints.items()
     ):
         message = "requested_print_locations must map HydNNN column IDs to actual location identities"
@@ -490,11 +490,7 @@ def archive_reference(spec_file: Path, parent: Path) -> Path:
         "inputs": {name: _file(spec_file, path) for name, path in inputs.items()},
         "outputs": {name: _file(spec_file, path) for name, path in outputs.items()},
     }
-    if any(
-        not isinstance(name, str) or not re.fullmatch(r"[A-Za-z0-9_.-]+", name)
-        for group in files.values()
-        for name in group
-    ):
+    if any(not re.fullmatch(r"[A-Za-z0-9_.-]+", name) for group in files.values() for name in group):
         message = "Archive file identifiers must be safe single path components"
         raise ValueError(message)
     root = _new_root(parent.absolute(), spec["case_id"])
