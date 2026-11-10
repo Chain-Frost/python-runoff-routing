@@ -47,10 +47,11 @@ def main(argv: list[str] | None = None) -> int:
         policy = Tolerance(args.policy_id, args.absolute, args.relative, args.near_zero_floor)
         result = compare_cached(args.left, args.right, policy)
         print(json.dumps(asdict(result), indent=2))
-        return 0 if result.status == "pass" else 1
     except (OSError, KeyError, ValueError, TypeError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
+    else:
+        return 0 if result.status == "pass" else 1
 
 
 if __name__ == "__main__":

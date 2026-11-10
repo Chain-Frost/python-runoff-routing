@@ -130,7 +130,7 @@ def _load(spec_file: Path) -> dict[str, Any]:
         raise ValueError(message)
     if not isinstance(raw["provenance"], dict) or not isinstance(raw["effective_settings"], dict):
         message = "provenance and effective_settings must be objects"
-        raise ValueError(message)
+        raise TypeError(message)
     prints = raw["requested_print_locations"]
     if not isinstance(prints, dict) or not prints or any(
         not isinstance(key, str) or not re.fullmatch(r"Hyd\d+", key) or not isinstance(value, str) or not value
@@ -153,10 +153,10 @@ def _path(spec_file: Path, raw: str) -> Path:
     return (value if value.is_absolute() else spec_file.absolute().parent / value).absolute()
 
 
-def _file(spec_file: Path, raw: Any) -> Path:
+def _file(spec_file: Path, raw: object) -> Path:
     if not isinstance(raw, str):
         message = "Input and executable paths must be strings"
-        raise ValueError(message)
+        raise TypeError(message)
     path = _path(spec_file, raw)
     if path.is_symlink() or not path.is_file():
         message = f"Reference file is missing or not a regular file: {raw}"
@@ -257,20 +257,17 @@ def _diagnostics(paths: list[Path]) -> dict[str, list[str]]:
 
 def _metadata_gaps(spec: dict[str, Any]) -> list[str]:
     """A readable hydrograph is not a complete provenance record."""
-    gaps: list[str] = []
-    for field in ("observed_banner", "observed_version"):
-        if not spec.get(field):
-            gaps.append(field)
+    gaps: list[str] = [field for field in ("observed_banner", "observed_version") if not spec.get(field)]
     provenance = spec["provenance"]
-    for field in ("source", "redistribution"):
-        if not provenance.get(field):
-            gaps.append(f"provenance.{field}")
+    gaps.extend(f"provenance.{field}" for field in ("source", "redistribution") if not provenance.get(field))
     generator = spec.get("generator")
     if not isinstance(generator, dict) or any(not generator.get(key) for key in ("name", "revision", "event_to_file")):
         gaps.append("generator name/revision/event_to_file")
-    for field in ("timestep_hours", "horizon", "isa_mapping", "burst_mapping"):
-        if spec["effective_settings"].get(field) in (None, "", []):
-            gaps.append(f"effective_settings.{field}")
+    gaps.extend(
+        f"effective_settings.{field}"
+        for field in ("timestep_hours", "horizon", "isa_mapping", "burst_mapping")
+        if spec["effective_settings"].get(field) in (None, "", [])
+    )
     if spec["expected_steps"] is None:
         gaps.append("expected_steps")
     if spec.get("parameters", {}).get("loss_model") == 2:
@@ -349,7 +346,7 @@ def capture_cmd(  # noqa: C901 -- single-case subprocess/evidence lifecycle, no 
     params_raw = spec.get("parameters")
     if not isinstance(params_raw, dict):
         message = "parameters must be an object for the limited CMD writer"
-        raise ValueError(message)
+        raise TypeError(message)
     allowed = {"kc", "m", "initial_loss_mm", "continuing", "loss_model"}
     if set(params_raw) != allowed:
         message = "CMD writer requires exactly kc, m, initial_loss_mm, continuing and loss_model"
@@ -504,9 +501,7 @@ def verify_manifest(manifest_path: Path) -> list[str]:
     root = manifest_path.absolute().parent
     discrepancies: list[str] = []
     entries = [*manifest.get("outputs", []), *manifest.get("inputs", {}).values()]
-    for key in ("stdout.bin", "stderr.bin"):
-        if key in manifest.get("capture", {}):
-            entries.append(manifest["capture"][key])
+    entries.extend(manifest["capture"][key] for key in ("stdout.bin", "stderr.bin") if key in manifest.get("capture", {}))
     for entry in entries:
         if not isinstance(entry, dict):
             discrepancies.append("Non-object evidence record")
