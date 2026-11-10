@@ -117,7 +117,7 @@ def _load(spec_file: Path) -> dict[str, Any]:
     decoded: object = json.loads(spec_file.read_text(encoding="utf-8"))
     if not isinstance(decoded, dict):
         message = "Capture spec must be a JSON object"
-        raise ValueError(message)
+        raise TypeError(message)
     raw = cast("dict[str, Any]", decoded)
     if raw.get("schema_version") != SCHEMA_VERSION:
         message = f"Expected capture spec schema_version={SCHEMA_VERSION}"
@@ -520,12 +520,35 @@ def archive_reference(spec_file: Path, parent: Path) -> Path:
     return _persist(root, manifest)
 
 
+def _evidence_problem(root: Path, entry: object) -> str | None:
+    """Identify one malformed or tampered cached evidence record."""
+    if not isinstance(entry, dict):
+        return "Non-object evidence record"
+    evidence = cast("dict[str, Any]", entry)
+    name = evidence.get("path") or evidence.get("staged")
+    if not isinstance(name, str):
+        return "Missing evidence path"
+    relative = Path(name)
+    if relative.is_absolute() or ".." in relative.parts:
+        return f"Unsafe evidence locator: {name}"
+    path = root / relative
+    if not path.is_file() or path.is_symlink():
+        return f"Evidence missing or symlinked: {name}"
+    expected_candidate: object = evidence.get("source_fingerprint", evidence)
+    if not isinstance(expected_candidate, dict):
+        return f"Evidence fingerprint is not a record: {name}"
+    expected = cast("dict[str, Any]", expected_candidate)
+    if fingerprint(path) != {key: expected[key] for key in ("sha256", "size_bytes")}:
+        return f"Evidence hash mismatch: {name}"
+    return None
+
+
 def verify_manifest(manifest_path: Path) -> list[str]:
     """Offline, read-only audit of all staged inputs and retained outputs."""
     decoded: object = json.loads(manifest_path.read_text(encoding="utf-8"))
     if not isinstance(decoded, dict):
         message = "Unrecognised capture manifest schema"
-        raise ValueError(message)
+        raise TypeError(message)
     manifest = cast("dict[str, Any]", decoded)
     if manifest.get("schema_version") != SCHEMA_VERSION:
         message = "Unrecognised capture manifest schema"
@@ -534,38 +557,13 @@ def verify_manifest(manifest_path: Path) -> list[str]:
     output_candidates: object = manifest.get("outputs")
     if not isinstance(input_candidates, dict) or not isinstance(output_candidates, list):
         message = "Capture manifest lacks input/output evidence lists"
-        raise ValueError(message)
+        raise TypeError(message)
     inputs = cast("dict[str, Any]", input_candidates)
     outputs = cast("list[Any]", output_candidates)
     root = manifest_path.absolute().parent
-    discrepancies: list[str] = []
     entries: list[Any] = [*outputs, *inputs.values()]
     capture_candidate: object = manifest.get("capture")
     if isinstance(capture_candidate, dict):
         capture = cast("dict[str, Any]", capture_candidate)
         entries.extend(capture[key] for key in ("stdout.bin", "stderr.bin") if key in capture)
-    for entry in entries:
-        if not isinstance(entry, dict):
-            discrepancies.append("Non-object evidence record")
-            continue
-        evidence = cast("dict[str, Any]", entry)
-        name = evidence.get("path") or evidence.get("staged")
-        if not isinstance(name, str):
-            discrepancies.append("Missing evidence path")
-            continue
-        relative = Path(name)
-        if relative.is_absolute() or ".." in relative.parts:
-            discrepancies.append(f"Unsafe evidence locator: {name}")
-            continue
-        path = root / relative
-        if not path.is_file() or path.is_symlink():
-            discrepancies.append(f"Evidence missing or symlinked: {name}")
-            continue
-        expected_candidate: object = evidence.get("source_fingerprint", evidence)
-        if not isinstance(expected_candidate, dict):
-            discrepancies.append(f"Evidence fingerprint is not a record: {name}")
-            continue
-        expected = cast("dict[str, Any]", expected_candidate)
-        if fingerprint(path) != {key: expected[key] for key in ("sha256", "size_bytes")}:
-            discrepancies.append(f"Evidence hash mismatch: {name}")
-    return discrepancies
+    return [problem for entry in entries if (problem := _evidence_problem(root, entry)) is not None]
