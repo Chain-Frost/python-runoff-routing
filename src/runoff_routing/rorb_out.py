@@ -69,8 +69,11 @@ def _validate_time(rows: tuple[HydrographRow, ...], timestep: Decimal | None) ->
     if timestep is None:
         return
     for previous, current in pairwise(rows):
-        precision = (_printed_resolution(previous.time_hours) + _printed_resolution(current.time_hours)
-                     + _printed_resolution(timestep)) / 2
+        precision = (
+            _printed_resolution(previous.time_hours)
+            + _printed_resolution(current.time_hours)
+            + _printed_resolution(timestep)
+        ) / 2
         tolerance = min(timestep / 2, precision)
         if abs(current.time_hours - previous.time_hours - timestep) > tolerance:
             message = f"Reported time increment differs from values at line {current.line}"
@@ -78,38 +81,54 @@ def _validate_time(rows: tuple[HydrographRow, ...], timestep: Decimal | None) ->
 
 
 def _validate_duration(rows: tuple[HydrographRow, ...], duration: int | None) -> None:
-    if duration is not None and (rows[0].increment != 0 or rows[-1].increment != duration
-                                 or len(rows) != duration + 1):
+    if duration is not None and (rows[0].increment != 0 or rows[-1].increment != duration or len(rows) != duration + 1):
         message = "Report hydrograph rows do not cover the full calculation duration"
         raise ValueError(message)
 
 
 def inspect_output(source: RorbSource) -> Inspection:
-    headers = [(index, line.split()) for index, line in enumerate(source.lines)
-               if line.split()[:2] == ["Inc", "Time"]]
+    headers = [(index, line.split()) for index, line in enumerate(source.lines) if line.split()[:2] == ["Inc", "Time"]]
     if not headers:
-        return Inspection("output_report", "unsupported", source,
-                          (Diagnostic("no_supported_table", "No Inc Time HydNNN table", "unsupported"),))
+        return Inspection(
+            "output_report",
+            "unsupported",
+            source,
+            (Diagnostic("no_supported_table", "No Inc Time HydNNN table", "unsupported"),),
+        )
     if len(headers) != 1:
-        return Inspection("output_report", "invalid", source,
-                          (Diagnostic("ambiguous_tables", "Multiple hydrograph tables need separate identities", "error"),))
+        return Inspection(
+            "output_report",
+            "invalid",
+            source,
+            (Diagnostic("ambiguous_tables", "Multiple hydrograph tables need separate identities", "error"),),
+        )
     index, fields = headers[0]
-    if (len(fields) < 3 or len(set(fields)) != len(fields)
-            or any(HYDRO.fullmatch(name) is None for name in fields[2:])):
-        return Inspection("output_report", "invalid", source,
-                          (Diagnostic("bad_table_header", "Duplicate or unrecognised hydrograph columns", "error", index + 1),))
+    if len(fields) < 3 or len(set(fields)) != len(fields) or any(HYDRO.fullmatch(name) is None for name in fields[2:]):
+        return Inspection(
+            "output_report",
+            "invalid",
+            source,
+            (Diagnostic("bad_table_header", "Duplicate or unrecognised hydrograph columns", "error", index + 1),),
+        )
     try:
         timestep, duration = _extract_metadata(source)
         rows = _read_rows(source, index, len(fields))
         _validate_time(rows, timestep)
         _validate_duration(rows, duration)
     except ValueError as exc:
-        return Inspection("output_report", "invalid", source,
-                          (Diagnostic("output_record", str(exc), "error", index + 1),))
+        return Inspection(
+            "output_report", "invalid", source, (Diagnostic("output_record", str(exc), "error", index + 1),)
+        )
     report = HydrographReport(tuple(fields[2:]), rows, timestep, duration)
-    notes = [Diagnostic("print_identity_unverified", "HydNNN labels do not establish native print locations", "warning")]
+    notes = [
+        Diagnostic("print_identity_unverified", "HydNNN labels do not establish native print locations", "warning")
+    ]
     if duration is None:
-        notes.append(Diagnostic("completion_unverified", "No reported calculation duration; cannot verify completeness", "warning"))
+        notes.append(
+            Diagnostic(
+                "completion_unverified", "No reported calculation duration; cannot verify completeness", "warning"
+            )
+        )
     if timestep is None:
         notes.append(Diagnostic("timestep_unverified", "No reported timestep; raw labels preserved", "warning"))
     return Inspection("output_report", "partial", source, tuple(notes), hydrographs=report)

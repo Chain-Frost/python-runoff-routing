@@ -23,8 +23,14 @@ def _write(tmp_path: Path, data: str, name: str = "case.par", *, crlf: bool = Fa
 
 def _cmd(*, lumped: bool = True, model: int = 1, extra: str = "", bursts: int = 1) -> str:
     lines = [
-        "# BEGIN", "Cat file :first.catg", "Stm file :TP03.stm", f"Lumped kc:{'T' if lumped else 'F'}",
-        "Verbosity:3", f"Lossmodel:{model}", "Num ISA  :2", "ISA 1    :12,0.8",
+        "# BEGIN",
+        "Cat file :first.catg",
+        "Stm file :TP03.stm",
+        f"Lumped kc:{'T' if lumped else 'F'}",
+        "Verbosity:3",
+        f"Lossmodel:{model}",
+        "Num ISA  :2",
+        "ISA 1    :12,0.8",
     ]
     if not lumped:
         lines.append("ISA 2    :25,1")
@@ -65,7 +71,9 @@ def test_cmd_read_preserves_raw_bytes_and_isa_order(tmp_path: Path, lumped: bool
 
 
 def test_par_generated_by_s0_writer_round_trips(tmp_path: Path) -> None:
-    params = Parameters.from_mapping({"kc": "15", "m": "0.8", "initial_loss_mm": "20", "continuing": "2", "loss_model": 1})
+    params = Parameters.from_mapping(
+        {"kc": "15", "m": "0.8", "initial_loss_mm": "20", "continuing": "2", "loss_model": 1}
+    )
     path = tmp_path / "native.par"
     path.write_bytes(render_par(Path("model.catg"), Path("rain.stm"), params))
     doc = inspect_file(path)

@@ -132,9 +132,13 @@ def _load(spec_file: Path) -> dict[str, Any]:
         message = "provenance and effective_settings must be objects"
         raise TypeError(message)
     prints = raw["requested_print_locations"]
-    if not isinstance(prints, dict) or not prints or any(
-        not isinstance(key, str) or not re.fullmatch(r"Hyd\d+", key) or not isinstance(value, str) or not value
-        for key, value in prints.items()
+    if (
+        not isinstance(prints, dict)
+        or not prints
+        or any(
+            not isinstance(key, str) or not re.fullmatch(r"Hyd\d+", key) or not isinstance(value, str) or not value
+            for key, value in prints.items()
+        )
     ):
         message = "requested_print_locations must map HydNNN column IDs to actual location identities"
         raise ValueError(message)
@@ -204,7 +208,10 @@ def _check_report(  # noqa: C901 -- explicit diagnostics for all malformed nativ
         return "incomplete_output", {"reason": f"Expected one Inc/Time table; found {len(headers)}"}
     index, names = headers[0]
     if len(names) != len(set(names)) or set(names[2:]) != set(expected_prints):
-        return "incomplete_output", {"reason": "Printed hydrograph columns differ from requested print identities", "columns": names}
+        return "incomplete_output", {
+            "reason": "Printed hydrograph columns differ from requested print identities",
+            "columns": names,
+        }
     readings: list[list[float]] = []
     time_labels: list[str] = []
     for line in lines[index + 1 :]:
@@ -442,7 +449,10 @@ def capture_cmd(  # noqa: C901 -- single-case subprocess/evidence lifecycle, no 
         try:
             if any(fingerprint(path) != original_hashes[key] for key, path in originals.items()):
                 outcome = "input_mutated"
-            if fingerprint(staged_catchment) != original_hashes["catchment"] or fingerprint(staged_storm) != original_hashes["storm"]:
+            if (
+                fingerprint(staged_catchment) != original_hashes["catchment"]
+                or fingerprint(staged_storm) != original_hashes["storm"]
+            ):
                 outcome = "input_mutated"
         except OSError as exc:
             outcome = "input_mutated"
@@ -464,9 +474,15 @@ def archive_reference(spec_file: Path, parent: Path) -> Path:
     if spec["engine_kind"] == "RORBwin" and not isinstance(spec.get("gui_effective_settings"), dict):
         message = "RORBwin archive requires explicit gui_effective_settings"
         raise ValueError(message)
-    files = {"inputs": {name: _file(spec_file, path) for name, path in raw_inputs.items()},
-             "outputs": {name: _file(spec_file, path) for name, path in raw_outputs.items()}}
-    if any(not isinstance(name, str) or not re.fullmatch(r"[A-Za-z0-9_.-]+", name) for group in files.values() for name in group):
+    files = {
+        "inputs": {name: _file(spec_file, path) for name, path in raw_inputs.items()},
+        "outputs": {name: _file(spec_file, path) for name, path in raw_outputs.items()},
+    }
+    if any(
+        not isinstance(name, str) or not re.fullmatch(r"[A-Za-z0-9_.-]+", name)
+        for group in files.values()
+        for name in group
+    ):
         message = "Archive file identifiers must be safe single path components"
         raise ValueError(message)
     root = _new_root(parent.absolute(), spec["case_id"])
@@ -501,7 +517,9 @@ def verify_manifest(manifest_path: Path) -> list[str]:
     root = manifest_path.absolute().parent
     discrepancies: list[str] = []
     entries = [*manifest.get("outputs", []), *manifest.get("inputs", {}).values()]
-    entries.extend(manifest["capture"][key] for key in ("stdout.bin", "stderr.bin") if key in manifest.get("capture", {}))
+    entries.extend(
+        manifest["capture"][key] for key in ("stdout.bin", "stderr.bin") if key in manifest.get("capture", {})
+    )
     for entry in entries:
         if not isinstance(entry, dict):
             discrepancies.append("Non-object evidence record")

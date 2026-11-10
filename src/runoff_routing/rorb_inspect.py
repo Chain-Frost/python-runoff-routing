@@ -18,9 +18,19 @@ def inspect_file(path: Path) -> Inspection:
     if suffix == ".out":
         return inspect_output(source)
     if suffix in {".cat", ".catg", ".dat", ".stm"}:
-        return Inspection(suffix.removeprefix("."), "unsupported", source,
-                          (Diagnostic("fixture_required", "Catchment/storm semantics require verified grammar fixtures",
-                                      "unsupported"),))
-    return Inspection("unknown", "unsupported", source,
-                      (Diagnostic("unknown_extension", "File type is not a supported RORB inspection format",
-                                  "unsupported"),))
+        return Inspection(
+            suffix.removeprefix("."),
+            "unsupported",
+            source,
+            (
+                Diagnostic(
+                    "fixture_required", "Catchment/storm semantics require verified grammar fixtures", "unsupported"
+                ),
+            ),
+        )
+    return Inspection(
+        "unknown",
+        "unsupported",
+        source,
+        (Diagnostic("unknown_extension", "File type is not a supported RORB inspection format", "unsupported"),),
+    )

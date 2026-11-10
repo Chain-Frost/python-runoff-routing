@@ -47,7 +47,11 @@ def _read(path: Path) -> dict[str, Any]:
 
 
 def _mock_execution(
-    monkeypatch: pytest.MonkeyPatch, *, report: str | None = None, stderr: bytes = b"", status: int = 0,
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    report: str | None = None,
+    stderr: bytes = b"",
+    status: int = 0,
     log: str = "",
 ) -> None:
     if report is None:
@@ -116,7 +120,13 @@ def test_cmd_capture_preserves_inputs_and_manifest(tmp_path: Path, monkeypatch: 
     assert verify_manifest(manifest_file) == []
     assert orig == ((tmp_path / "catchment.catg").read_bytes(), (tmp_path / "rain.stm").read_bytes())
     assert sorted(p.name for p in manifest_file.parent.iterdir()) == [
-        "catchment.catg", "manifest.json", "native.out", "reference.par", "stderr.bin", "stdout.bin", "storm.stm"
+        "catchment.catg",
+        "manifest.json",
+        "native.out",
+        "reference.par",
+        "stderr.bin",
+        "stdout.bin",
+        "storm.stm",
     ]
 
 
@@ -229,7 +239,9 @@ def test_no_linux_or_synthetic_run_is_native_acceptance(tmp_path: Path, monkeypa
     result = capture_cmd(spec, tmp_path / "captures", execute=True)
     assert result is not None
     record = _read(result)
-    assert record["environment"]["python"] == f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+    assert (
+        record["environment"]["python"] == f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+    )
     assert record["engine"]["observed_version"] == "synthetic-test-build"
 
 

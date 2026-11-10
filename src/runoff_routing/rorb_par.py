@@ -104,29 +104,50 @@ def _parse(cursor: _Cursor) -> ParameterModel:
         message = "Additional parameter records are not characterised"
         raise NotImplementedError(message)
     recognised_loss: Literal[1, 2] = 1 if loss_model == 1 else 2
-    return ParameterModel(catchment, storm, lumped, verbosity, recognised_loss, isa_count, bursts,
-                          tuple(routing), tuple(losses))
+    return ParameterModel(
+        catchment, storm, lumped, verbosity, recognised_loss, isa_count, bursts, tuple(routing), tuple(losses)
+    )
 
 
 def inspect_cmd_parameters(source: RorbSource) -> Inspection:
     """Only the documented CMD V2 signature is accepted; GUI .par is not CMD."""
     lines = source.lines
     if not lines or lines[0] != "# BEGIN":
-        return Inspection("gui_or_unknown_par", "unsupported", source,
-                          (Diagnostic("unknown_par_dialect", "Not a documented RORB_CMD # BEGIN file", "unsupported"),))
+        return Inspection(
+            "gui_or_unknown_par",
+            "unsupported",
+            source,
+            (Diagnostic("unknown_par_dialect", "Not a documented RORB_CMD # BEGIN file", "unsupported"),),
+        )
     if lines[-1] != "# END" or lines.count("# BEGIN") != 1 or lines.count("# END") != 1:
-        return Inspection("cmd_par", "invalid", source,
-                          (Diagnostic("cmd_boundary", "Expected one column-1 # BEGIN / # END pair", "error"),))
+        return Inspection(
+            "cmd_par",
+            "invalid",
+            source,
+            (Diagnostic("cmd_boundary", "Expected one column-1 # BEGIN / # END pair", "error"),),
+        )
     cursor = _Cursor(source)
     try:
         model = _parse(cursor)
     except NotImplementedError as exc:
-        return Inspection("cmd_par", "unsupported", source,
-                          (Diagnostic("cmd_variant", str(exc), "unsupported", cursor.position),), cursor.fields)
+        return Inspection(
+            "cmd_par",
+            "unsupported",
+            source,
+            (Diagnostic("cmd_variant", str(exc), "unsupported", cursor.position),),
+            cursor.fields,
+        )
     except ValueError as exc:
-        return Inspection("cmd_par", "invalid", source,
-                          (Diagnostic("cmd_record", str(exc), "error", max(1, cursor.position - 1)),), cursor.fields)
+        return Inspection(
+            "cmd_par",
+            "invalid",
+            source,
+            (Diagnostic("cmd_record", str(exc), "error", max(1, cursor.position - 1)),),
+            cursor.fields,
+        )
     notes = [Diagnostic("engine_unverified", "Parsed settings are not proof of executable compatibility", "warning")]
     if model.loss_model == 2:
-        notes.append(Diagnostic("loss_2_unverified", "IL/runoff-coefficient semantics need native verification", "warning"))
+        notes.append(
+            Diagnostic("loss_2_unverified", "IL/runoff-coefficient semantics need native verification", "warning")
+        )
     return Inspection("cmd_par", "parsed", source, tuple(notes), cursor.fields, parameters=model)
