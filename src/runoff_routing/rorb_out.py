@@ -62,7 +62,7 @@ def _read_rows(source: RorbSource, line_index: int, count: int) -> tuple[Hydrogr
 
 
 def _printed_resolution(value: Decimal) -> Decimal:
-    return Decimal(1).scaleb(value.as_tuple().exponent)
+    return Decimal(1).scaleb(int(value.as_tuple().exponent))
 
 
 def _validate_time(rows: tuple[HydrographRow, ...], timestep: Decimal | None) -> None:

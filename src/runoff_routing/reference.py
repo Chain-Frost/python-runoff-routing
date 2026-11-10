@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, cast
 from uuid import uuid4
 
 SCHEMA_VERSION = 1
@@ -114,8 +114,12 @@ def fingerprint(path: Path) -> dict[str, str | int]:
 
 
 def _load(spec_file: Path) -> dict[str, Any]:
-    raw: Any = json.loads(spec_file.read_text(encoding="utf-8"))
-    if not isinstance(raw, dict) or raw.get("schema_version") != SCHEMA_VERSION:
+    decoded: object = json.loads(spec_file.read_text(encoding="utf-8"))
+    if not isinstance(decoded, dict):
+        message = "Capture spec must be a JSON object"
+        raise ValueError(message)
+    raw = cast("dict[str, Any]", decoded)
+    if raw.get("schema_version") != SCHEMA_VERSION:
         message = f"Expected capture spec schema_version={SCHEMA_VERSION}"
         raise ValueError(message)
     if not isinstance(raw.get("case_id"), str) or not re.fullmatch(r"[A-Za-z0-9][\w.-]{0,79}", raw["case_id"]):
@@ -131,14 +135,14 @@ def _load(spec_file: Path) -> dict[str, Any]:
     if not isinstance(raw["provenance"], dict) or not isinstance(raw["effective_settings"], dict):
         message = "provenance and effective_settings must be objects"
         raise TypeError(message)
-    prints = raw["requested_print_locations"]
-    if (
-        not isinstance(prints, dict)
-        or not prints
-        or any(
-            not isinstance(key, str) or not re.fullmatch(r"Hyd\d+", key) or not isinstance(value, str) or not value
-            for key, value in prints.items()
-        )
+    raw_prints: object = raw["requested_print_locations"]
+    if not isinstance(raw_prints, dict) or not raw_prints:
+        message = "requested_print_locations must map HydNNN column IDs to actual location identities"
+        raise ValueError(message)
+    prints = cast("dict[str, object]", raw_prints)
+    if any(
+        not isinstance(key, str) or not re.fullmatch(r"Hyd\d+", key) or not isinstance(value, str) or not value
+        for key, value in prints.items()
     ):
         message = "requested_print_locations must map HydNNN column IDs to actual location identities"
         raise ValueError(message)
@@ -267,9 +271,13 @@ def _metadata_gaps(spec: dict[str, Any]) -> list[str]:
     gaps: list[str] = [field for field in ("observed_banner", "observed_version") if not spec.get(field)]
     provenance = spec["provenance"]
     gaps.extend(f"provenance.{field}" for field in ("source", "redistribution") if not provenance.get(field))
-    generator = spec.get("generator")
-    if not isinstance(generator, dict) or any(not generator.get(key) for key in ("name", "revision", "event_to_file")):
+    generator_candidate: object = spec.get("generator")
+    if not isinstance(generator_candidate, dict):
         gaps.append("generator name/revision/event_to_file")
+    else:
+        generator = cast("dict[str, Any]", generator_candidate)
+        if any(not generator.get(key) for key in ("name", "revision", "event_to_file")):
+            gaps.append("generator name/revision/event_to_file")
     gaps.extend(
         f"effective_settings.{field}"
         for field in ("timestep_hours", "horizon", "isa_mapping", "burst_mapping")
@@ -354,14 +362,15 @@ def capture_cmd(  # noqa: C901 -- single-case subprocess/evidence lifecycle, no 
     if not isinstance(params_raw, dict):
         message = "parameters must be an object for the limited CMD writer"
         raise TypeError(message)
+    params_fields = cast("dict[str, Any]", params_raw)
     allowed = {"kc", "m", "initial_loss_mm", "continuing", "loss_model"}
-    if set(params_raw) != allowed:
+    if set(params_fields) != allowed:
         message = "CMD writer requires exactly kc, m, initial_loss_mm, continuing and loss_model"
         raise ValueError(message)
     if spec["effective_settings"].get("isa_mapping") != [1] or spec["effective_settings"].get("burst_mapping") != [1]:
         message = "CMD writer supports only one explicit ISA and one explicit burst mapping ([1])"
         raise ValueError(message)
-    params = Parameters.from_mapping(params_raw)
+    params = Parameters.from_mapping(params_fields)
     timeout = spec.get("timeout_seconds", 1800)
     if isinstance(timeout, bool) or not isinstance(timeout, (float, int)) or not math.isfinite(timeout) or timeout <= 0:
         message = "timeout_seconds must be a positive finite number"
@@ -378,13 +387,14 @@ def capture_cmd(  # noqa: C901 -- single-case subprocess/evidence lifecycle, no 
     staged_storm = root / "storm.stm"
     originals = {"catchment": catchment, "storm": storm}
     original_hashes = {key: fingerprint(path) for key, path in originals.items()}
-    manifest["inputs"] = {
+    inputs: dict[str, Any] = {
         "catchment": {"source_fingerprint": _copy(catchment, staged_catchment), "staged": staged_catchment.name},
         "storm": {"source_fingerprint": _copy(storm, staged_storm), "staged": staged_storm.name},
     }
+    manifest["inputs"] = inputs
     par = root / "reference.par"
     par.write_bytes(render_par(staged_catchment.absolute(), staged_storm.absolute(), params))
-    manifest["inputs"]["parameters"] = {"generated": True, **_record(par, root)}
+    inputs["parameters"] = {"generated": True, **_record(par, root)}
     manifest["capture"]["argv"] = ["<fingerprinted RORB_CMD executable>", par.name]
     excluded = {staged_catchment, staged_storm, par, root / "manifest.json"}
     started = time.monotonic()
@@ -474,9 +484,11 @@ def archive_reference(spec_file: Path, parent: Path) -> Path:
     if spec["engine_kind"] == "RORBwin" and not isinstance(spec.get("gui_effective_settings"), dict):
         message = "RORBwin archive requires explicit gui_effective_settings"
         raise ValueError(message)
-    files = {
-        "inputs": {name: _file(spec_file, path) for name, path in raw_inputs.items()},
-        "outputs": {name: _file(spec_file, path) for name, path in raw_outputs.items()},
+    inputs = cast("dict[str, object]", raw_inputs)
+    outputs = cast("dict[str, object]", raw_outputs)
+    files: dict[str, dict[str, Path]] = {
+        "inputs": {name: _file(spec_file, path) for name, path in inputs.items()},
+        "outputs": {name: _file(spec_file, path) for name, path in outputs.items()},
     }
     if any(
         not isinstance(name, str) or not re.fullmatch(r"[A-Za-z0-9_.-]+", name)
@@ -510,21 +522,34 @@ def archive_reference(spec_file: Path, parent: Path) -> Path:
 
 def verify_manifest(manifest_path: Path) -> list[str]:
     """Offline, read-only audit of all staged inputs and retained outputs."""
-    manifest: Any = json.loads(manifest_path.read_text(encoding="utf-8"))
-    if not isinstance(manifest, dict) or manifest.get("schema_version") != SCHEMA_VERSION:
+    decoded: object = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if not isinstance(decoded, dict):
         message = "Unrecognised capture manifest schema"
         raise ValueError(message)
+    manifest = cast("dict[str, Any]", decoded)
+    if manifest.get("schema_version") != SCHEMA_VERSION:
+        message = "Unrecognised capture manifest schema"
+        raise ValueError(message)
+    input_candidates: object = manifest.get("inputs")
+    output_candidates: object = manifest.get("outputs")
+    if not isinstance(input_candidates, dict) or not isinstance(output_candidates, list):
+        message = "Capture manifest lacks input/output evidence lists"
+        raise ValueError(message)
+    inputs = cast("dict[str, Any]", input_candidates)
+    outputs = cast("list[Any]", output_candidates)
     root = manifest_path.absolute().parent
     discrepancies: list[str] = []
-    entries = [*manifest.get("outputs", []), *manifest.get("inputs", {}).values()]
-    entries.extend(
-        manifest["capture"][key] for key in ("stdout.bin", "stderr.bin") if key in manifest.get("capture", {})
-    )
+    entries: list[Any] = [*outputs, *inputs.values()]
+    capture_candidate: object = manifest.get("capture")
+    if isinstance(capture_candidate, dict):
+        capture = cast("dict[str, Any]", capture_candidate)
+        entries.extend(capture[key] for key in ("stdout.bin", "stderr.bin") if key in capture)
     for entry in entries:
         if not isinstance(entry, dict):
             discrepancies.append("Non-object evidence record")
             continue
-        name = entry.get("path") or entry.get("staged")
+        evidence = cast("dict[str, Any]", entry)
+        name = evidence.get("path") or evidence.get("staged")
         if not isinstance(name, str):
             discrepancies.append("Missing evidence path")
             continue
@@ -536,7 +561,11 @@ def verify_manifest(manifest_path: Path) -> list[str]:
         if not path.is_file() or path.is_symlink():
             discrepancies.append(f"Evidence missing or symlinked: {name}")
             continue
-        expected = entry.get("source_fingerprint", entry)
+        expected_candidate: object = evidence.get("source_fingerprint", evidence)
+        if not isinstance(expected_candidate, dict):
+            discrepancies.append(f"Evidence fingerprint is not a record: {name}")
+            continue
+        expected = cast("dict[str, Any]", expected_candidate)
         if fingerprint(path) != {key: expected[key] for key in ("sha256", "size_bytes")}:
             discrepancies.append(f"Evidence hash mismatch: {name}")
     return discrepancies

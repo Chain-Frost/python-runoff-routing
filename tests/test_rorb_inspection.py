@@ -93,20 +93,27 @@ def test_fortran_exponent_and_loss_flag_two(tmp_path: Path) -> None:
     assert any(d.code == "loss_2_unverified" for d in doc.diagnostics)
 
 
+def _replace(old: str, new: str) -> Callable[[str], str]:
+    """Explicitly typed synthetic file mutation, without lambda inference gaps."""
+    def apply(text: str) -> str:
+        return text.replace(old, new)
+    return apply
+
+
 @pytest.mark.parametrize(
     ("mutation", "expected_status"),
     [
-        (lambda text: text.replace("# BEGIN", "saved GUI settings"), "unsupported"),
-        (lambda text: text.replace("# END", "# WRONG"), "invalid"),
-        (lambda text: text.replace("Num burst:1", "Num burst:2"), "unsupported"),
-        (lambda text: text.replace("Lossmodel:1", "Lossmodel:4"), "unsupported"),
-        (lambda text: text.replace("Num ISA  :2", "Num ISA  :3"), "invalid"),
-        (lambda text: text.replace("ISA 2    :11,3", "ISA 1    :11,3"), "invalid"),
-        (lambda text: text.replace("12,0.8", "-12,0.8"), "invalid"),
-        (lambda text: text.replace("12,0.8", "nan,0.8"), "invalid"),
-        (lambda text: text.replace("ISA 2    :11,3", "ISA 2    :11"), "invalid"),
-        (lambda text: text.replace("# END", "EXTRA\n# END"), "unsupported"),
-        (lambda text: text.replace("Stm file :TP03.stm", "Stm file :"), "invalid"),
+        (_replace("# BEGIN", "saved GUI settings"), "unsupported"),
+        (_replace("# END", "# WRONG"), "invalid"),
+        (_replace("Num burst:1", "Num burst:2"), "unsupported"),
+        (_replace("Lossmodel:1", "Lossmodel:4"), "unsupported"),
+        (_replace("Num ISA  :2", "Num ISA  :3"), "invalid"),
+        (_replace("ISA 2    :11,3", "ISA 1    :11,3"), "invalid"),
+        (_replace("12,0.8", "-12,0.8"), "invalid"),
+        (_replace("12,0.8", "nan,0.8"), "invalid"),
+        (_replace("ISA 2    :11,3", "ISA 2    :11"), "invalid"),
+        (_replace("# END", "EXTRA\n# END"), "unsupported"),
+        (_replace("Stm file :TP03.stm", "Stm file :"), "invalid"),
     ],
 )
 def test_parameter_fail_closed(tmp_path: Path, mutation: Callable[[str], str], expected_status: str) -> None:
