@@ -117,8 +117,12 @@ def _compatibility_issue(left: dict[str, Any], right: dict[str, Any]) -> str | N
 
 
 def _hydrograph_differences(
-    names: list[str], raw_a: list[list[str]], raw_b: list[list[str]],
-    a: list[list[float]], b: list[list[float]], policy: Tolerance,
+    names: list[str],
+    raw_a: list[list[str]],
+    raw_b: list[list[str]],
+    a: list[list[float]],
+    b: list[list[float]],
+    policy: Tolerance,
 ) -> tuple[tuple[str, ...], int]:
     differences: list[str] = []
     for column, name in enumerate(names[2:], start=2):
