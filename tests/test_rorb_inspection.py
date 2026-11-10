@@ -95,8 +95,10 @@ def test_fortran_exponent_and_loss_flag_two(tmp_path: Path) -> None:
 
 def _replace(old: str, new: str) -> Callable[[str], str]:
     """Explicitly typed synthetic file mutation, without lambda inference gaps."""
+
     def apply(text: str) -> str:
         return text.replace(old, new)
+
     return apply
 
 
