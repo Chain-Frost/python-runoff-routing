@@ -16,5 +16,6 @@
 - [Work register](work/README.md)
 - [Bootstrap record](work/2026-11-09-bootstrap.md)
 - [First implementation handoff](work/S0-S1-HANDOFF.md)
+- [S2 numerical reference prototype](work/2026-11-10-s2-reach-kernel.md)
 
 Future repository-owned Markdown must be linked here. Policies describe required behaviour; the roadmap describes future implementation. No source document establishes that this package has passed a numerical acceptance gate.
