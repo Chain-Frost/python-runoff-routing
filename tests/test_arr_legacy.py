@@ -194,7 +194,7 @@ def test_legacy_preburst_typed_model_rejects_invalid_direct_construction() -> No
 
 
 def test_legacy_text_outside_marked_section_is_rejected() -> None:
-    text = _sample().replace(b"Storm Losses\n[LOSSES]", b"Stray,10\n[LOSSES]")
+    text = _sample().replace(b"[LOSSES]", b"Stray,10\n[LOSSES]", 1)
     with pytest.raises(ARRFormatError, match="outside a marked section"):
         parse_arr_txt(text, legacy_profile="arr2016")
 
