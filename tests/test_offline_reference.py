@@ -114,8 +114,8 @@ def _write_case(root: Path) -> None:
     ("raw", "expected", "encoding"),
     [
         (b"\xef\xbb\xbfSource\r\n", "Source\r\n", "utf-8-sig"),
-        ("Süd".encode("utf-8"), "Süd", "utf-8-sig"),
-        (b"Legacy \x96 name\r\n", "Legacy – name\r\n", "cp1252"),
+        ("Süd".encode(), "Süd", "utf-8-sig"),
+        (b"Legacy \x96 name\r\n", "Legacy \u2013 name\r\n", "cp1252"),
         (b"", "", "utf-8-sig"),
     ],
 )
