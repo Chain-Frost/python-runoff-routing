@@ -255,6 +255,20 @@ def test_s2_boundary_converts_once_and_rejects_unverified_losses() -> None:
         to_s2_payload(unsupported)
 
 
+def test_s2_float_boundary_rejects_nonzero_underflow() -> None:
+    run = _run()
+    tiny = Decimal("1e-400")
+    changed_reach = replace(run.catchment.reaches[0], length_km=tiny)
+    changed_catchment = replace(run.catchment, reaches=(changed_reach, *run.catchment.reaches[1:]))
+    with pytest.raises(ValueError, match="underflowed"):
+        to_s2_payload(replace(run, catchment=changed_catchment))
+
+    changed_loss = replace(run.parameters.losses[0], initial_loss_mm=tiny)
+    changed_parameters = replace(run.parameters, losses=(changed_loss,))
+    with pytest.raises(ValueError, match="underflowed"):
+        to_s2_payload(replace(run, parameters=changed_parameters))
+
+
 def test_file_adapters_are_read_only_and_no_clobber(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     def prohibited(*_args: object, **_kwargs: object) -> None:
         pytest.fail("Parser must never start RORB")
