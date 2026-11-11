@@ -132,9 +132,9 @@ def test_geometry_and_source_identity_rejection() -> None:
         serialize_catg_with_drawing(
             _model(), replace(original, nodes=(replace(original.nodes[0], identifier="JOIN"), *original.nodes[1:]))
         )
-    short_reach = replace(original.reaches[0], vertices_m=((0, 0), (4990, 0)))
+    longer_reach = replace(original.reaches[0], vertices_m=((0, 0), (2500, 100), (5000, 0)))
     with pytest.raises(ValueError, match="length differs"):
-        serialize_catg_with_drawing(_model(), replace(original, reaches=(short_reach, *original.reaches[1:])))
+        serialize_catg_with_drawing(_model(), replace(original, reaches=(longer_reach, *original.reaches[1:])))
     shifted_reach = replace(original.reaches[0], vertices_m=((0.1, 0), (5000, 0)))
     with pytest.raises(ValueError, match="matches 0 nodes"):
         serialize_catg_with_drawing(_model(), replace(original, reaches=(shifted_reach, *original.reaches[1:])))
