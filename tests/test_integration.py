@@ -61,8 +61,10 @@ def _run() -> RunModel:
             "Synthetic catchment",
             (SubArea("area_1", Decimal("2.0"), "A"),),
             (Reach("reach_1", Decimal("3.0"), "Reach A Sub-area A"),),
-            (ControlStep(1, "area_1", "reach_1", label="Reach A Sub-area A"),
-            ControlStep(7, print_id="print_1", label="Print A"),),
+            (
+                ControlStep(1, "area_1", "reach_1", label="Reach A Sub-area A"),
+                ControlStep(7, print_id="print_1", label="Print A"),
+            ),
             (PrintLocation("print_1", "Print A"),),
         ),
         StormModel(
@@ -121,9 +123,7 @@ def test_canonical_rejects_unrepresentable_authored_labels() -> None:
     run = _run()
     altered = replace(
         run,
-        catchment=replace(
-            run.catchment, subareas=(replace(run.catchment.subareas[0], label="unserializable label"),)
-        ),
+        catchment=replace(run.catchment, subareas=(replace(run.catchment.subareas[0], label="unserializable label"),)),
     )
     with pytest.raises(RunInputError, match="discard typed labels") as caught:
         canonical_run_bytes(altered)
