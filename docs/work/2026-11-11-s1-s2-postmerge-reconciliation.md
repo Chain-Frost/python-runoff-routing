@@ -20,3 +20,9 @@
 Run exact-head Windows Python 3.14 with Ruff 0.16.6, strict Pyright, complete public synthetic tests, built-wheel installed import outside checkout. Run the full private offline corpus **separately** on the final installed source wheel with frozen hashes; missing corpus is not a pass. No hosted native runs, raw evidence, S0 change, forced update, releases, merges or issue closure. S1 issue #3 and S2 issue #4 remain open.
 
 **Next:** Review the child PR, validate exact head, then reconcile uniquely supported changes into #23 after review; rerun 65-case private comparator before any numerical acceptance.
+
+## Source-quality result
+
+At implementation/test commit `95bedce591dbf296bc4a909a6378d44adb2be472`, [Windows Python 3.14 quality run #43046717476](https://github.com/Chain-Frost/python-runoff-routing/actions/runs/43046717476) completed **successfully**: repository hygiene (76 files, 0 errors), Ruff 0.16.6 lint and formatting, strict Pyright 1.1.414 (0 errors/warnings), **213 public synthetic tests passed**, wheel build and independent outside-checkout installed-wheel import. This paragraph is a documentation-only revision; CI on its resulting exact head remains a separate check until confirmed.
+
+Neither that run nor an installed-wheel import uses the private corpus or launches RORB. The previously published S2 65-case outcomes remain unaccepted as parity of this combined revision.
