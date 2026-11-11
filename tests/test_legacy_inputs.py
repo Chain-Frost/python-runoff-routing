@@ -1,12 +1,21 @@
-"""Characterised, strictly delimited RORB_GE and storm fixture input subset."""
+"""Compatibility shim regression: supported S1 grammar is authoritative."""
 
 import pytest
 from runoff_routing.legacy_inputs import LegacyInputError, parse_control_vector, parse_explicit_design_storm
+from runoff_routing.rorb_codec import parse_catg, parse_design_stm
 from runoff_routing.single_storm import Control
 
 CONTROL = """HEADER
+C RORB_GE 002
+C #NODES
+C 0
+C #REACHES
+C 0
+C #STORAGES
+C 0
+C #INFLOW/OUTFLOW
+C 0
 C END RORB_GE
-C
 1
 1, 2.0, -99, first source
 3
@@ -36,6 +45,7 @@ def test_control_sample_order_and_lengths() -> None:
     model = parse_control_vector(CONTROL)
     assert model.controls == (Control(1, 2), Control(3), Control(1, 3), Control(4), Control(5, 1), Control(7))
     assert model.areas_km2 == (1, 3)
+    assert len(parse_catg(CONTROL.encode()).model.controls) == len(model.controls)
 
 
 def test_explicit_design_storm() -> None:
@@ -44,6 +54,7 @@ def test_explicit_design_storm() -> None:
     assert storm.calculation_increments == 10
     assert storm.percentages == (20, 80)
     assert storm.depths_mm == (10, 20)
+    assert len(parse_design_stm(STORM.encode()).model.percentages) == len(storm.percentages)
 
 
 @pytest.mark.parametrize("source", [
@@ -53,6 +64,7 @@ def test_explicit_design_storm() -> None:
     CONTROL.replace("1.0, 3.0, -99", "1.0, 3.0"),
     CONTROL.replace("0, -99", "1, -99"),
     CONTROL.replace("1, 3.0", "1, nan"),
+    CONTROL.replace("C #STORAGES\nC 0", "C #STORAGES\nC 1"),
 ])
 def test_unsupported_catchment_fails(source: str) -> None:
     with pytest.raises(LegacyInputError):

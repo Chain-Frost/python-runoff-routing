@@ -9,3 +9,4 @@
 | [S1 bidirectional input model](2026-11-11-s1-bidirectional.md) | Initial subset staged for Windows/fixture verification; stage open | Unassigned | 2026-11-11 | PR-head checks | Run source quality and private read-only corpus hashes/parse; expand evidenced grammar. |
 
 [Implementation plan](../IMPLEMENTATION_PLAN.md) links all stage issues. S0-S7 remain unaccepted; S8 is deferred. Issue status and this register do not mean an agent is currently running.
+- [S1–S2 integration handoff implementation](2026-11-11-s1-s2-integration.md): dependency map, local checks and blocked parity gates.

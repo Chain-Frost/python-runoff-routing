@@ -7,7 +7,16 @@ from pathlib import Path
 import pytest
 from runoff_routing.offline_reference import CorpusError, compare_corpus_case
 
-CAT = """RORB_GE
+CAT = """SYNTHETIC CATCHMENT
+C RORB_GE 002
+C #NODES
+C 0
+C #REACHES
+C 0
+C #STORAGES
+C 0
+C #INFLOW/OUTFLOW
+C 0
 C END RORB_GE
 1
 1, 2.0, -99

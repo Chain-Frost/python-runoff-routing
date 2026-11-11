@@ -20,3 +20,4 @@
 Future repository-owned Markdown must be linked here. Policies describe required behaviour; the roadmap describes future implementation. No source document establishes that this package has passed a numerical acceptance gate.
 
 - [S1 bidirectional typed RORB inputs and capability matrix](RORB_BIDIRECTIONAL.md): source-preserving `.par` / `.catg` / `.stm`, validated JSON and canonical subset writers.
+- [S1/S2 Python-only integration](S1_S2_INTEGRATION.md): typed run, restricted numerical execution, reports and capability gates.
