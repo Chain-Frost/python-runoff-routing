@@ -129,9 +129,9 @@ def test_wrong_topology_is_not_silently_reordered() -> None:
 def test_geometry_and_source_identity_rejection() -> None:
     original = _drawing()
     with pytest.raises(ValueError, match="globally unique"):
-        serialize_catg_with_drawing(_model(), replace(original, nodes=(
-            replace(original.nodes[0], identifier="JOIN"), *original.nodes[1:]
-        )))
+        serialize_catg_with_drawing(
+            _model(), replace(original, nodes=(replace(original.nodes[0], identifier="JOIN"), *original.nodes[1:]))
+        )
     short_reach = replace(original.reaches[0], vertices_m=((0, 0), (4990, 0)))
     with pytest.raises(ValueError, match="length differs"):
         serialize_catg_with_drawing(_model(), replace(original, reaches=(short_reach, *original.reaches[1:])))
@@ -217,10 +217,9 @@ class _Shape:
 
     def Contains(self, other: _Shape) -> bool:  # noqa: N802 -- exact external OGR naming convention
         x, y = other.coords[0]
-        return (
-            min(point[0] for point in self.coords) < x < max(point[0] for point in self.coords)
-            and min(point[1] for point in self.coords) < y < max(point[1] for point in self.coords)
-        )
+        return min(point[0] for point in self.coords) < x < max(point[0] for point in self.coords) and min(
+            point[1] for point in self.coords
+        ) < y < max(point[1] for point in self.coords)
 
 
 class _FakeOgr:
@@ -233,23 +232,31 @@ class _FakeOgr:
 
 
 def _layers() -> tuple[_Layer, _Layer, _Layer, _Layer]:
-    centroids = _Layer([
-        ([(0, 0)], {"id": "area_1", "fi": 0}),
-        ([(5000, 4000)], {"id": "area_2", "fi": 0}),
-    ])
-    basins = _Layer([
-        ([(-500, -500), (500, -500), (500, 500), (-500, 500), (-500, -500)], {}),
-        ([(4500, 3500), (5500, 3500), (5500, 4500), (4500, 4500), (4500, 3500)], {}),
-    ])
-    confluences = _Layer([
-        ([(5000, 0)], {"id": "JOIN", "out": 0}),
-        ([(7500, 0)], {"id": "OUT", "out": 1}),
-    ])
-    reaches = _Layer([
-        ([(0, 0), (5000, 0)], {"id": "reach_1", "t": 1, "s": 0}),
-        ([(5000, 4000), (5000, 0)], {"id": "reach_2", "t": 1, "s": 0}),
-        ([(5000, 0), (7500, 0)], {"id": "reach_3", "t": 1, "s": 0}),
-    ])
+    centroids = _Layer(
+        [
+            ([(0, 0)], {"id": "area_1", "fi": 0}),
+            ([(5000, 4000)], {"id": "area_2", "fi": 0}),
+        ]
+    )
+    basins = _Layer(
+        [
+            ([(-500, -500), (500, -500), (500, 500), (-500, 500), (-500, -500)], {}),
+            ([(4500, 3500), (5500, 3500), (5500, 4500), (4500, 4500), (4500, 3500)], {}),
+        ]
+    )
+    confluences = _Layer(
+        [
+            ([(5000, 0)], {"id": "JOIN", "out": 0}),
+            ([(7500, 0)], {"id": "OUT", "out": 1}),
+        ]
+    )
+    reaches = _Layer(
+        [
+            ([(0, 0), (5000, 0)], {"id": "reach_1", "t": 1, "s": 0}),
+            ([(5000, 4000), (5000, 0)], {"id": "reach_2", "t": 1, "s": 0}),
+            ([(5000, 0), (7500, 0)], {"id": "reach_3", "t": 1, "s": 0}),
+        ]
+    )
     return centroids, basins, confluences, reaches
 
 
@@ -271,10 +278,12 @@ def test_optional_ogr_rejects_bad_basins(monkeypatch: pytest.MonkeyPatch) -> Non
     repeated = _Layer([basins.data[0], basins.data[0]])
     with pytest.raises(ValueError, match=r"already assigned|Unassigned|strictly inside"):
         drawing_from_layers(_model(), centroids, repeated, confluences, reaches, projected_crs="EPSG:28350")
-    ring_with_hole = _Layer([
-        (basins.data[0][0] + [(10, 10), (20, 10), (10, 10)], {}),
-        basins.data[1],
-    ])
+    ring_with_hole = _Layer(
+        [
+            (basins.data[0][0] + [(10, 10), (20, 10), (10, 10)], {}),
+            basins.data[1],
+        ]
+    )
     with pytest.raises(ValueError, match="holes or multipart"):
         drawing_from_layers(_model(), centroids, ring_with_hole, confluences, reaches, projected_crs="EPSG:28350")
 

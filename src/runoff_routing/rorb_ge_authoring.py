@@ -116,9 +116,7 @@ class _DirectedNetwork:
 
 def _endpoint_index(point: Point, nodes: tuple[GeNode, ...], tolerance: float, reach: str) -> int:
     matches = [
-        index
-        for index, node in enumerate(nodes)
-        if math.hypot(point[0] - node.x_m, point[1] - node.y_m) <= tolerance
+        index for index, node in enumerate(nodes) if math.hypot(point[0] - node.x_m, point[1] - node.y_m) <= tolerance
     ]
     if len(matches) != 1:
         message = f"Reach {reach!r} endpoint {point} matches {len(matches)} nodes within {tolerance:g} m"
@@ -180,10 +178,7 @@ def _network(drawing: GeDrawing) -> _DirectedNetwork:  # noqa: C901 -- validate 
 
 
 def _length_km(vertices: tuple[Point, ...]) -> float:
-    return math.fsum(
-        math.hypot(end[0] - start[0], end[1] - start[1])
-        for start, end in pairwise(vertices)
-    ) / 1000
+    return math.fsum(math.hypot(end[0] - start[0], end[1] - start[1]) for start, end in pairwise(vertices)) / 1000
 
 
 def _matches_model(model: CatchmentModel, drawing: GeDrawing, network: _DirectedNetwork) -> str:  # noqa: C901 -- explicit stack/geometry consistency checks

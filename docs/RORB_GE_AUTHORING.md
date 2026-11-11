@@ -28,7 +28,10 @@ No QGIS or GDAL packages are downloaded or installed automatically.
 ```python
 from runoff_routing.rorb_codec import parse_catg, write_new
 from runoff_routing.rorb_ge_authoring import (
-    GeDrawing, GeNode, GeReach, serialize_catg_with_drawing,
+    GeDrawing,
+    GeNode,
+    GeReach,
+    serialize_catg_with_drawing,
 )
 
 # Use an already inspected / authored CatchmentModel. Do not generate a new
