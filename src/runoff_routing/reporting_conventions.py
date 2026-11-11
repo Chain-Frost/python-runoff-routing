@@ -35,7 +35,7 @@ class VolumeConventionAudit:
 
 def _printed_token(token: str, *, label: str) -> tuple[Decimal, Decimal]:
     """Parse exact decimal text and its own half-last-place print unit."""
-    if not isinstance(token, str) or not token or token != token.strip() or "_" in token:
+    if not token or token != token.strip() or "_" in token:
         message = f"{label} must be one unmodified numeric print token"
         raise ValueError(message)
     try:
@@ -83,7 +83,7 @@ def audit_volume_conventions(
     or excludes a *reporting* hypothesis for this series, never native solver
     equivalence, hydrological mass balance or the interpretation of raw times.
     """
-    if not isinstance(timestep_hours, Decimal) or not timestep_hours.is_finite() or timestep_hours <= 0:
+    if not timestep_hours.is_finite() or timestep_hours <= 0:
         message = "Timestep must be a positive finite Decimal number of hours"
         raise ValueError(message)
     tokens = tuple(discharge_tokens)
