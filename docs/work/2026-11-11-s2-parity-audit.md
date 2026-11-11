@@ -48,3 +48,9 @@ Windows Python 3.14.6: repository hygiene, Ruff 0.16.6 lint/format, strict Pyrig
 Build and installed-wheel campaign rerun passed execution: 941 indexed files; four supplemental linear passes; 65 catalogue outcomes (36 compared, 25 skipped-unreviewed, 3 expected-failure, 1 invalid). All 36 computed cases fail the printed-precision hypothesis. Complete JSON and all 41 CSV files are byte/structure identical to the preceding adapter-repair run. Private output: ignored .local/s2-quality-wheel in the audit checkout. This confirms the refactor did not alter computed evidence.
 
 S1 PR #19 at f356ec5 has a successful hosted Windows check. S2 native compatibility remains open. Next: obtain explicit opt-in for bounded manufactured native nonlinear probes before inferring a legacy stopping profile; preserve strict kernel and fixed tolerances meanwhile.
+
+## Overlap reconciliation: PR #21 versus #22 (2026-11-11)
+
+PR #21 is the selected S2 adapter/strict-quality implementation. The overlapping PR #22 only addressed legacy text transport and the all-pervious annotation. PR #21's strict UTF-8/BOM/CP1252 decoder and exact all-pervious annotation handling are retained; unknown and nonzero impervious flags still reject. RORB v6 manual Table 5-2 permits the known inline annotation after the numeric flag. PR #22's two additional regression scenarios (annotated nonzero rejection and fingerprint-verified CP1252 whole-case comparison) have been added here. The separate #22 implementation is superseded; do not combine competing decoders or change routing formulas/tolerances.
+
+The 104-test Windows/Python 3.14 quality and installed-wheel evidence cited above applies to the preceding `17102b8` head. The two newly imported tests require exact-head revalidation before treating this revised head as quality checked. Their addition does not establish CMD or GUI numerical parity, and S2 issue #4 remains open.

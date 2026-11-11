@@ -161,3 +161,21 @@ def test_legacy_source_undefined_cp1252_is_rejected() -> None:
 def test_annotated_pervious_flag_matches_unannotated() -> None:
     annotated = CAT.replace("\n0, -99\n", "\n0, -99,No impervious areas in system\n")
     assert parse_control_vector(annotated) == parse_control_vector(CAT)
+
+
+def test_verified_cp1252_case_comparison(tmp_path: Path) -> None:
+    root = tmp_path / "corpus"
+    _write_case(root)
+    model_path = root / "model.catg"
+    raw = model_path.read_bytes().replace(b"C END RORB_GE", b"C \x96 legacy label\r\nC END RORB_GE")
+    model_path.write_bytes(raw)
+    catalogue_path = root / "catalogue.json"
+    catalogue: dict[str, Any] = json.loads(catalogue_path.read_text(encoding="utf-8"))
+    catchment: dict[str, Any] = catalogue["cases"][0]["inputs"][0]
+    catchment["fingerprint"]["sha256"] = hashlib.sha256(raw).hexdigest()
+    catchment["fingerprint"]["size_bytes"] = len(raw)
+    catalogue_path.write_text(json.dumps(catalogue), encoding="utf-8")
+    result = compare_corpus_case(root, "synthetic")
+    assert result.status == "compared"
+    assert result.exact_printed_matches == 4
+    assert model_path.read_bytes() == raw

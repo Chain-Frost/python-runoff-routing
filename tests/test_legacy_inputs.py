@@ -76,3 +76,9 @@ def test_unsupported_catchment_fails(source: str) -> None:
 def test_unsupported_storm_fails(source: str) -> None:
     with pytest.raises(LegacyInputError):
         parse_explicit_design_storm(source)
+
+
+def test_annotated_nonzero_pervious_flag_is_rejected() -> None:
+    annotated = CONTROL.replace("\n0, -99\n", "\n1, -99,No impervious areas in system\n")
+    with pytest.raises(LegacyInputError, match="all-pervious"):
+        parse_control_vector(annotated)
