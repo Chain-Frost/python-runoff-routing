@@ -2,7 +2,13 @@
 
 import pytest
 
-from runoff_routing.legacy_inputs import LegacyInputError, parse_control_vector, parse_explicit_design_storm
+from runoff_routing.legacy_inputs import (
+    LegacyInputError,
+    parse_control_bytes,
+    parse_control_vector,
+    parse_explicit_design_storm,
+    parse_explicit_design_storm_bytes,
+)
 from runoff_routing.rorb_codec import parse_catg, parse_design_stm
 from runoff_routing.single_storm import Control
 
@@ -48,6 +54,13 @@ def test_control_sample_order_and_lengths() -> None:
     assert model.controls == (Control(1, 2), Control(3), Control(1, 3), Control(4), Control(5, 1), Control(7))
     assert model.areas_km2 == (1, 3)
     assert len(parse_catg(CONTROL.encode()).model.controls) == len(model.controls)
+
+
+def test_original_bytes_accept_cp1252_and_annotated_pervious_data() -> None:
+    coded = CONTROL.replace("7\nPRINT\n", "7\nCafé\n").replace("0, -99\n", "0, -99, No impervious areas\n")
+    assert parse_control_bytes(coded.encode("cp1252")) == parse_control_vector(CONTROL)
+    storm = STORM.replace("Sample", "Café rainfall")
+    assert parse_explicit_design_storm_bytes(storm.encode("cp1252")) == parse_explicit_design_storm(STORM)
 
 
 def test_explicit_design_storm() -> None:

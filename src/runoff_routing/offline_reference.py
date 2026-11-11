@@ -17,7 +17,7 @@ from itertools import pairwise
 from pathlib import Path
 from typing import Any, Literal, cast
 
-from runoff_routing.legacy_inputs import parse_control_vector, parse_explicit_design_storm
+from runoff_routing.legacy_inputs import parse_control_bytes, parse_explicit_design_storm_bytes
 from runoff_routing.single_storm import Losses, calculate_storm
 
 Status = Literal["compared", "unsupported", "invalid"]
@@ -262,11 +262,11 @@ def compare_corpus_case(corpus_root: Path, case_id: str) -> OfflineComparison:  
     inputs = {item["identity"]: item for item in case.get("inputs", ())}
     if not {"catchment", "storm", "parameters"}.issubset(inputs):
         return OfflineComparison(case_id, "unsupported", "Missing catchment/storm/CMD parameter evidence.")
-    raw_model = _read_verified(root, inputs["catchment"]).decode("utf-8-sig")
-    raw_storm = _read_verified(root, inputs["storm"]).decode("utf-8-sig")
+    raw_model = _read_verified(root, inputs["catchment"])
+    raw_storm = _read_verified(root, inputs["storm"])
     _read_verified(root, inputs["parameters"])
-    model = parse_control_vector(raw_model)
-    storm = parse_explicit_design_storm(raw_storm)
+    model = parse_control_bytes(raw_model)
+    storm = parse_explicit_design_storm_bytes(raw_storm)
     if str(storm.timestep_hours) != str(float(settings["timestep_hours"])):
         message = "Mismatch between stored storm and effective timestep."
         raise CorpusError(message)

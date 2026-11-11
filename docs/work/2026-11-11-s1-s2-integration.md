@@ -43,3 +43,7 @@ See [integration API, sample and feature matrix](../S1_S2_INTEGRATION.md) for th
 ## S1 upstream reconciliation (2026-11-11)
 
 S0 #12, S1 inspection #13, S1 typed API #19 and corrected native code-7 writer #25 are merged to `main`. The integration draft merges the current `main` tree (preserving all newer capture, parser, tests and policy changes) with the S2/integration-only files. Its public synthetic `.catg` fixtures now use code 7 followed by a separate physical print-location record. S2 #14/#18 and overlapping transport correction #21 remain independent and subject to review; the rejected duplicate #22 does not supply an authoritative parser. Exact-head Windows quality and private evidence must be verified separately. No numerical stage or RORB native serialization is accepted by this reconciliation.
+
+## S1-backed offline source transport
+
+The retained offline S2 comparator passes SHA-256-verified original `.catg` and `.stm` bytes through the S1 grammar via the compatibility adapter. This preserves legacy CP1252 input support, avoids a duplicate parser, and retains original evidence hashes. Public synthetic regressions include CP1252 catchment/storm text and an annotated all-pervious sentinel. These are input-transport checks, not a private-corpus replay or numerical acceptance; overlapping S2 #21 must be reconciled independently before merging.

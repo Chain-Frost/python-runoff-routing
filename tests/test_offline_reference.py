@@ -146,6 +146,20 @@ def test_corrupt_reference_hydrograph_is_rejected(tmp_path: Path) -> None:
         compare_corpus_case(root, "synthetic")
 
 
+def test_cp1252_original_corpus_source_is_accepted(tmp_path: Path) -> None:
+    root = tmp_path / "corpus"
+    _write_case(root)
+    encoded = CAT.replace("SYNTHETIC CATCHMENT", "Café catchment").encode("cp1252")
+    (root / "model.catg").write_bytes(encoded)
+    catalogue = json.loads((root / "catalogue.json").read_text(encoding="utf-8"))
+    item = next(record for record in catalogue["cases"][0]["inputs"] if record["identity"] == "catchment")
+    item["fingerprint"] = {"sha256": hashlib.sha256(encoded).hexdigest(), "size_bytes": len(encoded)}
+    (root / "catalogue.json").write_text(json.dumps(catalogue), encoding="utf-8")
+    report = compare_corpus_case(root, "synthetic")
+    assert report.status == "compared"
+    assert report.exact_printed_matches == 4
+
+
 def test_gui_reference_is_not_misused(tmp_path: Path) -> None:
     root = tmp_path / "corpus"
     _write_case(root)

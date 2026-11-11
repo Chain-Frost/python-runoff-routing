@@ -26,10 +26,10 @@ def _float(value: Decimal) -> float:
     return number
 
 
-def parse_control_vector(text: str) -> Catchment:
-    """Preserve the historical return type while delegating syntax to S1."""
+def parse_control_bytes(data: bytes) -> Catchment:
+    """Adapt original verified source bytes using only the S1 .catg parser."""
     try:
-        model = parse_catg(text.encode("utf-8")).model
+        model = parse_catg(data).model
     except FormatProblem as exc:
         message = f"S1 {exc.status} catchment: {exc}"
         raise LegacyInputError(message) from exc
@@ -40,10 +40,15 @@ def parse_control_vector(text: str) -> Catchment:
     return Catchment(controls, tuple(_float(area.area_km2) for area in model.subareas))
 
 
-def parse_explicit_design_storm(text: str) -> Storm:
-    """Preserve the historical return type while delegating syntax to S1."""
+def parse_control_vector(text: str) -> Catchment:
+    """Historical text fixture interface; byte-based sources should avoid decoding."""
+    return parse_control_bytes(text.encode("utf-8"))
+
+
+def parse_explicit_design_storm_bytes(data: bytes) -> Storm:
+    """Adapt original verified source bytes using only the S1 .stm parser."""
     try:
-        model = parse_design_stm(text.encode("utf-8")).model
+        model = parse_design_stm(data).model
     except FormatProblem as exc:
         message = f"S1 {exc.status} DESIGN storm: {exc}"
         raise LegacyInputError(message) from exc
@@ -53,3 +58,8 @@ def parse_explicit_design_storm(text: str) -> Storm:
         tuple(_float(value) for value in model.percentages),
         tuple(_float(value) for value in model.depths_mm),
     )
+
+
+def parse_explicit_design_storm(text: str) -> Storm:
+    """Historical text fixture interface; byte-based sources should avoid decoding."""
+    return parse_explicit_design_storm_bytes(text.encode("utf-8"))
