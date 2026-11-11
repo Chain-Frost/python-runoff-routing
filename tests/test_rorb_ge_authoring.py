@@ -144,6 +144,45 @@ def test_geometry_and_source_identity_rejection() -> None:
         )
 
 
+
+
+def test_parallel_reaches_and_disconnected_graph_fail_closed() -> None:
+    drawing = _drawing()
+    parallel = replace(drawing.reaches[2], vertices_m=((0, 0), (5000, 0)))
+    with pytest.raises(ValueError, match="Parallel"):
+        serialize_catg_with_drawing(_model(), replace(drawing, reaches=(*drawing.reaches[:2], parallel)))
+    disconnected = replace(drawing.reaches[2], vertices_m=((0, 0), (5000, 4000)))
+    with pytest.raises(ValueError, match="Disconnected"):
+        serialize_catg_with_drawing(_model(), replace(drawing, reaches=(*drawing.reaches[:2], disconnected)))
+
+
+def test_ambiguous_endpoints_and_multiple_outlets_fail_closed() -> None:
+    drawing = _drawing()
+    coincident = replace(drawing.nodes[2], x_m=0, y_m=0)
+    with pytest.raises(ValueError, match="matches 2 nodes"):
+        serialize_catg_with_drawing(_model(), replace(drawing, nodes=(*drawing.nodes[:2], coincident, drawing.nodes[3])))
+    second_outlet = replace(drawing.nodes[1], outlet=True)
+    with pytest.raises(ValueError, match="one graphical outlet"):
+        serialize_catg_with_drawing(
+            _model(), replace(drawing, nodes=(drawing.nodes[0], second_outlet, *drawing.nodes[2:]))
+        )
+
+
+def test_gis_area_mapping_cannot_swap_computational_sources() -> None:
+    drawing = _drawing()
+    changed = replace(
+        drawing,
+        nodes=(
+            replace(drawing.nodes[0], subarea_id="area_2"),
+            drawing.nodes[1],
+            replace(drawing.nodes[2], subarea_id="area_1"),
+            drawing.nodes[3],
+        ),
+    )
+    with pytest.raises(ValueError, match="not upstream"):
+        serialize_catg_with_drawing(_model(), changed)
+
+
 def test_malformed_and_unsupported_drawing_rejected() -> None:
     drawing = _drawing()
     with pytest.raises(ValueError, match="projected CRS"):
