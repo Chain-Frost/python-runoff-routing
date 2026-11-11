@@ -79,7 +79,7 @@ Do not implement S1 parser internals or alter input semantics without coordinati
 
 First perform read-only PE header/runtime/symbol/import/format/error-string inspection on authorized local copies (no binary modification, protections bypass, unapproved upload or code extraction). Record possible internal routines and, for each, a behavioral question that can be checked by controlled execution.
 
-If that is insufficient, propose a **narrowed question for targeted disassembly** (example: how a documented nonlinear routing convergence exit is selected, or why a GUI input selection is ignored). Under current AGENTS.md, decompilation is forbidden. **Do not proceed** until rights/legal scope, licensing and repo instructions are explicitly reviewed and amended where applicable. Do not include disassembly/decompiled source in Python implementation PRs; record independently verifiable behavior instead.
+If that is insufficient, propose a **narrowed question for targeted disassembly** (example: how a documented nonlinear routing convergence exit is selected, or why a GUI input selection is ignored). Decompilation/disassembly is outside the scope authorized by this workpack. **Do not proceed** until rights/legal scope, licensing and repo instructions are explicitly reviewed and amended where applicable. Do not include disassembly/decompiled source in Python implementation PRs; record independently verifiable behavior instead.
 
 The audit is not a legal clearance.
 

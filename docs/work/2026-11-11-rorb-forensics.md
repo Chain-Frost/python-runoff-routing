@@ -14,7 +14,7 @@
 
 Characterise historical GUI/CMD/file/solver behavior, including latent defects. Specify user warnings and exact legacy-versus-corrected semantics. Establish robust CatchmentSIM/RORB GE-compatible source preservation and round-trip requirements. The investigation is **separate** from ongoing S0 [PR #12](https://github.com/Chain-Frost/python-runoff-routing/pull/12), S1 [PR #13](https://github.com/Chain-Frost/python-runoff-routing/pull/13), S2 [PR #14](https://github.com/Chain-Frost/python-runoff-routing/pull/14), and manual [PR #15](https://github.com/Chain-Frost/python-runoff-routing/pull/15).
 
-No executable/disassembly/native traces have been inspected or generated as part of this planning work. The existing source manual's historical licence, the conditional Australian statutory interoperability exception and current AGENTS.md prohibit treating broad decompilation as preapproved.
+No executable/disassembly/native traces have been inspected or generated as part of this planning work. The existing source manual's historical licence, the conditional Australian statutory interoperability exception and this workpack's scope do not preapprove decompilation or copying proprietary implementation details.
 
 ## Immediate next action
 

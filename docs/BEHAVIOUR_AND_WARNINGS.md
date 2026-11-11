@@ -4,7 +4,7 @@ Status: proposed policy, not an implemented feature. Tracking: [independent audi
 
 ## Purpose
 
-Deliver a **faithful import and independently correct, transparent calculation system**, not an uncritical clone of legacy mistakes. Historical RORB may exhibit errors in the graphical entry layer, persisted settings, execution preprocessing, routing engine, or reporting. These boundaries must be tested separately.
+Implement RORB procedures in Python, with pinned RORB_CMD and RORBwin executables as the **computational source of truth** for verified effective inputs. Preserve version-specific legacy behavior rather than silently correcting or copying unverified quirks. Independently audited or corrected procedures are a separately reviewed future compatibility profile, not an accepted replacement for native numerical equivalence. Historical RORB may exhibit errors in the graphical entry layer, persisted settings, execution preprocessing, routing engine, or reporting. These boundaries must be tested separately.
 
 The same input can have four different representations:
 
@@ -112,7 +112,7 @@ Randomized or combinatorial probes must have bounded case counts, independent se
 
 The user-supplied RORB v6 manual contains a licence that restricts modification/development of the licensed software. Australian Copyright Act section 47D provides a limited **conditional** interoperability exception; it is not a blanket licence for whole-program decompilation or copying implementation details: [legislation.gov.au](https://www.legislation.gov.au/C1968A00063/2026-04-02/2026-04-02/text/original/epub/OEBPS/document_1/document_1.html).
 
-Under current [AGENTS.md](../AGENTS.md), **decompilation is prohibited**. This handoff authorizes **only** normal authorized execution, isolated black-box experiments, file/GUI observations, system-call tracing and read-only PE metadata/string inspection within applicable rights. For targeted disassembly or decompilation, first raise a written, narrowly scoped permission/legal-policy decision and update repository instructions if authorized. Do not circumvent protection mechanisms, patch RORB, upload binaries to third-party analyzers or commit binary-derived code, pseudo-code, disassembly, private strings or proprietary sample files.
+This workpack does not authorize decompilation or disassembly. [AGENTS.md](../AGENTS.md) requires source provenance, private-evidence protection and separately reviewed compatibility claims. This handoff permits **only** normal authorized execution, isolated black-box experiments, file/GUI observations, system-call tracing and read-only PE metadata/string inspection within applicable rights. For targeted disassembly or decompilation, first raise a written, narrowly scoped permission/legal-policy decision and update repository instructions if authorized. Do not circumvent protection mechanisms, patch RORB, upload binaries to third-party analyzers or commit binary-derived code, pseudo-code, disassembly, private strings or proprietary sample files.
 
 The eventual independently authored Python code should derive from public mathematical specifications and separately reviewed behavioral tests, with traceable provenance. This project is public at the time of this document; avoid uploading sensitive working evidence.
 
