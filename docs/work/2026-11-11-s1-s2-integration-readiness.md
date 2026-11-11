@@ -1,68 +1,72 @@
-# S1/S2 integration readiness — Handoff C (blocked; preparatory slice)
+# S1/S2 Handoff C integration — readiness and dependency contract
 
-**Status:** BLOCKED, not an integrated parser/solver. **Date:** 2026-11-11. **Owner:** Unassigned.
+**2026-11-11 status: BLOCKED.** This is independent documentation and a conflict-free integration plan, **not** a working parser-to-solver bridge. The Handoff C start condition requires a *reviewed and stable* S1 typed API and canonical serializers. Those are now drafted in PR #19, but have **not** passed quality and review gates.
 
 **Authoritative assignment:** https://github.com/Chain-Frost/runoff-routing-investigations/blob/docs/2026-11-11-s1-s2-agent-handoffs/docs/work/2026-11-11-s1-s2-integration-handoff.md
 
-The investigations repository and its raw native corpus are private; the Python source repository is public. Do not transfer raw cases, per-event outputs, absolute private paths, native executables or hashes of private material into this branch.
+The investigations repo and native corpus are private while this Python repository is public. This preparation records no raw cases, machine paths, private artefacts or numerical case-level results.
 
-## Exact current upstream revisions
+## Current revision/owner map
 
-| Owner | Draft PR / head | Base | Current capability | Gate |
-| --- | --- | --- | --- | --- |
-| S0 | [#12](https://github.com/Chain-Frost/python-runoff-routing/pull/12), `0d964e81c2f992c0097a8a4d7c16455abe327cd8` | main | Source evidence harness, offline reference comparison | Native acceptance still open; S0 must remain untouched |
-| S1 | [#13](https://github.com/Chain-Frost/python-runoff-routing/pull/13), `06081dd645eebecb6ec273259e129adaa80b960f` | S0 #12, parent `07a54f931c441f3363b572ecc2a1dd0df3a79464` | CMD V2 single-burst .par `ParameterModel`, source line/hash diagnostics, partial .out inspection | **No RunModel, .catg/.stm reader, versioned JSON or canonical writers**; unreviewed draft |
-| S2 | [#14](https://github.com/Chain-Frost/python-runoff-routing/pull/14), `78d94926172c40ff11ccd4a3bc4c8b028cf5b689` | main | `calculate_storm`, local `Catchment/Control/Storm/Losses`, `legacy_inputs.py` narrow fixture adapter and offline comparator | No agreed S1 input mapping or accepted RORB numerical parity; draft |
-| Preparation | This branch | main `4498f7f466eb34a35d5eecf35844aa5bd4d7dcf7` | Pure, independently testable Decimal-to-float guard and integration checklist | Blocked before real adapter |
+| Role | Open PR and exact head | Base | State relevant to integration |
+| --- | --- | --- | --- |
+| S0 provenance | [#12](https://github.com/Chain-Frost/python-runoff-routing/pull/12): 0d964e81c2f992c0097a8a4d7c16455abe327cd8 | main | Draft; native acceptance separately open; do not touch |
+| S1 inspection parent | [#13](https://github.com/Chain-Frost/python-runoff-routing/pull/13): 06081dd645eebecb6ec273259e129adaa80b960f | Stacked on S0 #12, parent 07a54f931c441f3363b572ecc2a1dd0df3a79464 | CMD single-burst .par ParameterModel and partial .out, no catchment/storm domain |
+| **S1 bidirectional handoff A** | **[#19](https://github.com/Chain-Frost/python-runoff-routing/pull/19): 6403e8c6845bf4512720bba85e58f00fe6b720ec** | Stacked on S1 #13 | **RunModel, typed parameter/catchment/storm models, source-aware .catg/.stm/.par parsers, canonical serializers, JSON schema 1 and preliminary S2Payload exist. Draft, zero submitted reviews. Windows quality failed: 25 strict Pyright errors; wheel/build steps skipped.** |
+| S2 computation parent | [#14](https://github.com/Chain-Frost/python-runoff-routing/pull/14): 78d94926172c40ff11ccd4a3bc4c8b028cf5b689 | main | Independent pure single-storm kernel, temporary Catchment/Control/Storm/Losses, legacy_inputs fixture readers, private offline comparison; unaccepted numeric equivalence |
+| **S2 handoff B audit** | **[#18](https://github.com/Chain-Frost/python-runoff-routing/pull/18): 53021ff23ccb4ee46ddf9a528775b14220d7051e** | Stacked on S2 #14 | Printed-precision and linear balance diagnostics, 13 supplementary synthetic checks. Draft, no review; target quality and private comparison not accepted |
+| This document | feat/s1-s2-integration-readiness, started at main 4498f7f466eb34a35d5eecf35844aa5bd4d7dcf7 | main | Readiness plan only, no duplicate model/grammar/numerical code |
 
-Both S1 and S2 have **no submitted reviews** at this snapshot. No upstream branches were rebased, merged, cherry-picked, modified or released by this work.
+**Newer PRs #19 and #18 are separate from parent PRs #13 and #14.** Handoff C may proceed after upstream agreement but must not assume that a draft branch with failing CI is a reviewed contract. Do not close issues #3 or #4.
 
-## Required upstream handoffs
+## Actual S1 handoff A API (review required)
 
-1. **S1 owner** must publish and review a source-independent typed `RunModel` with source identities, ordered controls, subareas, ISA/pluviograph/depth mapping and explicit print-site identities. Implement characterised S1 .catg/.stm grammars, versioned JSON and canonical .par/.catg/.stm serializers with parse-after-write semantic round trips. Original-byte preservation must be separate from canonical export. Unsupported/non-representable features must reject.
-2. **S2 owner** must document admitted solver features and unresolved numerical hypotheses against its current head. Current assumptions include at-end-of-bin rainfall inflow, initial-loss/continuing-loss bin crossing and nonlinear stopping. Peak proximity does not accept full-ordinate parity.
-3. **Integrator**, only after the S1 contract is agreed, must pin current S1/S2 heads, map S1 typed records to S2 types through one adapter and remove duplicated fixture grammars only after tests establish migration equivalence. Do **not** create another S1-like parser or let S2 read raw input text directly.
+- `rorb_model.ParameterSet`, `CatchmentModel`, `StormModel`, `RunModel` are immutable source-independent domain objects. `RunModel` holds parameters/catchment/storm and validates ISA, burst and ordered subarea IDs.
+- `rorb_codec.parse_cmd_par`, `parse_catg`, `parse_design_stm` produce source-aware `ParsedDocument` values; `serialize_cmd_par`, `serialize_catg`, `serialize_design_stm` provide supported-format canonical bytes. `original_bytes` is separate source-preservation mode; `write_new` is exclusive/no-clobber.
+- `rorb_model.to_json/from_json` provide schema-1 interchange with Decimal strings. `docs/RORB_BIDIRECTIONAL.md` already provides a draft API example. A new speculative schema must **not** be created by the integration owner.
+- `rorb_codec.to_s2_payload(RunModel)` already creates a restricted `S2Payload` with control code/reach length pairs, areas, storm values, losses, `kc`, and `m`. **Reuse or improve this existing single conversion boundary** after owner review; do not create another generic Decimal converter or duplicate .catg/.stm grammars.
+- The current `S2Payload` omits print-site/source identifiers and source provenance; these must be retained in an integration result/diagnostic object without inventing associations. The current `_as_float` checks finite output, but not positive-Decimal underflow-to-zero and not field/expected unit context. These are review questions for S1, not permission to bypass its boundary. In particular, S1 `Reach.length_km` is positive Decimal while S2 accepts zero-length routing, so policy for representability and zero-length semantics needs explicit agreement.
+- A canonical .catg writer using an empty graphical scaffold is **not** proof that native RORB accepts it. Preserve original source bytes/graphical information separately. Original print labels may not equal retained `HydNNN` output columns.
 
-## Future adapter contract (not an API implemented here)
+## Numerical adapter after upstream contract approval
 
-- Validate *parse*, *numerical execution* and *native parity* as independent gates. Input recognised by S1 does not imply it can be computed by S2. Fail closed before calculation for unknown control codes, storage, FIT, imperviousness, external/lateral inflows, GUI .par, multiple bursts or other unsupported numerical features.
-- Preserve original RORB control order, source/area/depth/ISA mapping and subarea identities. S2 supports control 1/3/4/5/7; the imported 0 is a terminator, not a routed operation. Do not silently reorder, merge ISAs or infer hydrograph-to-print-location associations from positional `HydNNN` labels. No invented print-site identities.
-- Admit only a one-ISA, one-burst, fully pervious, natural-reach, explicit DESIGN storm subset, and S1 CMD loss model **1** if it is proven semantically IL/CL. S1 loss model 2 is ambiguous and must reject for computation. S2 currently has one `kc/m`, a single `Losses` object and a uniform storm pattern.
-- S1 values are `Decimal`. The new pure `decimal_to_solver_float(value, field=..., units=..., constraint=...)` primitive rejects nonfinite values, binary64 overflow, underflow-to-zero and out-of-domain values. It performs no unit conversion, never handles integer codes/IDs, and is **not** a `RunModel` adapter. The future adapter must supply each field's correct source units and error-to-source diagnostic mapping. Expected units include mm, mm/h, km, km2, hours and dimensionless kc/m; outputs are m3/s. IEEE-754 rounding is not proof of native parity.
-- A future `run_model(model)` must be side-effect-free, return typed results and diagnostics, and include trustworthy print-location identities only where established. Preserve the S1 raw input hashes and line metadata, and native original time/increment tokens without shifting any axis. Use a thin Windows-friendly wrapper with exclusive no-clobber report/CSV output, not a new parser or generic plugin system.
-- Distinguish `invalid_source`, `parsed`, `unsupported_execution`, `calculated_unvalidated`, `compared_unaccepted` and `incomplete_evidence`. Neither a skipped private test nor a missing corpus constitutes a green parity result.
+Use S1 `RunModel` as the single authority. Construct S2 `Catchment(tuple(Control(code,length) ...), areas)`, `Storm(timestep,calculation_increments,percentages,depths)`, `Losses(initial,continuing)` and `calculate_storm(...,kc,m)` only after all execution capabilities are checked.
 
-## Capability matrix at this revision
+1. Preserve original computational control order exactly; do not treat trailing control 0 as a routed operation. Preserve subarea/area/depth/ISA identifiers; do not reorder by geometry, name or drawing order.
+2. Initially accept only one ISA, one explicit DESIGN burst, loss flag 1 IL/CL, lumped kc/m, fully pervious source areas, uniform temporal percentages, natural reaches and S2 controls 1/3/4/5/7. Reject GUI .par, loss flag 2, multiple ISAs or bursts, FIT, external/lateral inflows, special storage, impervious fractions, unsupported controls or uncharacterised storms **before** any calculation.
+3. Keep source decoding, parser diagnostics and format-specific token handling out of the numerical solver. Reject invalid/unsupported inputs differently from valid-but-unexecuted or executed-but-unvalidated inputs. Loss crossing, at-end-of-bin source phase, legacy nonlinear stopping, time labels and native volume conventions are unresolved S2 scientific hypotheses.
+4. Export a pure `run_model(model)` with typed results and source-aware, machine-readable diagnostics; associate printed locations only through explicit stable S1 identities. No native process, file writes, time-axis adjustment or implicit `HydNNN` index matching.
+5. Keep a thin Windows-friendly wrapper optional. Output JSON/report/CSV with exclusive creation by default. Reuse the S2 offline comparator only after native print-site and phase associations are established. Preserve raw increment and time strings.
 
-| Dialect / feature | S1 parse | S1 canonical write | S2 isolated calculation | Integrated end-to-end | Parity accepted |
+## Capability matrix (unmerged heads; no Handoff C integration)
+
+| Dialect / feature | S1 #19 parse | S1 #19 canonical serialize | S2 #14 isolated calculation | Integrated execute | Native numerical parity |
 | --- | --- | --- | --- | --- | --- |
-| CMD V2 single-burst .par | Limited typed inspection | No | Manual parameter setup only | No | No |
-| GUI .par / multi-burst CMD | No | No | No | No | No |
-| RORB_GE .catg, codes 1/3/4/5/7 | No | No | Fixture-only S2 parser | No | No |
-| Explicit DESIGN .stm, fully pervious, one ISA | No | No | Fixture-only S2 parser | No | No |
-| Other .cat/.dat/.stm dialects | No | No | No | No | No |
-| Versioned JSON RunModel | No | No | No | No | No |
-| Single .out HydNNN table | Partial only, print identities unverified | N/A | Separate cached comparator | No trusted identity join | No |
-| Storage, FIT, GUI imperviousness, code 2/6, multiple ISAs | No runnable typed model | No | Unsupported/reject | No | No |
+| CMD V2 .par single-burst subset | Draft yes | Draft yes | Manual setup only | **No** | No |
+| RORB_GE 002 .catg natural/1,3,4,5,7 | Draft yes | Draft yes, empty graphic scaffold | Narrow legacy fixture parser | **No** | No |
+| Explicit DESIGN .stm, one ISA/one burst | Draft yes | Draft yes | Narrow legacy fixture parser | **No** | No |
+| Versioned JSON RunModel schema 1 | Draft yes | JSON draft yes | Separate S2 domain | **No** | No |
+| Single cached .out HydNNN table | Partial read-only S1 inspector | Not applicable | S2 cached comparator | Print mapping unverified | No |
+| GUI .par, .cat/.dat, FIT, unknown controls, storage, impervious, multi-burst | Unsupported / uncharacterised | Unsupported | Unsupported | No | No |
 
-**No versioned JSON example is published as runnable** because S1 has not defined its format. Generating a speculative config would undermine the authoritative type contract.
+`Draft yes` means implementation exists at a particular unmerged revision, **not** that public CI/native equivalence or the shared API has been accepted.
 
-## Integration acceptance plan (after readiness gate)
+## Integration validation plan
 
-1. Re-read upstream PR heads; review S1 `RunModel` and canonical writer APIs. Assert `read → typed model → JSON → typed model → canonical .par/.catg/.stm → read` semantic equality for characterised fixtures. Reject unrepresentable features rather than dropping them.
-2. Implement the single typed adapter to S2 `Catchment/Control/Storm/Losses`, preserve command and ISA order, invoke `calculate_storm` and return typed print identities and structured source diagnostics. Test fail-closed unsupported constructs **before** a solver call.
-3. Exercise supported `read → calculate → offline compare` via S2's comparator, retaining raw CMD tokens; run private corpus strictly outside this repository and record unsupported/incomplete separately. Do not claim tolerance acceptance from near-equal peaks.
-4. Run focused synthetic, parser/writer/source, offline and installed-wheel tests separately. Target Windows/Python **3.14**, pinned Ruff **0.16.6**, strict Pyright and installed-wheel import outside checkout. Do not execute RORB or start native capture from the integration test suite.
-5. Produce reviewed API example and supported versioned JSON sample **after** S1 settles the format. Keep issues [#3](https://github.com/Chain-Frost/python-runoff-routing/issues/3) and [#4](https://github.com/Chain-Frost/python-runoff-routing/issues/4) open until their separate acceptance gates pass.
+- Pin reviewed source heads before opening a *real* integration stack. Exercise `read → RunModel → to_json → from_json → canonical .par/.catg/.stm write → read` and semantic identity equality; preserve original bytes in the separate source-preservation path. Reject unrepresentable canonical features.
+- Construct S2 from `to_s2_payload`; compare numeric results against equivalent direct S2 fixtures, verify control/area/ISA mapping and explicit print IDs, and assert unsupported features reject **before** `calculate_storm`.
+- Retire or mark `legacy_inputs.py` a compatibility shim only after tests prove migration, not by moving the old grammar under a new module name.
+- Run parser/writer/source and synthetic solver checks separately. Run the private offline corpus only from an approved **external** directory, reporting unsupported/incomplete cases separately from compared-but-unaccepted results, without writing data to the public source tree.
+- Required target: Windows/Python 3.14, pinned Ruff 0.16.6, strict Pyright, full repository suite, wheel build and import outside checkout. Do not start RORB. Do not infer parity from peaks, an absent corpus or a skipped wheel check.
 
-## Dependency and conflict/merge plan
+## Staged conflict and merge plan
 
-This preparatory branch is based directly on **main**, not on any unmerged implementation. It does not contain S1 or S2 source and must not be presented as the final integration PR.
+No upstream branch is modified by this main-based readiness PR. **S0 #12 → stacked S1 #13 → stacked S1 #19 → S2 #14 → S2 #18 → final integration** is the provisional conceptual order, each step requiring its own owner approval, current-head review and deliberate conflict resolution. The S2 stack is independent from main; do not blind-rebase it during another agent's work. Integration may instead use an expressly agreed stack of pinned parents, with one documented dependency map. Do not force updates, merge, release, change workflows or close #3/#4 automatically.
 
-Recommended review/merge order, **subject to explicit separate approval**: S0 #12 → stacked S1 #13 → independently based S2 #14 (review and resolve conflicts) → completed integration PR. Alternatively agree a pinned integration stack with reviewed parents. Never perform a blind rebase while an upstream branch is being edited and never force-push. After the parents are agreed, re-evaluate this preparation against the combined tree, then retire/mark `legacy_inputs.py` a compatibility shim only after migration tests; do not change S0 capture machinery or workflows.
+## Current readiness validation and exact blocker
 
-## Evidence for this preparatory PR
+- **S1 #19 Windows quality run [43030412072](https://github.com/Chain-Frost/python-runoff-routing/actions/runs/43030412072): FAILED at head 6403e8c6845bf4512720bba85e58f00fe6b720ec.** Ruff lint/format passed; strict Pyright failed with **25 errors** in `check_private_parser_corpus.py`, `rorb_inspect.py`, `rorb_model.py` and `test_rorb_roundtrip.py`. Wheel build/import were skipped. No review submissions recorded.
+- **S2 #18:** reported 13 supplementary synthetic diagnostic tests; Windows/Python 3.14, full private corpus and native parity remain unaccepted.
+- **This document-only readiness branch:** no application code or tests changed, and no source test run is claimed. It cannot be treated as Handoff C completion.
 
-- **PASS, supplementary only:** 19 synthetic unit tests on Linux/CPython 3.13.5; compilation succeeded. No native executables or private data accessed.
-- **NOT RUN:** Ruff 0.16.6, strict Pyright, Windows/Python 3.14, whole-repository tests, installed wheel, parser/serializer round trips (S1 contract absent), offline private corpus and numeric parity.
-- **Next action:** Wait for an agreed S1 typed-model/serializer revision. Re-read all three PR heads and then implement the actual end-to-end adapter. This preparatory PR must remain draft and is not accepted Handoff C completion.
+**Next action:** S1 #19 owner resolves 25 strict typing findings, records full Windows/wheel checks and obtains an agreed reviewed typed model/serializer interface. Re-read fresh #19/#18 heads, then create a pinned stack and implement the single `run_model` adapter with tests.
