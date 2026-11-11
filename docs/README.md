@@ -28,5 +28,6 @@
 - [S1 CMD inspection record](work/2026-11-10-s1-inspection.md)
 - [S1 typed parser work record](work/2026-11-11-s1-bidirectional.md)
 - [Native code-7 serialization work record](work/2026-11-11-s1-code7-serialization.md)
+- [S1/S2 integration readiness and dependency register](work/2026-11-11-s1-s2-integration-readiness.md)
 
 Future repository-owned Markdown must be linked here. Policies describe required behaviour; the roadmap describes future implementation. No source document establishes that this package has passed a numerical acceptance gate.
