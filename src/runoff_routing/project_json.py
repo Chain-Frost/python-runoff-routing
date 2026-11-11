@@ -388,6 +388,13 @@ def import_rorb_project(
     return project
 
 
+def _validated_profile(value: str) -> RainfallProfile:
+    if value not in {"explicit", "legacy-rorb", "arr-2026v1"}:
+        message = f"Unknown rainfall-method profile: {value}"
+        raise ProjectError(message)
+    return cast("RainfallProfile", value)
+
+
 def main(argv: list[str] | None = None) -> int:
     """Small Windows-friendly CLI without argparse, native calls or side effects."""
     args = sys.argv[1:] if argv is None else argv
@@ -411,13 +418,12 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if len(args) == 7 and args[0] == "import-rorb":
             _, identifier, profile, par, catg, stm, destination = args
-            if profile not in {"explicit", "legacy-rorb", "arr-2026v1"}:
-                raise ProjectError(f"Unknown rainfall-method profile: {profile}")
+            selected_profile = _validated_profile(profile)
             target = Path(destination)
             project = import_rorb_project(
                 target,
                 identifier=identifier,
-                rainfall_profile=cast("RainfallProfile", profile),
+                rainfall_profile=selected_profile,
                 parameters=Path(par),
                 catchment=Path(catg),
                 storm=Path(stm),

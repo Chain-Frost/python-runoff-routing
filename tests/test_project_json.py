@@ -7,7 +7,6 @@ import json
 from dataclasses import replace
 from decimal import Decimal
 from pathlib import Path
-from typing import cast
 
 import pytest
 
@@ -50,13 +49,13 @@ def _run() -> RunModel:
             1,
             1,
             1,
-            (RoutingValue(1, Decimal("1"), Decimal("0.8")),),
-            (LossValue(1, 1, Decimal("2"), Decimal("0.5")),),
+            (RoutingValue(1, Decimal(1), Decimal("0.8")),),
+            (LossValue(1, 1, Decimal(2), Decimal("0.5")),),
         ),
         CatchmentModel(
             "Example project",
-            (SubArea("area_1", Decimal("2"), "A"),),
-            (Reach("reach_1", Decimal("3"), "Reach 1 Sub-area A"),),
+            (SubArea("area_1", Decimal(2), "A"),),
+            (Reach("reach_1", Decimal(3), "Reach 1 Sub-area A"),),
             (
                 ControlStep(1, "area_1", "reach_1", label="Reach 1 Sub-area A"),
                 ControlStep(7, print_id="print_1", label="Outlet"),
@@ -68,8 +67,8 @@ def _run() -> RunModel:
             Decimal("0.5"),
             10,
             0,
-            (Decimal("25"), Decimal("75")),
-            (Decimal("10"),),
+            (Decimal(25), Decimal(75)),
+            (Decimal(10),),
             ("area_1",),
         ),
     )
@@ -210,9 +209,10 @@ def test_invalid_assets_and_duplicate_ids_rejected() -> None:
     asset = ExternalAsset("data1", "reference", "arr_2026v1", source)
     with pytest.raises(ProjectError, match="Duplicate"):
         replace(_inline(), assets=(asset, asset))
-    invalid_role = cast("Any", "unexpected")
+    data = json.loads(project_to_json(replace(_inline(), assets=(asset,))))
+    data["external_assets"][0]["role"] = "unexpected"
     with pytest.raises(ProjectError, match="role"):
-        ExternalAsset("x", invalid_role, "other", source)
+        project_from_json(json.dumps(data))
 
 
 def test_file_corruption_rejected_without_changing_evidence(tmp_path: Path) -> None:
