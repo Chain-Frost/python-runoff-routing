@@ -14,6 +14,7 @@ import pytest
 from runoff_routing.integration import (
     RunInputError,
     assess_recorded_print,
+    canonical_run_bytes,
     parse_run_bytes,
     read_run_files,
     read_run_json,
@@ -25,9 +26,6 @@ from runoff_routing.rorb_codec import (
     parse_catg,
     parse_cmd_par,
     parse_design_stm,
-    serialize_catg,
-    serialize_cmd_par,
-    serialize_design_stm,
 )
 from runoff_routing.rorb_model import (
     CatchmentModel,
@@ -61,9 +59,10 @@ def _run() -> RunModel:
         ),
         CatchmentModel(
             "Synthetic catchment",
-            (SubArea("area_1", Decimal("2.0"), "Source A"),),
-            (Reach("reach_1", Decimal("3.0"), "Reach A"),),
-            (ControlStep(1, "area_1", "reach_1"), ControlStep(7, print_id="print_1", label="Print A")),
+            (SubArea("area_1", Decimal("2.0"), "A"),),
+            (Reach("reach_1", Decimal("3.0"), "Reach A Sub-area A"),),
+            (ControlStep(1, "area_1", "reach_1", label="Reach A Sub-area A"),
+            ControlStep(7, print_id="print_1", label="Print A"),),
             (PrintLocation("print_1", "Print A"),),
         ),
         StormModel(
@@ -79,11 +78,7 @@ def _run() -> RunModel:
 
 
 def _files(run: RunModel) -> tuple[bytes, bytes, bytes]:
-    return (
-        serialize_cmd_par(run.parameters),
-        serialize_catg(run.catchment),
-        serialize_design_stm(run.storm),
-    )
+    return canonical_run_bytes(run)
 
 
 def test_s1_to_s2_calculation_uses_the_same_kernel_and_explicit_print_identity() -> None:
@@ -119,6 +114,20 @@ def test_original_files_json_canonical_files_read_then_calculate_roundtrip() -> 
     assert parse_catg(converted[1]).model == run.catchment
     assert parse_design_stm(converted[2]).model == run.storm
     assert run_model(restored) == run_model(parsed.model)
+
+
+
+def test_canonical_rejects_unrepresentable_authored_labels() -> None:
+    run = _run()
+    altered = replace(
+        run,
+        catchment=replace(
+            run.catchment, subareas=(replace(run.catchment.subareas[0], label="unserializable label"),)
+        ),
+    )
+    with pytest.raises(RunInputError, match="discard typed labels") as caught:
+        canonical_run_bytes(altered)
+    assert caught.value.code == "canonical_loss"
 
 
 def test_run_file_adapter_reads_only_explicit_paths(tmp_path: Path) -> None:

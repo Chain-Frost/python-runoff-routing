@@ -10,6 +10,7 @@ S1 `RunModel` is the sole input-domain authority; its numbers are `Decimal` and 
 from pathlib import Path
 
 from runoff_routing.integration import (
+    canonical_run_bytes,
     parse_run_bytes,
     read_run_json,
     run_model,
@@ -20,9 +21,6 @@ from runoff_routing.rorb_codec import (
     parse_catg,
     parse_cmd_par,
     parse_design_stm,
-    serialize_catg,
-    serialize_cmd_par,
-    serialize_design_stm,
     write_new,
 )
 from runoff_routing.rorb_model import RunModel, to_json
@@ -39,11 +37,7 @@ write_result_csv(source / "python-hydrographs.csv", result)
 
 json_run = to_json(parsed.model)
 restored = read_run_json(json_run)
-par, catg, stm = (
-    serialize_cmd_par(restored.parameters),
-    serialize_catg(restored.catchment),
-    serialize_design_stm(restored.storm),
-)
+par, catg, stm = canonical_run_bytes(restored)
 assert (
     RunModel(
         parse_cmd_par(par).model,

@@ -24,6 +24,9 @@ from .rorb_codec import (
     parse_catg,
     parse_cmd_par,
     parse_design_stm,
+    serialize_catg,
+    serialize_cmd_par,
+    serialize_design_stm,
     to_s2_payload,
     write_new,
 )
@@ -111,6 +114,31 @@ def read_run_json(source: str) -> RunModel:
         error = RunInputError("unsupported", "incomplete_run", message)
         raise error
     return parsed
+
+
+def canonical_run_bytes(model: RunModel) -> tuple[bytes, bytes, bytes]:
+    """Emit a complete canonical run only if reparsing preserves typed semantics.
+
+    The legacy format cannot represent arbitrary authored labels/IDs. Refuse
+    silent data loss before writing a set of canonical RORB source files.
+    """
+    try:
+        par = serialize_cmd_par(model.parameters)
+        catg = serialize_catg(model.catchment)
+        stm = serialize_design_stm(model.storm)
+    except ValueError as exc:
+        error = RunInputError("unsupported", "canonical_unsupported", str(exc))
+        raise error from exc
+    try:
+        restored = parse_run_bytes(par, catg, stm).model
+    except RunInputError as exc:
+        error = RunInputError("unsupported", "canonical_reparse", str(exc))
+        raise error from exc
+    if restored != model:
+        message = "Canonical legacy files would discard typed labels or other model semantics"
+        error = RunInputError("unsupported", "canonical_loss", message)
+        raise error
+    return par, catg, stm
 
 
 @dataclass(frozen=True, slots=True)
