@@ -63,6 +63,9 @@ class Parameters:
         if kc <= 0 or m <= 0 or initial_loss < 0 or continuing < 0:
             message = "kc and m must be positive; losses must be nonnegative"
             raise ValueError(message)
+        if flag == 2 and continuing > 1:
+            message = "Runoff coefficient must be between 0 and 1"
+            raise ValueError(message)
         return cls(kc, m, initial_loss, continuing, flag)
 
     def as_effective(self) -> dict[str, str | int]:

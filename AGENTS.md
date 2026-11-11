@@ -7,7 +7,7 @@ Read [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md), [docs/work/README.md](docs/work
 - Work on one selected stage/slice. Preserve unrelated changes and concurrent work. Use a topic branch or isolated worktree.
 - Commit and push a coherent locally checked batch; with GitHub APIs use one tree/commit and one branch update, not a commit per file.
 - Re-read remote heads before publishing. Do not force-push, merge, release, publish, change visibility or enable hosted automation without explicit owner approval.
-- The repository is public: keep private data, executables and unreviewed reference assets out of Git. Do not vendor RORB binaries or unreviewed reference data. Implement documented methods independently; do not decompile or modify supplied executables.
+- The repository is public: keep private evidence, manuals and unreviewed RORB inputs/executables out of Git. Implement RORB procedures in Python, using existing RORB executables as the computational source of truth. Verify effective inputs and retain separate CMD and RORBwin profiles/results when they differ. Do not decompile or modify the supplied executables.
 - Update the selected work record and issue with exact revision, scope, evidence, limitations and next action. Do not close a numerical stage merely because code was merged.
 
 ## Implementation
@@ -26,5 +26,5 @@ Read [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md), [docs/work/README.md](docs/work
 - Add focused executable tests for each parser or numerical behaviour. Run relevant prior-stage regressions. Documentation-only edits need link/claim checks, not unrelated simulation suites.
 - Windows/Python 3.14 and installed-wheel evidence are acceptance gates. Linux checks are supplementary; report missing checks and unexpected skips honestly.
 - Native runs, baseline updates and costly benchmarks are explicit opt-ins. Missing reference data is not a passing native test.
-- The owner authorised one low-cost Windows/Python 3.14 quality workflow on 2026-11-10 after making the repository public. Keep `.github/workflows/quality.yml` limited to lint, type checks, synthetic tests and wheel import. No native engine execution, third-party/private fixtures, dependency-update bots, automatic releases or package uploads.
+- The owner separately authorised one bounded Windows/Python 3.14 quality workflow on 2026-11-10. Only the pre-existing `.github/workflows/quality.yml` is permitted: static checks, synthetic tests and wheel import, without native runs, private data, automated releases or publication. Do not add or enable further hosted automation without explicit approval.
 - Retain the readable reference backend when optimising. Validate acceleration dependencies before selection; no unmeasured speed claims or silent fast-math.
