@@ -287,7 +287,6 @@ def test_code7_physical_location_is_authoritative_not_inline_annotation() -> Non
     source = _catg().replace("7, PRINT outlet\nPRINT outlet", "7, metadata only\nNative outlet")
     parsed = parse_catg(source.encode())
     assert parsed.model.print_locations[0].label == "Native outlet"
-    assert parsed.model.controls[-1].label == "Native outlet"
     assert any(item.field == "print_location" and item.source_text == "Native outlet" for item in parsed.source_map)
     assert original_bytes(parsed) == source.encode()
     assert parsed.model.controls[-1].label == "metadata only"
@@ -312,7 +311,6 @@ def test_code7_blank_physical_location_is_not_the_inline_annotation() -> None:
     source = _catg().replace("7, PRINT outlet\nPRINT outlet", "7, metadata only\n    ")
     parsed = parse_catg(source.encode())
     assert parsed.model.print_locations[0].label == ""
-    assert parsed.model.controls[-1].label == ""
     assert parsed.model.controls[-1].label == "metadata only"
     assert b"7, metadata only\n\n0\n" in serialize_catg(parsed.model)
     assert parse_catg(serialize_catg(parsed.model)).model == parsed.model
