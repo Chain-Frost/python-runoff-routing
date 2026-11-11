@@ -34,3 +34,7 @@ This *slice* can be reviewed only after target Windows quality and installed-whe
 Next: after S1 input-model contracts stabilise, build an adapter that computes k = kc * kr with validated dav and routes real model reaches; compare each timestep against the pinned RORB_CMD/RORBwin cases from S0. Record disagreements without changing tolerance after observing the results. Later add network traversal and loss calculations as separate reviewed slices. Preserve this readable reference kernel when considering Numba acceleration.
 
 Do not rework the S0 runner, S1 inspectors, GitHub CI settings or repository visibility in this workpack.
+
+## Subsequent S2 computational slice (2026-11-11)
+
+A bounded Python-only single-storm computation, fixture input adapter, independent linear-storage oracle and offline reference comparator were subsequently added to this PR. See [S2 offline development](2026-11-11-s2-offline-development.md). The historical 21-test statement above describes the **original reach-only commit**, not the later combined branch. S2 numerical equivalence remains unaccepted; do not treat the expanded functionality as closing issue #4.
