@@ -10,3 +10,4 @@
 
 [Implementation plan](../IMPLEMENTATION_PLAN.md) links all stage issues. S0-S7 remain unaccepted; S8 is deferred. Issue status and this register do not mean an agent is currently running.
 - [S1–S2 integration handoff implementation](2026-11-11-s1-s2-integration.md): dependency map, local checks and blocked parity gates.
+- [S1/S2 code-7 and legacy encoding reconciliation](2026-11-11-s1-s2-reconciliation.md): stacked review of native output label identity and offline corpus source decoding; numerical acceptance open.

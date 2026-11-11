@@ -251,3 +251,38 @@ def test_pure_api_never_launches_native_engines(monkeypatch: pytest.MonkeyPatch)
     monkeypatch.setattr(subprocess, "run", no_subprocess)
     run = parse_run_bytes(*_files(_run())).model
     assert run_model(run).prints
+
+
+def test_separate_graphical_and_native_print_labels_survive_integration() -> None:
+    run = _run()
+    edited_catchment = replace(
+        run.catchment,
+        controls=(
+            run.catchment.controls[0],
+            replace(run.catchment.controls[1], label="Graphical PRINT annotation"),
+        ),
+        print_locations=(PrintLocation("print_1", "Native physical location"),),
+    )
+    model = replace(run, catchment=edited_catchment)
+    _, catg, _ = canonical_run_bytes(model)
+    assert b"7, Graphical PRINT annotation\nNative physical location\n0\n" in catg
+
+    parsed = parse_catg(catg)
+    assert parsed.model == edited_catchment
+    assert parsed.model.controls[-1].label == "Graphical PRINT annotation"
+    assert parsed.model.print_locations[0].label == "Native physical location"
+    assert run_model(model).prints[0].label == "Native physical location"
+    assert read_run_json(to_json(model)) == model
+
+
+def test_integrated_code7_missing_physical_label_is_not_accepted() -> None:
+    par, catg, stm = _files(_run())
+    malformed = catg.replace(
+        b"7, Print A\nPrint A\n0\n",
+        b"7, Print A\n0\n",
+    )
+    assert malformed != catg
+    with pytest.raises(RunInputError) as caught:
+        parse_run_bytes(par, malformed, stm)
+    assert caught.value.role == "catchment"
+    assert caught.value.status == "invalid"

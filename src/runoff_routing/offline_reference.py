@@ -18,9 +18,20 @@ from pathlib import Path
 from typing import Any, Literal, cast
 
 from runoff_routing.legacy_inputs import parse_control_vector, parse_explicit_design_storm
+from runoff_routing.rorb_codec import SourceDocument
 from runoff_routing.single_storm import Losses, calculate_storm
 
 Status = Literal["compared", "unsupported", "invalid"]
+
+
+def decode_legacy_source(data: bytes) -> str:
+    """Decode verified legacy bytes using S1's authoritative source classification.
+
+    An offline comparison never rewrites, normalises or modifies original
+    reference inputs. General source parsing remains with S1.
+    """
+    source = SourceDocument.from_bytes(data)
+    return data.decode(source.encoding)
 
 
 @dataclass(frozen=True, slots=True)
@@ -262,8 +273,8 @@ def compare_corpus_case(corpus_root: Path, case_id: str) -> OfflineComparison:  
     inputs = {item["identity"]: item for item in case.get("inputs", ())}
     if not {"catchment", "storm", "parameters"}.issubset(inputs):
         return OfflineComparison(case_id, "unsupported", "Missing catchment/storm/CMD parameter evidence.")
-    raw_model = _read_verified(root, inputs["catchment"]).decode("utf-8-sig")
-    raw_storm = _read_verified(root, inputs["storm"]).decode("utf-8-sig")
+    raw_model = decode_legacy_source(_read_verified(root, inputs["catchment"]))
+    raw_storm = decode_legacy_source(_read_verified(root, inputs["storm"]))
     _read_verified(root, inputs["parameters"])
     model = parse_control_vector(raw_model)
     storm = parse_explicit_design_storm(raw_storm)

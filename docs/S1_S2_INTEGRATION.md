@@ -106,3 +106,7 @@ Use the existing Windows `quality.yml` on the draft integration PR. Run private 
 4. Run exact-head Windows 3.14 quality, build/wheel import, public integration tests, then separate private offline replay. Only then request independent numerical/domain review. No issue closure, package publication, native launches or automatic merge from this draft integration branch.
 
 This integration does **not** change S0 reference-capture machinery, hosted workflow permissions or the original S1/S2 PR branches.
+
+## Reconciled native location record and offline decoding
+
+The [reconciliation work record](work/2026-11-11-s1-s2-reconciliation.md) adopts the S1 source model that keeps a code-7 graphical annotation distinct from the physical native print-location name. Canonical RORB_GE must emit both records separately, and the integration result uses the physical name. The five-subarea native acceptance case ran with PR #25's earlier canonical serializer; the annotation-preserving variant's native identity remains a separate check. Offline legacy bytes are classified using S1 SourceDocument before parsing. No numeric solver or parity-tolerance changes are implied.

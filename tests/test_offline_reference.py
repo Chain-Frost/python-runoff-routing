@@ -23,6 +23,7 @@ C END RORB_GE
 1
 1, 2.0, -99
 7
+
 0
 C Areas
 10.0, -99
@@ -154,3 +155,22 @@ def test_gui_reference_is_not_misused(tmp_path: Path) -> None:
     report = compare_corpus_case(root, "synthetic")
     assert report.status == "unsupported"
     assert report.exact_printed_matches is None
+
+
+def test_cp1252_catchment_bytes_are_read_without_modifying_the_corpus(tmp_path: Path) -> None:
+    root = tmp_path / "corpus"
+    _write_case(root)
+    model_path = root / "model.catg"
+    raw = model_path.read_bytes().replace(b"C END RORB_GE", b"C \x96 source annotation\r\nC END RORB_GE")
+    model_path.write_bytes(raw)
+    catalogue_path = root / "catalogue.json"
+    catalogue: dict[str, Any] = json.loads(catalogue_path.read_text(encoding="utf-8"))
+    catchment: dict[str, Any] = catalogue["cases"][0]["inputs"][0]
+    catchment["fingerprint"]["sha256"] = hashlib.sha256(raw).hexdigest()
+    catchment["fingerprint"]["size_bytes"] = len(raw)
+    catalogue_path.write_text(json.dumps(catalogue), encoding="utf-8")
+
+    result = compare_corpus_case(root, "synthetic")
+    assert result.status == "compared"
+    assert result.exact_printed_matches == 4
+    assert model_path.read_bytes() == raw
