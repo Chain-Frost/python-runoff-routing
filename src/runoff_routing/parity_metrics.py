@@ -35,9 +35,23 @@ class PrintedParity:
 
 
 @dataclass(frozen=True, slots=True)
+class PrintedBalanceStep:
+    """Independent end-indexed linear storage and flux audit, in m³."""
+
+    end_index: int
+    inflow_volume_m3: float
+    outflow_volume_m3: float
+    storage_change_m3: float
+    closure_residual_m3: float
+    print_rounding_bound_m3: float
+    within_print_budget: bool
+
+
+@dataclass(frozen=True, slots=True)
 class PrintedLinearBalance:
     """Inferred storage and independently calculated printed-output flux residuals."""
 
+    steps: tuple[PrintedBalanceStep, ...]
     initial_inferred_storage_m3: float
     final_inferred_storage_m3: float
     inflow_integral_m3: float
@@ -203,7 +217,20 @@ def audit_printed_linear_balance(
          if abs(step.residual_m3) > bound + 1e-9), None
     )
     global_bound = _integral_uncertainty(eps, dt_hours) + 3600.0 * coefficient_k * (eps[0] + eps[-1])
+    steps = tuple(
+        PrintedBalanceStep(
+            end_index=step.end_index,
+            inflow_volume_m3=step.inflow_volume_m3,
+            outflow_volume_m3=step.outflow_volume_m3,
+            storage_change_m3=step.storage_change_m3,
+            closure_residual_m3=step.residual_m3,
+            print_rounding_bound_m3=bound,
+            within_print_budget=abs(step.residual_m3) <= bound + 1e-9,
+        )
+        for step, bound in zip(audit.steps, step_bounds, strict=True)
+    )
     return PrintedLinearBalance(
+        steps=steps,
         initial_inferred_storage_m3=audit.initial_storage_m3,
         final_inferred_storage_m3=audit.final_storage_m3,
         inflow_integral_m3=audit.integrated_inflow_m3,

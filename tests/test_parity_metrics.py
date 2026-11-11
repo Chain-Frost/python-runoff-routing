@@ -28,6 +28,9 @@ def test_linear_triangle_full_print_precision_and_balance(dt: float) -> None:
     assert abs(precision.native_integral_m3 - precision.predicted_integral_m3) <= precision.integral_rounding_bound_m3
     assert balance.steps_within_budget
     assert balance.closure_within_budget
+    assert len(balance.steps) == len(inflow) - 1
+    assert balance.steps[0].end_index == 1
+    assert all(step.within_print_budget for step in balance.steps)
     assert balance.max_step_printing_bound_m3 == pytest.approx(0.36)
     # Exact prescribed initial state permits a tighter bound than the
     # prewritten conservative 1.98 m³ allowance.
@@ -79,6 +82,8 @@ def test_balance_detects_nonconserving_native_table() -> None:
     )
     assert not balance.steps_within_budget
     assert balance.first_outside_step_budget_index == 3
+    assert not balance.steps[2].within_print_budget
+    assert balance.steps[2].closure_residual_m3 != 0
 
 
 @pytest.mark.parametrize(
