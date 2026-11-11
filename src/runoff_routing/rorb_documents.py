@@ -9,6 +9,8 @@ from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Literal
 
+from .rorb_model import CatchmentModel, StormModel
+
 Status = Literal["parsed", "partial", "unsupported", "invalid"]
 Severity = Literal["warning", "error", "unsupported"]
 
@@ -117,6 +119,8 @@ class Inspection:
     fields: tuple[SourceField, ...] = ()
     parameters: ParameterModel | None = None
     hydrographs: HydrographReport | None = None
+    catchment: CatchmentModel | None = None
+    storm: StormModel | None = None
 
     def to_json(self) -> str:
         """Return deterministic machine-readable inspection diagnostics."""
