@@ -566,7 +566,7 @@ def _control(raw: object) -> ControlStep:
         message = "Unrecognised RORB computational control code"
         raise ValueError(message)
     return ControlStep(
-        cast("ControlCode", code),
+        code,
         _optional_str(record, "subarea_id"),
         _optional_str(record, "reach_id"),
         _optional_str(record, "print_id"),
