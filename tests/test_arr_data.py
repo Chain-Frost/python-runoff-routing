@@ -123,13 +123,25 @@ def test_other_layers_remain_unprocessed_not_discarded_or_adjusted() -> None:
         (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"columns": [1, 1.0]}), "Duplicate"),
         (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"columns": [0, 1]}), "AEP"),
         (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"columns": [101, 1]}), "AEP"),
-        (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"columns": ["2EY", 1]}), "decimal"),
+        (
+            lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"columns": ["2EY", 1]}),
+            "decimal",
+        ),
         (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"index": [5.5, 60]}), "Duration"),
         (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"data": [[0, 1]]}), "row count"),
         (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"data": [[0], [1]]}), "column count"),
-        (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"data": [[-2, 3], [1, 2]]}), "negative"),
-        (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"data": [[True, 3], [1, 2]]}), "Boolean"),
-        (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"data": [["10", 3], [1, 2]]}), "decimal"),
+        (
+            lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"data": [[-2, 3], [1, 2]]}),
+            "negative",
+        ),
+        (
+            lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"data": [[True, 3], [1, 2]]}),
+            "Boolean",
+        ),
+        (
+            lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"data": [["10", 3], [1, 2]]}),
+            "decimal",
+        ),
         (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"extra": 1}), "exactly"),
         (lambda obj: obj["input_data"].update({"Latitude": 91}), "bounds"),
         (lambda obj: obj["input_data"].update({"Outlet Latitude": -25}), "outlet"),
@@ -205,8 +217,10 @@ def test_txt_bad_table_shape_and_section_marker_fail_closed() -> None:
 
 
 def test_txt_unknown_ifd_variant_is_not_silently_ignored() -> None:
-    text = _raw("2026v1-minimal.txt").replace(b"[RECIFD]", b"[RECIFD_OTHER]").replace(
-        b"[END_RECIFD]", b"[END_RECIFD_OTHER]"
+    text = (
+        _raw("2026v1-minimal.txt")
+        .replace(b"[RECIFD]", b"[RECIFD_OTHER]")
+        .replace(b"[END_RECIFD]", b"[END_RECIFD_OTHER]")
     )
     with pytest.raises(ARRFormatError, match="Unknown RECIFD"):
         parse_arr_txt(text)

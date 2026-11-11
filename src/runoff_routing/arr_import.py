@@ -134,7 +134,9 @@ def _make_source(
     captured_at: str | None,
     compatibility_profile: str | None = None,
 ) -> DataHubSource:
-    return DataHubSource(fmt, version, hashlib.sha256(raw).hexdigest(), len(raw), locator, captured_at, compatibility_profile)
+    return DataHubSource(
+        fmt, version, hashlib.sha256(raw).hexdigest(), len(raw), locator, captured_at, compatibility_profile
+    )
 
 
 def _ifd_table(
@@ -173,20 +175,18 @@ def _json_table(name: str, value: object) -> IFDDataset:
     aeps = tuple(_number(v, f"{name}.columns") for v in _array(table["columns"], "columns"))
     rows = _array(table["data"], f"{name}.data")
     depths = tuple(
-        tuple(_number(v, f"{name}.data[{i}]") for v in _array(row, f"{name}.data[{i}]"))
-        for i, row in enumerate(rows)
+        tuple(_number(v, f"{name}.data[{i}]") for v in _array(row, f"{name}.data[{i}]")) for i, row in enumerate(rows)
     )
     return _ifd_table(name, durations, aeps, depths)
 
 
-def parse_arr_json(
-    raw: bytes, *, locator: str | None = None, captured_at: str | None = None
-) -> ARRDocument:
+def parse_arr_json(raw: bytes, *, locator: str | None = None, captured_at: str | None = None) -> ARRDocument:
     """Parse ARR 2026v1 RecIFD only, retaining original bytes and skipped layer names."""
     text = _readable(raw)
     try:
         decoded = cast(
-            "object", json.loads(text, parse_float=Decimal, object_pairs_hook=_unique_pairs, parse_constant=_bad_constant)
+            "object",
+            json.loads(text, parse_float=Decimal, object_pairs_hook=_unique_pairs, parse_constant=_bad_constant),
         )
     except (json.JSONDecodeError, UnicodeError, RecursionError) as exc:
         _problem("Malformed ARR JSON", cause=exc)
@@ -346,10 +346,7 @@ def parse_arr_txt(
     unprocessed = tuple(
         marker
         for line in payload
-        if line.startswith("[")
-        and line.endswith("]")
-        and not line.startswith("[END_")
-        and not line.endswith("_META]")
+        if line.startswith("[") and line.endswith("]") and not line.startswith("[END_") and not line.endswith("_META]")
         if (marker := line[1:-1]) not in recognised
     )
     return ARRDocument(
