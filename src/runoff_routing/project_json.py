@@ -10,12 +10,12 @@ import hashlib
 import json
 import re
 import sys
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path, PureWindowsPath
 from typing import Any, Literal, cast
 
 from .rorb_codec import FormatProblem, parse_catg, parse_cmd_par, parse_design_stm
-from .rorb_model import RunModel, from_dict, to_dict
+from .rorb_model import RunModel, from_dict, to_dict, to_json
 
 PROJECT_VERSION = 1
 PROJECT_FORMAT = "python-runoff-routing-project"
@@ -388,6 +388,109 @@ def import_rorb_project(
     return project
 
 
+MAX_DIFFERENCE_PATHS = 24
+
+
+@dataclass(frozen=True, slots=True)
+class ProjectComparison:
+    """Exact typed-model and project-method comparison, without solver execution."""
+
+    left_project_id: str
+    right_project_id: str
+    left_source_kind: Literal["embedded-run", "rorb-files"]
+    right_source_kind: Literal["embedded-run", "rorb-files"]
+    model_equal: bool
+    rainfall_profile_equal: bool
+    external_assets_equal: bool
+    configuration_equal: bool
+    first_differences: tuple[str, ...]
+    numerical_parity: Literal["not_assessed"] = "not_assessed"
+
+    def to_json(self) -> str:
+        """Stable machine-readable model comparison, not a native routing verdict."""
+        return json.dumps(asdict(self), indent=2, sort_keys=True, allow_nan=False) + "\n"
+
+
+def _first_differences(left: object, right: object, path: str, differences: list[str]) -> None:
+    """Report bounded field-level mismatches without changing source order."""
+    if len(differences) >= MAX_DIFFERENCE_PATHS or left == right:
+        return
+    if isinstance(left, dict) and isinstance(right, dict):
+        first = cast("dict[str, object]", left)
+        second = cast("dict[str, object]", right)
+        for key in sorted(first.keys() | second.keys()):
+            if len(differences) >= MAX_DIFFERENCE_PATHS:
+                break
+            label = f"{path}.{key}"
+            if key not in first or key not in second:
+                differences.append(label)
+            else:
+                _first_differences(first[key], second[key], label, differences)
+    elif isinstance(left, list) and isinstance(right, list):
+        first_items = cast("list[object]", left)
+        second_items = cast("list[object]", right)
+        if len(first_items) != len(second_items):
+            differences.append(f"{path}.length")
+        for index, (a, b) in enumerate(zip(first_items, second_items)):
+            if len(differences) >= MAX_DIFFERENCE_PATHS:
+                break
+            _first_differences(a, b, f"{path}[{index}]", differences)
+    else:
+        differences.append(path)
+
+
+def _source_kind(source: EmbeddedRun | LegacyRunFiles) -> Literal["embedded-run", "rorb-files"]:
+    return "embedded-run" if isinstance(source, EmbeddedRun) else "rorb-files"
+
+
+def compare_project_files(left: Path, right: Path) -> ProjectComparison:
+    """Compare two fully verified JSON projects using S1's typed model.
+
+    Exact S1 model identity is not native hydrograph or rainfall-method parity.
+    """
+    a = load_project(left)
+    b = load_project(right)
+    model_equal = a.run == b.run
+    profile_equal = a.project.rainfall_profile == b.project.rainfall_profile
+    assets_equal = a.project.assets == b.project.assets
+    differences: list[str] = []
+    if not model_equal:
+        _first_differences(to_dict(a.run), to_dict(b.run), "run", differences)
+    if not profile_equal:
+        differences.append("rainfall_profile")
+    if not assets_equal:
+        _first_differences(
+            project_to_dict(a.project)["external_assets"],
+            project_to_dict(b.project)["external_assets"],
+            "external_assets",
+            differences,
+        )
+    return ProjectComparison(
+        a.project.identifier,
+        b.project.identifier,
+        _source_kind(a.project.model_source),
+        _source_kind(b.project.model_source),
+        model_equal,
+        profile_equal,
+        assets_equal,
+        model_equal and profile_equal and assets_equal,
+        tuple(differences[:MAX_DIFFERENCE_PATHS]),
+    )
+
+
+def export_run_json(project_path: Path, destination: Path) -> str:
+    """Write verified S1 RunModel JSON; the project retains source provenance.
+
+    The exported S1 model intentionally omits project rainfall-method and
+    external source metadata. Returns the SHA-256 of the new JSON file.
+    """
+    model = load_project(project_path).run
+    contents = to_json(model).encode("utf-8")
+    with destination.open("xb") as stream:
+        stream.write(contents)
+    return hashlib.sha256(contents).hexdigest()
+
+
 def _validated_profile(value: str) -> RainfallProfile:
     if value not in {"explicit", "legacy-rorb", "arr-2026v1"}:
         message = f"Unknown rainfall-method profile: {value}"
@@ -399,6 +502,20 @@ def main(argv: list[str] | None = None) -> int:
     """Small Windows-friendly CLI without argparse, native calls or side effects."""
     args = sys.argv[1:] if argv is None else argv
     try:
+        if len(args) == 3 and args[0] == "compare":
+            report = compare_project_files(Path(args[1]), Path(args[2]))
+            print(report.to_json(), end="")
+            return 0 if report.configuration_equal else 1
+        if len(args) == 3 and args[0] == "export-run":
+            source_path, destination_path = Path(args[1]), Path(args[2])
+            fingerprint = export_run_json(source_path, destination_path)
+            print(
+                json.dumps(
+                    {"status": "written", "sha256": fingerprint, "numerical_parity": "not_assessed"},
+                    sort_keys=True,
+                )
+            )
+            return 0
         if len(args) == 2 and args[0] in {"validate", "inspect"}:
             loaded = load_project(Path(args[1]))
             print(
@@ -436,7 +553,8 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     print(
         "Usage: python -m runoff_routing.project_json (validate|inspect) <project.json> "
-        "| import-rorb <id> <rainfall-profile> <par> <catg> <stm> <project.json>",
+        "| import-rorb <id> <rainfall-profile> <par> <catg> <stm> <project.json> "
+        "| export-run <project.json> <run.json> | compare <left.json> <right.json>",
         file=sys.stderr,
     )
     return 2

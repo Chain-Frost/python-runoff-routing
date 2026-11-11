@@ -17,6 +17,8 @@ from runoff_routing.project_json import (
     Project,
     ProjectError,
     SourceFile,
+    compare_project_files,
+    export_run_json,
     import_rorb_project,
     load_project,
     main,
@@ -36,6 +38,7 @@ from runoff_routing.rorb_model import (
     RunModel,
     StormModel,
     SubArea,
+    from_json,
 )
 
 
@@ -297,3 +300,143 @@ def test_cli_import_rorb_writes_fingerprinted_project(tmp_path: Path, capsys: py
     assert load_project(target).run == _run()
     capsys.readouterr()
     assert main(args) == 2
+
+
+
+def test_original_rorb_files_and_embedded_json_have_exact_typed_model_identity(tmp_path: Path) -> None:
+    par, catg, stm = _legacy_sources(tmp_path)
+    legacy_path = tmp_path / "historic project.json"
+    legacy_project = import_rorb_project(
+        legacy_path,
+        identifier="historic-model",
+        rainfall_profile="legacy-rorb",
+        parameters=par,
+        catchment=catg,
+        storm=stm,
+    )
+    write_project(legacy_path, legacy_project)
+    embedded_path = tmp_path / "converted model.json"
+    write_project(embedded_path, Project("comparison-target", "legacy-rorb", EmbeddedRun(_run())))
+    comparison = compare_project_files(legacy_path, embedded_path)
+    assert comparison.left_source_kind == "rorb-files"
+    assert comparison.right_source_kind == "embedded-run"
+    assert comparison.model_equal
+    assert comparison.rainfall_profile_equal
+    assert comparison.external_assets_equal
+    assert comparison.configuration_equal
+    assert comparison.first_differences == ()
+    assert comparison.numerical_parity == "not_assessed"
+    assert json.loads(comparison.to_json())["configuration_equal"] is True
+
+
+def test_compare_reports_exact_rorb_model_field_changes_without_fitting_tolerances(tmp_path: Path) -> None:
+    before = tmp_path / "before.json"
+    after = tmp_path / "after.json"
+    write_project(before, _inline())
+    run = _run()
+    routing = replace(run.parameters.routing[0], m=Decimal("0.9"))
+    changed_parameters = replace(run.parameters, routing=(routing,))
+    write_project(after, Project("after", "explicit", EmbeddedRun(replace(run, parameters=changed_parameters))))
+    result = compare_project_files(before, after)
+    assert not result.model_equal
+    assert result.rainfall_profile_equal
+    assert not result.configuration_equal
+    assert "run.model.parameters.routing[0].m" in result.first_differences
+    assert result.numerical_parity == "not_assessed"
+
+
+def test_same_model_with_different_rainfall_profiles_is_not_interchangeable(tmp_path: Path) -> None:
+    legacy, modern = tmp_path / "legacy.json", tmp_path / "modern.json"
+    write_project(legacy, Project("legacy", "legacy-rorb", EmbeddedRun(_run())))
+    write_project(modern, Project("modern", "arr-2026v1", EmbeddedRun(_run())))
+    result = compare_project_files(legacy, modern)
+    assert result.model_equal
+    assert not result.rainfall_profile_equal
+    assert not result.configuration_equal
+    assert result.first_differences == ("rainfall_profile",)
+
+
+def test_external_asset_provenance_can_disagree_even_with_identical_run_model(tmp_path: Path) -> None:
+    first = tmp_path / "2016 rainfall.json"
+    second = tmp_path / "2026 rainfall.json"
+    first.write_bytes(b"historic")
+    second.write_bytes(b"modern")
+    asset_a = ExternalAsset(
+        "rain",
+        "rainfall",
+        "legacy_2016",
+        SourceFile(first.name, hashlib.sha256(first.read_bytes()).hexdigest()),
+    )
+    asset_b = ExternalAsset(
+        "rain",
+        "rainfall",
+        "arr_2026v1",
+        SourceFile(second.name, hashlib.sha256(second.read_bytes()).hexdigest()),
+    )
+    left = tmp_path / "first.json"
+    right = tmp_path / "second.json"
+    write_project(left, replace(_inline(), assets=(asset_a,)))
+    write_project(right, replace(_inline(), assets=(asset_b,)))
+    result = compare_project_files(left, right)
+    assert result.model_equal and result.rainfall_profile_equal
+    assert not result.external_assets_equal
+    assert not result.configuration_equal
+    assert any(path.startswith("external_assets[0]") for path in result.first_differences)
+
+
+def test_export_s1_run_json_is_readable_and_does_not_clobber_or_claim_parity(tmp_path: Path) -> None:
+    source = tmp_path / "project.json"
+    destination = tmp_path / "run.json"
+    write_project(source, _inline())
+    before = source.read_bytes()
+    digest = export_run_json(source, destination)
+    assert digest == hashlib.sha256(destination.read_bytes()).hexdigest()
+    assert from_json(destination.read_text(encoding="utf-8")) == _run()
+    assert b"rainfall_profile" not in destination.read_bytes()
+    assert source.read_bytes() == before
+    with pytest.raises(FileExistsError):
+        export_run_json(source, destination)
+
+
+def test_compare_and_export_command_exit_codes_and_json_reports(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    first, other, export = tmp_path / "a.json", tmp_path / "b.json", tmp_path / "run.json"
+    write_project(first, _inline())
+    write_project(other, replace(_inline(), rainfall_profile="legacy-rorb"))
+    assert main(["compare", str(first), str(first)]) == 0
+    passed = json.loads(capsys.readouterr().out)
+    assert passed["configuration_equal"]
+    assert passed["numerical_parity"] == "not_assessed"
+    assert main(["compare", str(first), str(other)]) == 1
+    mismatch = json.loads(capsys.readouterr().out)
+    assert not mismatch["rainfall_profile_equal"]
+    assert "rainfall_profile" in mismatch["first_differences"]
+    assert main(["export-run", str(first), str(export)]) == 0
+    receipt = json.loads(capsys.readouterr().out)
+    assert receipt["status"] == "written"
+    assert receipt["numerical_parity"] == "not_assessed"
+    assert from_json(export.read_text(encoding="utf-8")) == _run()
+    assert main(["export-run", str(first), str(export)]) == 2
+
+
+def test_compare_and_export_fail_closed_on_bad_input_hash(tmp_path: Path) -> None:
+    par, catg, stm = _legacy_sources(tmp_path)
+    source = tmp_path / "legacy.json"
+    write_project(
+        source,
+        import_rorb_project(
+            source,
+            identifier="historical",
+            rainfall_profile="legacy-rorb",
+            parameters=par,
+            catchment=catg,
+            storm=stm,
+        ),
+    )
+    catg.write_bytes(catg.read_bytes() + b"invalid source changed")
+    with pytest.raises(ProjectError, match="SHA-256"):
+        compare_project_files(source, source)
+    with pytest.raises(ProjectError, match="SHA-256"):
+        export_run_json(source, tmp_path / "should_not_exist.json")
+    assert not (tmp_path / "should_not_exist.json").exists()
