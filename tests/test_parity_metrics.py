@@ -99,7 +99,7 @@ def test_balance_detects_nonconserving_native_table() -> None:
     ],
 )
 def test_invalid_precision_inputs_fail(prediction: tuple[float, ...], tokens: tuple[str, ...], dt: float) -> None:
-    with pytest.raises(ValueError, match="printed|discharge|sample|timestep"):
+    with pytest.raises(ValueError, match=r"printed|discharge|sample|timestep"):
         assess_printed_parity(prediction, tokens, dt_hours=dt)
 
 

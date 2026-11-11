@@ -114,10 +114,10 @@ def _integral(samples: Sequence[float], dt_hours: float) -> float:
     return 3600.0 * dt_hours * math.fsum(0.5 * (a + b) for a, b in pairwise(samples))
 
 
-def _compare_rows(
+def _compare_rows(  # noqa: C901 -- complete raw-row evidence validation
     rows: list[list[str]], predicted: tuple[float, ...], *, case_id: str, settings: Mapping[str, Any],
     column: str, engine: Mapping[str, Any], manifest_sha: str, dav: float, excess_volume: float,
-) -> OfflineComparison:  # noqa: C901 -- complete raw-row evidence validation
+) -> OfflineComparison:
     if len(rows) != len(predicted) or any(len(row) != 3 for row in rows):
         message = "Native row count/width does not match the predicted single print location."
         raise CorpusError(message)
