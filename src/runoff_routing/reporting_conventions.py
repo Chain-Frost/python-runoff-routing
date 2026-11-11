@@ -49,7 +49,7 @@ def _printed_token(token: str, *, label: str) -> tuple[Decimal, Decimal]:
     exponent = value.as_tuple().exponent
     if not isinstance(exponent, int):
         message = f"{label} does not have a finite print resolution"
-        raise ValueError(message)
+        raise TypeError(message)
     try:
         half_unit = Decimal(5).scaleb(exponent - 1)
     except InvalidOperation as exc:
@@ -71,7 +71,7 @@ def audit_volume_conventions(
     discharge_tokens: Sequence[str],
     *,
     timestep_hours: Decimal,
-    native_reported_volume_token: str | None = None,
+    native_reported_volume_text: str | None = None,
     raw_native_time_tokens: Sequence[str] | None = None,
 ) -> VolumeConventionAudit:
     """Audit distinct native summary and physical-horizon volume candidates.
@@ -107,8 +107,8 @@ def audit_volume_conventions(
     )
     reported = reported_bound = None
     sample_sum_consistent = trapezoid_consistent = None
-    if native_reported_volume_token is not None:
-        reported, reported_bound = _printed_token(native_reported_volume_token, label="Native volume")
+    if native_reported_volume_text is not None:
+        reported, reported_bound = _printed_token(native_reported_volume_text, label="Native volume")
         sample_sum_consistent = _overlaps_print_intervals(inclusive, inclusive_bound, reported, reported_bound)
         trapezoid_consistent = _overlaps_print_intervals(trapezoid, trapezoid_bound, reported, reported_bound)
 

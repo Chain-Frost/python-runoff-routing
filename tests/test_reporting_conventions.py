@@ -11,15 +11,15 @@ from runoff_routing.reporting_conventions import audit_volume_conventions
 
 def test_native_inclusive_sample_sum_differs_from_physical_horizon() -> None:
     result = audit_volume_conventions(
-        ["2.0000"] * 21, timestep_hours=Decimal("0.5"), native_reported_volume_token="7.56E+04"
+        ["2.0000"] * 21, timestep_hours=Decimal("0.5"), native_reported_volume_text="7.56E+04"
     )
     assert result.sample_count == 21
-    assert result.inclusive_sample_sum_m3 == Decimal("75600")
-    assert result.physical_trapezoid_m3 == Decimal("72000")
-    assert result.endpoint_weight_difference_m3 == Decimal("3600")
+    assert result.inclusive_sample_sum_m3 == Decimal(75600)
+    assert result.physical_trapezoid_m3 == Decimal(72000)
+    assert result.endpoint_weight_difference_m3 == Decimal(3600)
     assert result.sample_sum_printing_bound_m3 == Decimal("1.89")
     assert result.trapezoid_printing_bound_m3 == Decimal("1.8")
-    assert result.reported_native_half_unit_m3 == Decimal("50")
+    assert result.reported_native_half_unit_m3 == Decimal(50)
     assert result.sample_sum_consistent_with_report is True
     assert result.trapezoid_consistent_with_report is False
     assert result.sample_index_centroid_hours == Decimal("5.0")
@@ -36,22 +36,22 @@ def test_native_inclusive_sample_sum_differs_from_physical_horizon() -> None:
 def test_native_volume_candidate_counts_all_samples(dt: str, count: int, expected_sum: str) -> None:
     result = audit_volume_conventions(["2.0000"] * count, timestep_hours=Decimal(dt))
     assert result.inclusive_sample_sum_m3 == Decimal(expected_sum)
-    assert result.physical_trapezoid_m3 == Decimal("72000")
-    assert result.endpoint_weight_difference_m3 == Decimal(expected_sum) - Decimal("72000")
+    assert result.physical_trapezoid_m3 == Decimal(72000)
+    assert result.endpoint_weight_difference_m3 == Decimal(expected_sum) - Decimal(72000)
     assert result.sample_sum_consistent_with_report is None
     assert result.trapezoid_consistent_with_report is None
 
 
 def test_manufactured_single_step_separates_summary_from_balance() -> None:
     audit = audit_volume_conventions(
-        ["0.0000", "1.0001"], timestep_hours=Decimal("0.5"), native_reported_volume_token="1.80E+03"
+        ["0.0000", "1.0001"], timestep_hours=Decimal("0.5"), native_reported_volume_text="1.80E+03"
     )
     assert audit.inclusive_sample_sum_m3 == Decimal("1800.18")
     assert audit.physical_trapezoid_m3 == Decimal("900.09")
     assert audit.endpoint_weight_difference_m3 == Decimal("900.09")
     assert audit.sample_sum_printing_bound_m3 == Decimal("0.18")
     assert audit.trapezoid_printing_bound_m3 == Decimal("0.09")
-    assert audit.reported_native_half_unit_m3 == Decimal("5")
+    assert audit.reported_native_half_unit_m3 == Decimal(5)
     assert audit.sample_sum_consistent_with_report is True
     assert audit.trapezoid_consistent_with_report is False
 
@@ -71,7 +71,7 @@ def test_zero_discharge_has_no_centroid_and_is_not_a_reported_parity_pass() -> N
     result = audit_volume_conventions(
         ["0.0000", "0.0000"],
         timestep_hours=Decimal("0.5"),
-        native_reported_volume_token="0.00",
+        native_reported_volume_text="0.00",
     )
     assert result.inclusive_sample_sum_m3 == result.physical_trapezoid_m3 == Decimal(0)
     assert result.sample_index_centroid_hours is None
@@ -81,9 +81,9 @@ def test_zero_discharge_has_no_centroid_and_is_not_a_reported_parity_pass() -> N
 
 def test_one_sample_is_a_zero_duration_physical_horizon() -> None:
     result = audit_volume_conventions(["2.0000"], timestep_hours=Decimal("0.5"))
-    assert result.inclusive_sample_sum_m3 == Decimal("3600")
+    assert result.inclusive_sample_sum_m3 == Decimal(3600)
     assert result.physical_trapezoid_m3 == Decimal(0)
-    assert result.endpoint_weight_difference_m3 == Decimal("3600")
+    assert result.endpoint_weight_difference_m3 == Decimal(3600)
     assert result.trapezoid_printing_bound_m3 == Decimal(0)
     assert result.sample_index_centroid_hours == Decimal(0)
 
@@ -105,7 +105,7 @@ def test_invalid_timestep_fails_closed(timestep: Decimal) -> None:
 
 def test_ambiguous_reported_precision_is_not_forced_to_one_convention() -> None:
     result = audit_volume_conventions(
-        ["0.0000", "0.0000"], timestep_hours=Decimal("0.5"), native_reported_volume_token="0"
+        ["0.0000", "0.0000"], timestep_hours=Decimal("0.5"), native_reported_volume_text="0"
     )
     assert result.sample_sum_consistent_with_report is True
     assert result.trapezoid_consistent_with_report is True
@@ -115,7 +115,7 @@ def test_ambiguous_reported_precision_is_not_forced_to_one_convention() -> None:
 def test_bad_native_summary_volume_rejected(native: str) -> None:
     with pytest.raises(ValueError, match="Native volume"):
         audit_volume_conventions(
-            ["1.0000"], timestep_hours=Decimal("0.5"), native_reported_volume_token=native
+            ["1.0000"], timestep_hours=Decimal("0.5"), native_reported_volume_text=native
         )
 
 
@@ -143,7 +143,7 @@ def test_native_volume_conventions_do_not_depend_on_raw_label_offsets() -> None:
 
 def test_invalid_print_unit_does_not_elevate_reporting_hypothesis_to_parity() -> None:
     result = audit_volume_conventions(
-        ["0.0000", "0.0000"], timestep_hours=Decimal("0.5"), native_reported_volume_token="0.00"
+        ["0.0000", "0.0000"], timestep_hours=Decimal("0.5"), native_reported_volume_text="0.00"
     )
     assert result.sample_sum_consistent_with_report is True
     assert result.trapezoid_consistent_with_report is True

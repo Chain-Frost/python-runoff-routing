@@ -38,7 +38,7 @@ from runoff_routing.reporting_conventions import audit_volume_conventions
 audit = audit_volume_conventions(
     ["0.0000", "1.0001"],
     timestep_hours=Decimal("0.5"),
-    native_reported_volume_token="1.80E+03",
+    native_reported_volume_text="1.80E+03",
     raw_native_time_tokens=["0.50", "1.00"],
 )
 assert audit.inclusive_sample_sum_m3 == Decimal("1800.18")
