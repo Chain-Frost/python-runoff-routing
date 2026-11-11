@@ -4,10 +4,10 @@ import csv
 import hashlib
 import io
 import json
+from collections.abc import Callable
 from dataclasses import FrozenInstanceError, replace
 from decimal import Decimal
 from pathlib import Path
-from collections.abc import Callable
 from typing import Any, cast
 
 import pytest
@@ -159,7 +159,7 @@ def test_nonfinite_json_literals_and_extreme_exponents_rejected() -> None:
     with pytest.raises(ARRFormatError, match="Nonfinite"):
         parse_arr_json(raw)
     raw = _raw().replace(b"9.60", b"1e99999999", 1)
-    with pytest.raises(ARRFormatError, match="Nonfinite|finite"):
+    with pytest.raises(ARRFormatError, match=r"Nonfinite|finite"):
         parse_arr_json(raw)
 
 
@@ -246,8 +246,9 @@ def test_source_is_immutable_and_no_clobber_writes(tmp_path: Path) -> None:
     parsed = read_arr_file(source)
     assert parsed.raw_bytes == before
     assert source.read_bytes() == before
+    immutable_field = "sha256"
     with pytest.raises(FrozenInstanceError):
-        setattr(parsed.source, "sha256", "tampered")
+        setattr(parsed.source, immutable_field, "tampered")
     with pytest.raises(ARRFormatError, match="row count"):
         replace(parsed.ifd_datasets[0], depths_mm=((Decimal(1),),))
     target = tmp_path / "inventory.json"

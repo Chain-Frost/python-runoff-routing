@@ -72,40 +72,50 @@ class IFDDataset:
         if not self.name:
             msg = "IFD dataset name must not be empty"
             raise ARRFormatError(msg)
-        if not self.durations_min or len(self.durations_min) > MAX_DURATION_COUNT:
-            msg = "IFD durations must be nonempty and bounded"
-            raise ARRFormatError(msg)
-        if not self.aep_percent or len(self.aep_percent) > MAX_AEP_COUNT:
-            msg = "IFD AEP axis must be nonempty and bounded"
-            raise ARRFormatError(msg)
-        if len(set(self.durations_min)) != len(self.durations_min):
-            msg = f"Duplicate IFD durations in {self.name}"
-            raise ARRFormatError(msg)
-        if len(set(self.aep_percent)) != len(self.aep_percent):
-            msg = f"Duplicate IFD AEP values in {self.name}"
-            raise ARRFormatError(msg)
-        for duration in self.durations_min:
-            if not isinstance(duration, int) or isinstance(duration, bool) or duration <= 0:
-                msg = f"Invalid IFD duration: {duration!r}"
-                raise ARRFormatError(msg)
-        for aep in self.aep_percent:
-            if not isinstance(aep, Decimal) or not aep.is_finite() or not (0 < aep <= 100):
-                msg = f"Invalid AEP percentage: {aep!r}"
-                raise ARRFormatError(msg)
-        if len(self.depths_mm) != len(self.durations_min):
-            msg = f"IFD row count mismatch in {self.name}"
-            raise ARRFormatError(msg)
-        for number, row in enumerate(self.depths_mm, 1):
-            if len(row) != len(self.aep_percent):
-                msg = f"IFD column count mismatch in {self.name} row {number}"
-                raise ARRFormatError(msg)
-            for depth in row:
-                if not isinstance(depth, Decimal) or not depth.is_finite() or depth < 0:
-                    msg = f"Nonfinite or negative IFD depth in {self.name} row {number}"
-                    raise ARRFormatError(msg)
+        _validate_ifd_axes(self)
+        _validate_ifd_depths(self)
         if self.scenario_ssp is not None or self.scenario_year is not None:
             msg = "Scenario IFDs require a separately reviewed ARR climate-product contract"
             raise ARRFormatError(msg)
+
+
+def _validate_ifd_axes(table: IFDDataset) -> None:
+    """Keep probability and duration checks separate from matrix shape validation."""
+    if not table.durations_min or len(table.durations_min) > MAX_DURATION_COUNT:
+        msg = "IFD durations must be nonempty and bounded"
+        raise ARRFormatError(msg)
+    if not table.aep_percent or len(table.aep_percent) > MAX_AEP_COUNT:
+        msg = "IFD AEP axis must be nonempty and bounded"
+        raise ARRFormatError(msg)
+    if len(set(table.durations_min)) != len(table.durations_min):
+        msg = f"Duplicate IFD durations in {table.name}"
+        raise ARRFormatError(msg)
+    if len(set(table.aep_percent)) != len(table.aep_percent):
+        msg = f"Duplicate IFD AEP values in {table.name}"
+        raise ARRFormatError(msg)
+    for duration in table.durations_min:
+        if not isinstance(duration, int) or isinstance(duration, bool) or duration <= 0:
+            msg = f"Invalid IFD duration: {duration!r}"
+            raise ARRFormatError(msg)
+    for aep in table.aep_percent:
+        if not isinstance(aep, Decimal) or not aep.is_finite() or not (0 < aep <= 100):
+            msg = f"Invalid AEP percentage: {aep!r}"
+            raise ARRFormatError(msg)
+
+
+def _validate_ifd_depths(table: IFDDataset) -> None:
+    """Protect row and column coordinates and finite/nonnegative source values."""
+    if len(table.depths_mm) != len(table.durations_min):
+        msg = f"IFD row count mismatch in {table.name}"
+        raise ARRFormatError(msg)
+    for number, row in enumerate(table.depths_mm, 1):
+        if len(row) != len(table.aep_percent):
+            msg = f"IFD column count mismatch in {table.name} row {number}"
+            raise ARRFormatError(msg)
+        for depth in row:
+            if not isinstance(depth, Decimal) or not depth.is_finite() or depth < 0:
+                msg = f"Nonfinite or negative IFD depth in {table.name} row {number}"
+                raise ARRFormatError(msg)
 
 
 @dataclass(frozen=True, slots=True)

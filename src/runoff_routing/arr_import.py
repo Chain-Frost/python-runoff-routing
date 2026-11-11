@@ -7,7 +7,7 @@ import json
 import re
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
-from typing import cast
+from typing import Never, cast
 
 from runoff_routing.arr_data import (
     MAX_SOURCE_BYTES,
@@ -34,61 +34,64 @@ _DURATION_TXT = re.compile(r"^(\d+)\s+\((?:\d+(?:\.\d+)?)\)$")
 _RELEASE_YEAR = re.compile(r"^[^,;+()]+ \((19\d\d|20\d\d)\)$")
 
 
-def _problem(message: str) -> ARRFormatError:
-    return ARRFormatError(message)
+def _problem(message: str, *, cause: Exception | None = None) -> Never:
+    """Raise a consistently classified format error, retaining optional explicit cause."""
+    if cause is None:
+        raise ARRFormatError(message)
+    raise ARRFormatError(message) from cause
 
 
 def _readable(raw: bytes) -> str:
     if not raw or len(raw) > MAX_SOURCE_BYTES:
-        raise _problem("ARR input is empty or exceeds the 8 MiB offline intake limit")
+        _problem("ARR input is empty or exceeds the 8 MiB offline intake limit")
     try:
         return raw.decode("utf-8-sig")
     except UnicodeDecodeError as exc:
-        raise _problem("ARR input must be UTF-8 (optional UTF-8 BOM)") from exc
+        _problem("ARR input must be UTF-8 (optional UTF-8 BOM)", cause=exc)
 
 
 def _unique_pairs(pairs: list[tuple[str, object]]) -> dict[str, object]:
     result: dict[str, object] = {}
     for key, value in pairs:
         if key in result:
-            raise _problem(f"Duplicate JSON key: {key}")
+            _problem(f"Duplicate JSON key: {key}")
         result[key] = value
     return result
 
 
 def _bad_constant(token: str) -> None:
-    raise _problem(f"Nonfinite JSON constant: {token}")
+    _problem(f"Nonfinite JSON constant: {token}")
 
 
 def _object(value: object, path: str) -> dict[str, object]:
     if not isinstance(value, dict) or any(not isinstance(key, str) for key in value):
-        raise _problem(f"Expected JSON object at {path}")
+        _problem(f"Expected JSON object at {path}")
     return cast("dict[str, object]", value)
 
 
 def _array(value: object, path: str) -> list[object]:
     if not isinstance(value, list):
-        raise _problem(f"Expected JSON array at {path}")
+        _problem(f"Expected JSON array at {path}")
     return cast("list[object]", value)
 
 
 def _number(value: object, path: str, *, from_text: bool = False) -> Decimal:
     if isinstance(value, bool):
-        raise _problem(f"Boolean is not a number at {path}")
+        _problem(f"Boolean is not a number at {path}")
     if isinstance(value, int | Decimal) or (from_text and isinstance(value, str)):
         try:
             number = Decimal(str(value))
         except InvalidOperation as exc:
-            raise _problem(f"Invalid decimal at {path}") from exc
+            _problem(f"Invalid decimal at {path}", cause=exc)
         if number.is_finite() and -1000 <= number.adjusted() <= 1000:
             return number
-    raise _problem(f"Expected a finite decimal at {path}")
+    _problem(f"Expected a finite decimal at {path}")
 
 
 def _duration(value: object, path: str) -> int:
     number = _number(value, path)
     if number <= 0 or number != number.to_integral_value():
-        raise _problem(f"Duration must be a positive whole number of minutes at {path}")
+        _problem(f"Duration must be a positive whole number of minutes at {path}")
     return int(number)
 
 
@@ -97,22 +100,22 @@ def _location(fields: dict[str, object], *, from_text: bool = False) -> QueryLoc
         lat = _number(fields["Latitude"], "input_data.Latitude", from_text=from_text)
         lon = _number(fields["Longitude"], "input_data.Longitude", from_text=from_text)
     except KeyError as exc:
-        raise _problem(f"Missing ARR input coordinate {exc.args[0]}") from exc
+        _problem(f"Missing ARR input coordinate {exc.args[0]}", cause=exc)
     if not (-90 <= lat <= 90 and -180 <= lon <= 180):
-        raise _problem("ARR geographic input coordinates out of WGS84 bounds")
+        _problem("ARR geographic input coordinates out of WGS84 bounds")
     centroid_value = fields.get("Centroid_Used")
     if centroid_value is not None and not isinstance(centroid_value, str):
-        raise _problem("Centroid_Used must be a text label")
+        _problem("Centroid_Used must be a text label")
     outlet_lat = fields.get("Outlet Latitude")
     outlet_lon = fields.get("Outlet Longitude")
     if (outlet_lat is None) != (outlet_lon is None):
-        raise _problem("ARR outlet requires both latitude and longitude")
+        _problem("ARR outlet requires both latitude and longitude")
     outlet_latitude = _number(outlet_lat, "Outlet Latitude", from_text=from_text) if outlet_lat is not None else None
     outlet_longitude = _number(outlet_lon, "Outlet Longitude", from_text=from_text) if outlet_lon is not None else None
     if outlet_latitude is not None and not (-90 <= outlet_latitude <= 90):
-        raise _problem("ARR outlet latitude outside WGS84 bounds")
+        _problem("ARR outlet latitude outside WGS84 bounds")
     if outlet_longitude is not None and not (-180 <= outlet_longitude <= 180):
-        raise _problem("ARR outlet longitude outside WGS84 bounds")
+        _problem("ARR outlet longitude outside WGS84 bounds")
     return QueryLocation(
         latitude=lat,
         longitude=lon,
@@ -144,7 +147,7 @@ def _ifd_table(
 ) -> IFDDataset:
     baseline = BASELINES.get(name)
     if baseline is None:
-        raise _problem(f"Unrecognised RecIFD baseline {name!r}; refuse to infer a scenario")
+        _problem(f"Unrecognised RecIFD baseline {name!r}; refuse to infer a scenario")
     datasets = next((value for key, value in metadata if key == "Datasets"), None)
     # A release year is only recorded when a single source dataset explicitly names it.
     match = _RELEASE_YEAR.fullmatch(datasets) if datasets else None
@@ -165,7 +168,7 @@ def _ifd_table(
 def _json_table(name: str, value: object) -> IFDDataset:
     table = _object(value, f"RecIFD.{name}")
     if set(table) != {"index", "columns", "data"}:
-        raise _problem(f"RecIFD.{name}: expected exactly index, columns, data")
+        _problem(f"RecIFD.{name}: expected exactly index, columns, data")
     durations = tuple(_duration(v, f"{name}.index") for v in _array(table["index"], "index"))
     aeps = tuple(_number(v, f"{name}.columns") for v in _array(table["columns"], "columns"))
     rows = _array(table["data"], f"{name}.data")
@@ -186,16 +189,16 @@ def parse_arr_json(
             "object", json.loads(text, parse_float=Decimal, object_pairs_hook=_unique_pairs, parse_constant=_bad_constant)
         )
     except (json.JSONDecodeError, UnicodeError, RecursionError) as exc:
-        raise _problem("Malformed ARR JSON") from exc
+        _problem("Malformed ARR JSON", cause=exc)
     root = _object(decoded, "root")
     version = root.get("datahub_version")
     if version != "2026v1":
-        raise _problem(f"Unsupported ARR JSON Data Hub version: {version!r}")
+        _problem(f"Unsupported ARR JSON Data Hub version: {version!r}")
     location = _location(_object(root.get("input_data"), "input_data"))
     layers = _object(root.get("layers"), "layers")
     ifd_tables = _object(layers["RecIFD"], "layers.RecIFD") if "RecIFD" in layers else {}
     if len(ifd_tables) > 64:
-        raise _problem("Too many RecIFD tables")
+        _problem("Too many RecIFD tables")
     datasets = tuple(_json_table(name, value) for name, value in ifd_tables.items())
     return ARRDocument(
         source=_make_source(raw, "json", "2026v1", locator, captured_at),
@@ -212,28 +215,28 @@ def _marked(lines: list[str], opening: str, closing: str, *, required: bool) -> 
     if lines.count(opening) == 0 and lines.count(closing) == 0 and not required:
         return None
     if lines.count(opening) != 1 or lines.count(closing) != 1:
-        raise _problem(f"Expected exactly one {opening}/{closing} section")
+        _problem(f"Expected exactly one {opening}/{closing} section")
     start, end = lines.index(opening), lines.index(closing)
     if start >= end:
-        raise _problem(f"Misordered ARR section {opening}")
+        _problem(f"Misordered ARR section {opening}")
     return lines[start + 1 : end]
 
 
 def _input_section(lines: list[str], *, legacy: bool) -> QueryLocation:
     content = _marked(lines, "[INPUTDATA]", "[END_INPUTDATA]", required=True)
     if content is None:
-        raise _problem("Missing INPUTDATA section")
+        _problem("Missing INPUTDATA section")
     fields: dict[str, object] = {}
     for line in content:
         if not line.strip():
             continue
         if "," not in line or line.startswith("["):
-            raise _problem(f"Malformed INPUTDATA field {line!r}")
+            _problem(f"Malformed INPUTDATA field {line!r}")
         key, value = line.split(",", 1)
         if key in fields:
-            raise _problem(f"Duplicate INPUTDATA key {key}")
+            _problem(f"Duplicate INPUTDATA key {key}")
         if legacy and key not in {"Latitude", "Longitude", "Centroid_Used"}:
-            raise _problem(f"Unsupported legacy INPUTDATA field {key}")
+            _problem(f"Unsupported legacy INPUTDATA field {key}")
         fields[key] = value
     return _location(fields, from_text=True)
 
@@ -241,21 +244,21 @@ def _input_section(lines: list[str], *, legacy: bool) -> QueryLocation:
 def _txt_duration(value: str) -> int:
     match = _DURATION_TXT.fullmatch(value.strip())
     if match is None:
-        raise _problem(f"Unsupported TXT duration/hour label {value!r}")
+        _problem(f"Unsupported TXT duration/hour label {value!r}")
     return _duration(int(match.group(1)), "TXT duration")
 
 
 def _txt_ifd_table(name: str, section: list[str]) -> IFDDataset:
     marker = TXT_TABLE_MARKERS[name]
     if len(section) < 4 or section[0] != f"[{marker}]" or section[-1] != f"[END_{marker}]":
-        raise _problem(f"Invalid TXT baseline section for {name}")
+        _problem(f"Invalid TXT baseline section for {name}")
     if section[1].split(",", 1)[0] != r"min (h)\AEP(%)":
-        raise _problem(f"Unknown TXT IFD axis units in {name}")
+        _problem(f"Unknown TXT IFD axis units in {name}")
     header = section[1].split(",")
     aeps = tuple(_number(part, f"{name}.AEP", from_text=True) for part in header[1:])
     meta_marker = f"[{marker}_META]"
     if section.count(meta_marker) != 1:
-        raise _problem(f"Missing or duplicate IFD metadata marker in {name}")
+        _problem(f"Missing or duplicate IFD metadata marker in {name}")
     split = section.index(meta_marker)
     rows: list[tuple[Decimal, ...]] = []
     durations: list[int] = []
@@ -266,7 +269,7 @@ def _txt_ifd_table(name: str, section: list[str]) -> IFDDataset:
     metadata: list[tuple[str, str]] = []
     for line in section[split + 1 : -1]:
         if "," not in line or line.startswith("["):
-            raise _problem(f"Invalid IFD metadata in {name}")
+            _problem(f"Invalid IFD metadata in {name}")
         key, value = line.split(",", 1)
         metadata.append((key, value))
     return _ifd_table(name, tuple(durations), aeps, tuple(rows), metadata=tuple(metadata))
@@ -283,17 +286,30 @@ def _txt_recifd(lines: list[str]) -> tuple[IFDDataset, ...]:
         name = compact[cursor]
         marker = TXT_TABLE_MARKERS.get(name)
         if marker is None:
-            raise _problem(f"Unrecognised RecIFD TXT heading {name!r}")
+            _problem(f"Unrecognised RecIFD TXT heading {name!r}")
         end_tag = f"[END_{marker}]"
         try:
             end = compact.index(end_tag, cursor + 1)
         except ValueError as exc:
-            raise _problem(f"Missing RecIFD TXT terminator {end_tag}") from exc
+            _problem(f"Missing RecIFD TXT terminator {end_tag}", cause=exc)
         result.append(_txt_ifd_table(name, compact[cursor + 1 : end + 1]))
         cursor = end + 1
     if len({table.name for table in result}) != len(result):
-        raise _problem("Duplicate RecIFD TXT baseline")
+        _problem("Duplicate RecIFD TXT baseline")
     return tuple(result)
+
+
+def _txt_version(lines: list[str], start_pos: int, legacy_profile: str | None) -> str | None:
+    version_lines = [line for line in lines[1:start_pos] if line.startswith("Data Hub Version,")]
+    if len(version_lines) > 1:
+        _problem("Ambiguous TXT Data Hub version")
+    version = version_lines[0].split(",", 1)[1] if version_lines else None
+    if version == "2026v1":
+        if legacy_profile is not None:
+            _problem("Legacy profile cannot reinterpret ARR 2026v1 TXT")
+    elif not (legacy_profile == "2019v1" and version in (None, "2019v1")):
+        _problem(f"Unsupported/undeclared ARR TXT version {version!r}; explicit legacy profile required")
+    return version
 
 
 def parse_arr_txt(
@@ -306,35 +322,25 @@ def parse_arr_txt(
     """Read 2026v1 IFD TXT or opt-in location-only legacy 2019 TXT profile."""
     lines = [line.strip() for line in _readable(raw).splitlines()]
     if not lines or not lines[0].startswith("Results - ARR Data Hub"):
-        raise _problem("Unrecognised ARR TXT header")
+        _problem("Unrecognised ARR TXT header")
     payload = _marked(lines, "[STARTTXT]", "[ENDTXT]", required=True)
     if payload is None:
-        raise _problem("Missing STARTTXT section")
+        _problem("Missing STARTTXT section")
     start_pos, end_pos = lines.index("[STARTTXT]"), lines.index("[ENDTXT]")
     if any(line for line in lines[end_pos + 1 :]):
-        raise _problem("Trailing content after ENDTXT")
-    version_lines = [line for line in lines[1:start_pos] if line.startswith("Data Hub Version,")]
-    if len(version_lines) > 1:
-        raise _problem("Ambiguous TXT Data Hub version")
-    version = version_lines[0].split(",", 1)[1] if version_lines else None
-    if version == "2026v1":
-        if legacy_profile is not None:
-            raise _problem("Legacy profile cannot reinterpret ARR 2026v1 TXT")
-    elif legacy_profile == "2019v1" and version in (None, "2019v1"):
-        pass  # Unversioned original remains unversioned; profile is recorded separately.
-    else:
-        raise _problem(f"Unsupported/undeclared ARR TXT version {version!r}; explicit legacy profile required")
+        _problem("Trailing content after ENDTXT")
+    version = _txt_version(lines, start_pos, legacy_profile)
     is_legacy = legacy_profile == "2019v1"
     location = _input_section(payload, legacy=is_legacy)
     if is_legacy:
         allowed = {"[STARTTXT]", "[ENDTXT]", "[INPUTDATA]", "[END_INPUTDATA]"}
         other = {line for line in payload if line.startswith("[") and line.endswith("]")} - allowed
         if other:
-            raise _problem(f"Legacy TXT sections not characterised: {sorted(other)}")
+            _problem(f"Legacy TXT sections not characterised: {sorted(other)}")
         datasets: tuple[IFDDataset, ...] = ()
     else:
         if any(line.startswith("[RECIFD_") for line in payload):
-            raise _problem("Unknown RECIFD TXT variant requires a reviewed format contract")
+            _problem("Unknown RECIFD TXT variant requires a reviewed format contract")
         datasets = _txt_recifd(payload)
     recognised = {"STARTTXT", "INPUTDATA", "RECIFD", *TXT_TABLE_MARKERS.values()}
     unprocessed = tuple(
@@ -368,12 +374,12 @@ def read_arr_file(
     with path.open("rb") as stream:
         raw = stream.read(MAX_SOURCE_BYTES + 1)
     if len(raw) > MAX_SOURCE_BYTES:
-        raise _problem("ARR file exceeds 8 MiB offline intake limit")
+        _problem("ARR file exceeds 8 MiB offline intake limit")
     source_locator = locator if locator is not None else str(path.absolute())
     if path.suffix.lower() == ".json":
         if legacy_profile is not None:
-            raise _problem("Legacy TXT profile is not valid for JSON")
+            _problem("Legacy TXT profile is not valid for JSON")
         return parse_arr_json(raw, locator=source_locator, captured_at=captured_at)
     if path.suffix.lower() in {".txt", ".text"}:
         return parse_arr_txt(raw, locator=source_locator, captured_at=captured_at, legacy_profile=legacy_profile)
-    raise _problem(f"Unsupported ARR file extension {path.suffix!r}; ZIP and CSV are later workpacks")
+    _problem(f"Unsupported ARR file extension {path.suffix!r}; ZIP and CSV are later workpacks")

@@ -7,7 +7,7 @@ import io
 import json
 from pathlib import Path
 
-from runoff_routing.arr_data import ARRDocument, IFDDataset, SCHEMA_VERSION
+from runoff_routing.arr_data import SCHEMA_VERSION, ARRDocument, IFDDataset
 
 
 def _dataset_dict(table: IFDDataset) -> dict[str, object]:
