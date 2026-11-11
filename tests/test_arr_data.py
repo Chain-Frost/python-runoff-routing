@@ -111,42 +111,42 @@ def test_other_layers_remain_unprocessed_not_discarded_or_adjusted() -> None:
     assert doc.ifd_datasets[0].scenario_year is None
 
 
-@pytest.mark.parametrize(
-    ("changed", "message"),
-    [
-        (lambda obj: obj.update({"datahub_version": "2019v1"}), "version"),
-        (lambda obj: obj.pop("datahub_version"), "version"),
-        (lambda obj: obj["layers"].update({"RecIFD": None}), "RecIFD"),
-        (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"index": []}), "durations"),
-        (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"columns": []}), "AEP"),
-        (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"index": [5, 5]}), "Duplicate"),
-        (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"columns": [1, 1.0]}), "Duplicate"),
-        (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"columns": [0, 1]}), "AEP"),
-        (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"columns": [101, 1]}), "AEP"),
-        (
-            lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"columns": ["2EY", 1]}),
-            "decimal",
-        ),
-        (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"index": [5.5, 60]}), "Duration"),
-        (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"data": [[0, 1]]}), "row count"),
-        (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"data": [[0], [1]]}), "column count"),
-        (
-            lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"data": [[-2, 3], [1, 2]]}),
-            "negative",
-        ),
-        (
-            lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"data": [[True, 3], [1, 2]]}),
-            "Boolean",
-        ),
-        (
-            lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"data": [["10", 3], [1, 2]]}),
-            "decimal",
-        ),
-        (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"extra": 1}), "exactly"),
-        (lambda obj: obj["input_data"].update({"Latitude": 91}), "bounds"),
-        (lambda obj: obj["input_data"].update({"Outlet Latitude": -25}), "outlet"),
-    ],
-)
+_INVALID_JSON_CASES: list[tuple[Callable[[dict[str, Any]], object], str]] = [
+    (lambda obj: obj.update({"datahub_version": "2019v1"}), "version"),
+    (lambda obj: obj.pop("datahub_version"), "version"),
+    (lambda obj: obj["layers"].update({"RecIFD": None}), "RecIFD"),
+    (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"index": []}), "durations"),
+    (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"columns": []}), "AEP"),
+    (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"index": [5, 5]}), "Duplicate"),
+    (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"columns": [1, 1.0]}), "Duplicate"),
+    (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"columns": [0, 1]}), "AEP"),
+    (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"columns": [101, 1]}), "AEP"),
+    (
+        lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"columns": ["2EY", 1]}),
+        "decimal",
+    ),
+    (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"index": [5.5, 60]}), "Duration"),
+    (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"data": [[0, 1]]}), "row count"),
+    (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"data": [[0], [1]]}), "column count"),
+    (
+        lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"data": [[-2, 3], [1, 2]]}),
+        "negative",
+    ),
+    (
+        lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"data": [[True, 3], [1, 2]]}),
+        "Boolean",
+    ),
+    (
+        lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"data": [["10", 3], [1, 2]]}),
+        "decimal",
+    ),
+    (lambda obj: obj["layers"]["RecIFD"]["Default Native Baseline"].update({"extra": 1}), "exactly"),
+    (lambda obj: obj["input_data"].update({"Latitude": 91}), "bounds"),
+    (lambda obj: obj["input_data"].update({"Outlet Latitude": -25}), "outlet"),
+]
+
+
+@pytest.mark.parametrize(("changed", "message"), _INVALID_JSON_CASES)
 def test_invalid_json_models_fail_closed(changed: Callable[[dict[str, Any]], object], message: str) -> None:
     with pytest.raises(ARRFormatError, match=message):
         parse_arr_json(_modify(changed))

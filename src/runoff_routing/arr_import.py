@@ -64,7 +64,7 @@ def _bad_constant(token: str) -> None:
 
 
 def _object(value: object, path: str) -> dict[str, object]:
-    if not isinstance(value, dict) or any(not isinstance(key, str) for key in value):
+    if not isinstance(value, dict):
         _problem(f"Expected JSON object at {path}")
     return cast("dict[str, object]", value)
 

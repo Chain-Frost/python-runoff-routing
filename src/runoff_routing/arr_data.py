@@ -79,6 +79,18 @@ class IFDDataset:
             raise ARRFormatError(msg)
 
 
+def _is_positive_int(value: object) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool) and value > 0
+
+
+def _is_valid_aep(value: object) -> bool:
+    return isinstance(value, Decimal) and value.is_finite() and 0 < value <= 100
+
+
+def _is_valid_depth(value: object) -> bool:
+    return isinstance(value, Decimal) and value.is_finite() and value >= 0
+
+
 def _validate_ifd_axes(table: IFDDataset) -> None:
     """Keep probability and duration checks separate from matrix shape validation."""
     if not table.durations_min or len(table.durations_min) > MAX_DURATION_COUNT:
@@ -94,11 +106,11 @@ def _validate_ifd_axes(table: IFDDataset) -> None:
         msg = f"Duplicate IFD AEP values in {table.name}"
         raise ARRFormatError(msg)
     for duration in table.durations_min:
-        if not isinstance(duration, int) or isinstance(duration, bool) or duration <= 0:
+        if not _is_positive_int(duration):
             msg = f"Invalid IFD duration: {duration!r}"
             raise ARRFormatError(msg)
     for aep in table.aep_percent:
-        if not isinstance(aep, Decimal) or not aep.is_finite() or not (0 < aep <= 100):
+        if not _is_valid_aep(aep):
             msg = f"Invalid AEP percentage: {aep!r}"
             raise ARRFormatError(msg)
 
@@ -113,7 +125,7 @@ def _validate_ifd_depths(table: IFDDataset) -> None:
             msg = f"IFD column count mismatch in {table.name} row {number}"
             raise ARRFormatError(msg)
         for depth in row:
-            if not isinstance(depth, Decimal) or not depth.is_finite() or depth < 0:
+            if not _is_valid_depth(depth):
                 msg = f"Nonfinite or negative IFD depth in {table.name} row {number}"
                 raise ARRFormatError(msg)
 
