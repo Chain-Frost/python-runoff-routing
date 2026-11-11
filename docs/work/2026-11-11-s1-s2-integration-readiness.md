@@ -1,72 +1,62 @@
-# S1/S2 Handoff C integration — readiness and dependency contract
+# S1/S2 integration readiness and dependency register
 
-**2026-11-11 status: BLOCKED.** This is independent documentation and a conflict-free integration plan, **not** a working parser-to-solver bridge. The Handoff C start condition requires a *reviewed and stable* S1 typed API and canonical serializers. Those are now drafted in PR #19; latest-head Windows quality **passed**, but independent interface review and agreement are still pending.
+**Snapshot date:** 2026-11-11. **Status:** S0/S1 implementation merged; S1 canonical native acceptance, S2 numerical parity and integrated private/native acceptance **open**. This is a *status and gate register*, not proof that either routing engine profile is matched or that a release is authorised. **Owner:** Unassigned; independent branch authors retain control of outstanding implementation branches. **Review:** On the next bounded validation session.
 
-**Authoritative assignment:** https://github.com/Chain-Frost/runoff-routing-investigations/blob/docs/2026-11-11-s1-s2-agent-handoffs/docs/work/2026-11-11-s1-s2-integration-handoff.md
+The objective is to implement RORB procedures in Python, using pinned RORB executables as the computational source of truth. Confirm effective inputs and preserve separate RORB_CMD and RORBwin version profiles. This project is publicly visible; private source data and evidence stay outside it.
 
-The investigations repo and native corpus are private while this Python repository is public. This preparation records no raw cases, machine paths, private artefacts or numerical case-level results.
+## Verified PR map at this snapshot
 
-## Current revision/owner map
-
-| Role | Open PR and exact head | Base | State relevant to integration |
+| Work | PR / source head | Disposition | Independent acceptance |
 | --- | --- | --- | --- |
-| S0 provenance | [#12](https://github.com/Chain-Frost/python-runoff-routing/pull/12): 0d964e81c2f992c0097a8a4d7c16455abe327cd8 | main | Draft; native acceptance separately open; do not touch |
-| S1 inspection parent | [#13](https://github.com/Chain-Frost/python-runoff-routing/pull/13): 06081dd645eebecb6ec273259e129adaa80b960f | Stacked on S0 #12, parent 07a54f931c441f3363b572ecc2a1dd0df3a79464 | CMD single-burst .par ParameterModel and partial .out, no catchment/storm domain |
-| **S1 bidirectional handoff A** | **[#19](https://github.com/Chain-Frost/python-runoff-routing/pull/19): f356ec51a470ae1ab9e6919d7c4e5744674a3b38** | Stacked on S1 #13 | **RunModel, typed parameter/catchment/storm models, source-aware .catg/.stm/.par parsers, canonical serializers, JSON schema 1 and preliminary S2Payload exist. Draft, zero submitted reviews. At the updated head, Windows quality, strict Pyright, wheel build and outside-checkout import **passed**; earlier head failed 25 Pyright checks.** |
-| S2 computation parent | [#14](https://github.com/Chain-Frost/python-runoff-routing/pull/14): 78d94926172c40ff11ccd4a3bc4c8b028cf5b689 | main | Independent pure single-storm kernel, temporary Catchment/Control/Storm/Losses, legacy_inputs fixture readers, private offline comparison; unaccepted numeric equivalence |
-| **S2 handoff B audit** | **[#18](https://github.com/Chain-Frost/python-runoff-routing/pull/18): 53021ff23ccb4ee46ddf9a528775b14220d7051e** | Stacked on S2 #14 | Printed-precision and linear balance diagnostics, 13 supplementary synthetic checks. Draft, no review; target quality and private comparison not accepted |
-| This document | feat/s1-s2-integration-readiness, started at main 4498f7f466eb34a35d5eecf35844aa5bd4d7dcf7 | main | Readiness plan only, no duplicate model/grammar/numerical code |
+| Planning and owner reference policy | #11, #24 | Merged | Documentation/scaffold only |
+| Reference capture S0 | [#12](https://github.com/Chain-Frost/python-runoff-routing/pull/12), merged `f9f51ad` | Merged implementation | [S0 #2](https://github.com/Chain-Frost/python-runoff-routing/issues/2) open; CMD 6.44 and limited GUI 6.52 evidence |
+| CMD .par/.out inspection S1 | [#13](https://github.com/Chain-Frost/python-runoff-routing/pull/13), merged `17d134b` | Merged implementation | S1 #3 open; subset inspector only |
+| Typed model/canonical S1 | [#19](https://github.com/Chain-Frost/python-runoff-routing/pull/19), merged `be8832e` | Merged implementation | S1 #3 open; native canonical acceptance not proven |
+| Native code-7 line fix | [#25](https://github.com/Chain-Frost/python-runoff-routing/pull/25), merged `3575fb5` | Merged implementation | Corrected canonical files not rerun through CMD |
+| Worked-example inventory and warnings | [#15](https://github.com/Chain-Frost/python-runoff-routing/pull/15), [#17](https://github.com/Chain-Frost/python-runoff-routing/pull/17) | Merged documentation | No numerical acceptance |
+| S2 single-storm kernel | [#14](https://github.com/Chain-Frost/python-runoff-routing/pull/14), `78d9492` | **Draft / unmerged** | [S2 #4](https://github.com/Chain-Frost/python-runoff-routing/issues/4) parity unsatisfied |
+| Printed-ordinate and linear-balance audit | [#18](https://github.com/Chain-Frost/python-runoff-routing/pull/18), `53021ff`, stacked on #14 | **Draft / unmerged** | Strict native model comparisons unresolved |
+| Selected S2 quality/transport repairs | [#21](https://github.com/Chain-Frost/python-runoff-routing/pull/21), `947a9aa`, stacked on #18 | **Draft / unmerged** | Revalidate two added tests; 36 private computed cases exceed precision budget |
+| Duplicate transport repair | [#22](https://github.com/Chain-Frost/python-runoff-routing/pull/22) | **Closed, superseded by #21** | Useful transport tests retained on #21 |
+| Typed S1+S2 integration | [#23](https://github.com/Chain-Frost/python-runoff-routing/pull/23), `4450475` at snapshot | **Draft / unmerged** | Needs selected #21 and #25 reconciled, updated Windows and private native checks |
+| This readiness register | [#20](https://github.com/Chain-Frost/python-runoff-routing/pull/20) | Documentation refresh | Not an integration acceptance |
 
-**Newer PRs #19 and #18 are separate from parent PRs #13 and #14.** Handoff C may proceed after upstream agreement but must not assume that a draft branch with failing CI is a reviewed contract. Do not close issues #3 or #4.
+The heads above are a dated record, not a lease: fetch remote heads again before any edit or merge. No automated scheduling is implied.
 
-## Actual S1 handoff A API (review required)
+## Integration contract and reuse
 
-- `rorb_model.ParameterSet`, `CatchmentModel`, `StormModel`, `RunModel` are immutable source-independent domain objects. `RunModel` holds parameters/catchment/storm and validates ISA, burst and ordered subarea IDs.
-- `rorb_codec.parse_cmd_par`, `parse_catg`, `parse_design_stm` produce source-aware `ParsedDocument` values; `serialize_cmd_par`, `serialize_catg`, `serialize_design_stm` provide supported-format canonical bytes. `original_bytes` is separate source-preservation mode; `write_new` is exclusive/no-clobber.
-- `rorb_model.to_json/from_json` provide schema-1 interchange with Decimal strings. `docs/RORB_BIDIRECTIONAL.md` already provides a draft API example. A new speculative schema must **not** be created by the integration owner.
-- `rorb_codec.to_s2_payload(RunModel)` already creates a restricted `S2Payload` with control code/reach length pairs, areas, storm values, losses, `kc`, and `m`. **Reuse or improve this existing single conversion boundary** after owner review; do not create another generic Decimal converter or duplicate .catg/.stm grammars.
-- The current `S2Payload` omits print-site/source identifiers and source provenance; these must be retained in an integration result/diagnostic object without inventing associations. The current `_as_float` checks finite output, but not positive-Decimal underflow-to-zero and not field/expected unit context. These are review questions for S1, not permission to bypass its boundary. In particular, S1 `Reach.length_km` is positive Decimal while S2 accepts zero-length routing, so policy for representability and zero-length semantics needs explicit agreement.
-- A canonical .catg writer using an empty graphical scaffold is **not** proof that native RORB accepts it. Preserve original source bytes/graphical information separately. Original print labels may not equal retained `HydNNN` output columns.
+- Reuse the merged S1 `RunModel`, `ParameterSet`, `CatchmentModel`, `StormModel`, `rorb_codec.to_s2_payload`, source-aware `.par/.catg/.stm` parsers, canonical writers and schema-1 JSON. Preserve computational control order, area/rainfall/ISA identities, original bytes, source spans and diagnostic print IDs.
+- Reuse S2's pure `calculate_storm`, reach-storage kernel and frozen `assess_printed_parity`/linear-balance audit. Keep the solver and file/capture adapters separate; no generic parallel parser or second RORB process runner.
+- The #23 `integration.run_model` bridge already exists with typed results, no-clobber CSV/JSON, explicit `parity_status=unassessed`, stable S1 print IDs and a checked Decimal-to-float boundary. That work includes an S2 #18 integration merge, **not** the newer selected #21 strict-quality/transport repairs or the native code-7 #25 update. The active #23 author should reconcile these without overwriting concurrent work.
+- Reject unsupported or uncharacterised features **before** numerical computation: GUI .par, FIT, multiple ISA/bursts, storage, imperviousness, uncharacterised controls, other rainfall/loss semantics or speculative print-site mappings. The supported minimum is a restricted single-burst, one-ISA, pervious DESIGN profile. Parsing success, mathematical execution and native parity are different statuses.
+- Native CMD 6.44 consumed the old canonical code-7 print-location line incorrectly. #25 fixes the Python physical-record layout, but a new **native replay** against the corrected complete .catg/.stm/.par is required. Original-byte preservation and a Python round trip alone do not prove RORB accepts the exported file.
 
-## Numerical adapter after upstream contract approval
+## Evidence and numerical gate
 
-Use S1 `RunModel` as the single authority. Construct S2 `Catchment(tuple(Control(code,length) ...), areas)`, `Storm(timestep,calculation_increments,percentages,depths)`, `Losses(initial,continuing)` and `calculate_storm(...,kc,m)` only after all execution capabilities are checked.
+- **S1:** merged-head Windows/Python 3.14.10 quality checks passed on #13 (64 tests), #19 (98 tests) and #25 (101 tests), with Ruff 0.16.6, strict Pyright, wheel builds and isolated installed-wheel import. The quality workflow is an already owner-approved single Windows lane, not permission to add more automation.
+- **S0:** fingerprinted CMD 6.44 and user-operated GUI 6.52 baseline had 301 exactly matching outlet **values in row order** but different printed increment/time labels. This is a single baseline-specific reporting observation, not general cross-engine parity or a validated universal time shift.
+- **S2 #21:** a Windows/Python 3.14.6 report from earlier head `17102b8` records Ruff, Pyright, 104 synthetic tests and private installed-wheel replay. At amended `947a9aa` two tests from #22 are added; the previous quality result is **not** a check of this newer head. The private campaign records 941 indexed files, four additional linear checks and 65 outcomes: 36 compared, 25 unreviewed, 3 expected failures and 1 incomplete reference. All **36 computed whole-catchment cases exceed the frozen printed-precision budget**. This is evidence of a compatibility blocker, not evidence for loosening the tolerance.
+- Six manufactured nonlinear kernel controls passed, but pinned native endpoint/stopping and source time/phase conventions remain unresolved. The private raw corpus is not copied into this public repo. The current implementation is *executable but unvalidated* for RORB parity.
 
-1. Preserve original computational control order exactly; do not treat trailing control 0 as a routed operation. Preserve subarea/area/depth/ISA identifiers; do not reorder by geometry, name or drawing order.
-2. Initially accept only one ISA, one explicit DESIGN burst, loss flag 1 IL/CL, lumped kc/m, fully pervious source areas, uniform temporal percentages, natural reaches and S2 controls 1/3/4/5/7. Reject GUI .par, loss flag 2, multiple ISAs or bursts, FIT, external/lateral inflows, special storage, impervious fractions, unsupported controls or uncharacterised storms **before** any calculation.
-3. Keep source decoding, parser diagnostics and format-specific token handling out of the numerical solver. Reject invalid/unsupported inputs differently from valid-but-unexecuted or executed-but-unvalidated inputs. Loss crossing, at-end-of-bin source phase, legacy nonlinear stopping, time labels and native volume conventions are unresolved S2 scientific hypotheses.
-4. Export a pure `run_model(model)` with typed results and source-aware, machine-readable diagnostics; associate printed locations only through explicit stable S1 identities. No native process, file writes, time-axis adjustment or implicit `HydNNN` index matching.
-5. Keep a thin Windows-friendly wrapper optional. Output JSON/report/CSV with exclusive creation by default. Reuse the S2 offline comparator only after native print-site and phase associations are established. Preserve raw increment and time strings.
+## Outstanding graph and concrete gates
 
-## Capability matrix (unmerged heads; no Handoff C integration)
+```text
+main: #11, #24, #15, #17, #12, #13, #19, #25  [merged code/docs]
+  |
+  +-- #14 S2 kernel [draft] -- #18 diagnostics [draft] -- #21 selected quality [draft]
+  |                                                 `-- #22 closed/superseded
+  |
+  +-- #23 S1+S2 integration [draft; uses S1 + #18, pending #21/#25 reconciliation]
 
-| Dialect / feature | S1 #19 parse | S1 #19 canonical serialize | S2 #14 isolated calculation | Integrated execute | Native numerical parity |
-| --- | --- | --- | --- | --- | --- |
-| CMD V2 .par single-burst subset | Draft yes | Draft yes | Manual setup only | **No** | No |
-| RORB_GE 002 .catg natural/1,3,4,5,7 | Draft yes | Draft yes, empty graphic scaffold | Narrow legacy fixture parser | **No** | No |
-| Explicit DESIGN .stm, one ISA/one burst | Draft yes | Draft yes | Narrow legacy fixture parser | **No** | No |
-| Versioned JSON RunModel schema 1 | Draft yes | JSON draft yes | Separate S2 domain | **No** | No |
-| Single cached .out HydNNN table | Partial read-only S1 inspector | Not applicable | S2 cached comparator | Print mapping unverified | No |
-| GUI .par, .cat/.dat, FIT, unknown controls, storage, impervious, multi-burst | Unsupported / uncharacterised | Unsupported | Unsupported | No | No |
+#20: this documentation-only status register; not solver acceptance
+```
 
-`Draft yes` means implementation exists at a particular unmerged revision, **not** that public CI/native equivalence or the shared API has been accepted.
+1. **S0 #2:** audit the profile-specific time labels, effective GUI settings and reference provenance for additional permission-cleared cases, retaining raw report/CSV identities. Do not close on the single 301-row match.
+2. **S1 #3:** re-execute the repaired canonical code-7 output with actual fingerprinted CMD 6.44 and verify complete file acceptance, effective input echo and source-folder write isolation. Extend only approved dialect fixtures.
+3. **S2 #4:** characterise the native nonlinear step/Regula-Falsi stopping and source rainfall phase with bounded, preapproved native probes; compare every ordinate under the *existing* precision budget. Keep #14/#18/#21 draft until their acceptance criteria and exact-head Windows/wheel gates are met.
+4. **Integration #23:** coordinate with its active branch owner; merge the chosen #21 behavior and #25 code-7 fixes without duplicating S1 grammar or S2 kernel; run exact-head Windows/Python 3.14, source and isolated-wheel tests plus authorized private corpus comparison. If those gates do not establish native parity, retain the draft and `parity_status=unassessed`.
+5. **Operational boundary:** no force-push, release, PyPI upload, visibility change, new workflows, or automatic closure of numerical issues. This register does not authorise a native simulation or a private data upload.
 
-## Integration validation plan
+## Change and validation history
 
-- Pin reviewed source heads before opening a *real* integration stack. Exercise `read → RunModel → to_json → from_json → canonical .par/.catg/.stm write → read` and semantic identity equality; preserve original bytes in the separate source-preservation path. Reject unrepresentable canonical features.
-- Construct S2 from `to_s2_payload`; compare numeric results against equivalent direct S2 fixtures, verify control/area/ISA mapping and explicit print IDs, and assert unsupported features reject **before** `calculate_storm`.
-- Retire or mark `legacy_inputs.py` a compatibility shim only after tests prove migration, not by moving the old grammar under a new module name.
-- Run parser/writer/source and synthetic solver checks separately. Run the private offline corpus only from an approved **external** directory, reporting unsupported/incomplete cases separately from compared-but-unaccepted results, without writing data to the public source tree.
-- Required target: Windows/Python 3.14, pinned Ruff 0.16.6, strict Pyright, full repository suite, wheel build and import outside checkout. Do not start RORB. Do not infer parity from peaks, an absent corpus or a skipped wheel check.
-
-## Staged conflict and merge plan
-
-No upstream branch is modified by this main-based readiness PR. **S0 #12 → stacked S1 #13 → stacked S1 #19 → S2 #14 → S2 #18 → final integration** is the provisional conceptual order, each step requiring its own owner approval, current-head review and deliberate conflict resolution. The S2 stack is independent from main; do not blind-rebase it during another agent's work. Integration may instead use an expressly agreed stack of pinned parents, with one documented dependency map. Do not force updates, merge, release, change workflows or close #3/#4 automatically.
-
-## Current readiness validation and exact blocker
-
-- **S1 #19 latest Windows quality [43031259081](https://github.com/Chain-Frost/python-runoff-routing/actions/runs/43031259081): PASS at head f356ec51a470ae1ab9e6919d7c4e5744674a3b38.** The strict checks, wheel build and outside-checkout wheel verification all passed. The earlier [run 43030412072](https://github.com/Chain-Frost/python-runoff-routing/actions/runs/43030412072) at head 6403e8c6845bf4512720bba85e58f00fe6b720ec failed 25 Pyright checks; that failure was superseded. **No submitted reviews or agreed data-contract sign-off** at this snapshot.
-- **S2 #18:** reported 13 supplementary synthetic diagnostic tests; Windows/Python 3.14, full private corpus and native parity remain unaccepted.
-- **This document-only readiness branch:** no application code or tests changed, and no source test run is claimed. It cannot be treated as Handoff C completion.
-
-**Next action:** Obtain explicit S1 typed model/serializer contract review and agreement, then re-read fresh #19/#18 heads and build the pinned `run_model` integration stack. The latest quality result is green but does not itself constitute API sign-off.
+Updated 2026-11-11 during the owner-authorised PR cleanup to replace obsolete pre-integration statements and superseded SHA/status claims. Documentation-only changes require repository Markdown link/hygiene checks, not numerical simulations. The source/installed-wheel and native checks quoted above belong to their named source revisions, **not** automatically to this document or an unreviewed combined S2/integration head.

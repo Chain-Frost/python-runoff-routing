@@ -26,3 +26,7 @@ def test_external_links_are_not_fetched(tmp_path: Path) -> None:
     document = tmp_path / "README.md"
     document.write_text("[Site](https://example.invalid/) [Mail](mailto:review@example.invalid)\n", encoding="utf-8")
     assert MARKDOWN_ERRORS(document, "README.md") == []
+
+
+def test_only_owner_approved_quality_workflow_is_allowed() -> None:
+    assert CHECKS["ALLOWED_WORKFLOWS"] == {".github/workflows/quality.yml"}

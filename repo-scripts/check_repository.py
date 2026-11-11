@@ -9,6 +9,7 @@ from urllib.parse import unquote
 
 ROOT = Path(__file__).absolute().parents[1]
 FORBIDDEN_SUFFIXES = {".exe", ".dll", ".whl", ".pyc", ".pdf"}
+ALLOWED_WORKFLOWS = {".github/workflows/quality.yml"}
 LINK = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 
 
@@ -40,7 +41,9 @@ def main() -> int:
     errors: list[str] = []
     for name in paths:
         path = ROOT / name
-        if name.startswith((".github/workflows/", ".local/", "results/", "reports/", "dist/", "build/")):
+        if name.startswith((".local/", "results/", "reports/", "dist/", "build/")) or (
+            name.startswith(".github/workflows/") and name not in ALLOWED_WORKFLOWS
+        ):
             errors.append(f"Disallowed tracked/candidate path: {name}")
         if path.suffix.lower() in FORBIDDEN_SUFFIXES:
             errors.append(f"Reference/binary artifact must remain outside Git: {name}")

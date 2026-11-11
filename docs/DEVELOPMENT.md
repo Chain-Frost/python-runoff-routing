@@ -31,15 +31,13 @@ Documentation changes require relative-link and factual-claim review. Numerical/
 
 The planning/scaffold PR needs these local quality checks and a Windows/Python 3.14 package/install smoke check before acceptance. It does not need to wait for RORB runner, hydrological or Monte Carlo validation: those are separate S0-S7 gates.
 
-## CI policy during private development
+## CI policy for the public repository (owner-approved 2026-11-10)
 
-No active files under .github/workflows. No scheduled/manual hosted workflows, dependency-update bots, release jobs or publication. The local hygiene check rejects workflow files; do not rely on draft PR status or skip-CI markers.
+The owner explicitly authorised adding helpful CI now that this repository is public. Only `.github/workflows/quality.yml` is allowed by the repository checker. Pull requests and pushes to main run a scoped **Windows/Python 3.14** check with read-only GitHub permissions and cancellation of superseded runs. It installs the lightweight dev extras, runs the unchanged local repository hygiene, pinned Ruff lint/format checks, strict Pyright and all non-native/non-benchmark pytest cases, builds a wheel, and imports that installed wheel from outside the checkout.
 
-Private repositories may receive included GitHub Actions usage; additional usage can be billed. Disabling hosted CI is a cost-control choice, not a requirement of privacy. Repository-level Actions permissions are a separate setting. The bootstrap does not assert that this switch has been changed.
+Do not execute RORB_CMD/RORBwin, use client fixtures, access private executables, run expensive benchmarks or publish packages on hosted runners. CI validates *software quality*, not native numerical equivalence or Windows permission-cleared reference execution. Native and historical acceptance must be recorded separately on an actual reference machine.
 
-The owner can apply the stronger switch under Settings > Actions > General > Actions permissions > Disable actions > Save. Do not configure required hosted status checks while no workflow can supply them. The available connector does not expose an administration write action for this switch, so an owner/admin step remains.
-
-Later CI requires explicit approval: start with inexpensive static checks, then focused Windows tests, batch pushes, dependency caching and scoped collection. Native executables/corpora and long benchmarks remain explicit local campaigns unless separately approved. Do not enable CI merely because the repository becomes public.
+The workflow is intentionally one Windows lane and no release/dependency-update job. Cache pip dependencies and cancel stale PR runs to limit costs. Keep the workflow explicitly reviewed, without unapproved matrix expansion, automatic publication or runtime secrets. A CI green result does not close S0-S7.
 
 ## Git and data safety
 

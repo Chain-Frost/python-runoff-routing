@@ -6,9 +6,10 @@ from pathlib import Path
 ROOT = Path(__file__).absolute().parents[1]
 
 
-def test_no_hosted_workflows() -> None:
+def test_only_owner_approved_hosted_workflow() -> None:
     workflow_dir = ROOT / ".github" / "workflows"
-    assert not workflow_dir.exists() or not any(workflow_dir.iterdir())
+    assert workflow_dir.is_dir()
+    assert {path.name for path in workflow_dir.iterdir()} == {"quality.yml"}
 
 
 def test_python_target_and_strict_typing() -> None:
