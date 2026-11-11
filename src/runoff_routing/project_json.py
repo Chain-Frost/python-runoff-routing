@@ -416,27 +416,35 @@ def _first_differences(left: object, right: object, path: str, differences: list
     if len(differences) >= MAX_DIFFERENCE_PATHS or left == right:
         return
     if isinstance(left, dict) and isinstance(right, dict):
-        first = cast("dict[str, object]", left)
-        second = cast("dict[str, object]", right)
-        for key in sorted(first.keys() | second.keys()):
-            if len(differences) >= MAX_DIFFERENCE_PATHS:
-                break
-            label = f"{path}.{key}"
-            if key not in first or key not in second:
-                differences.append(label)
-            else:
-                _first_differences(first[key], second[key], label, differences)
+        _difference_mapping(cast("dict[str, object]", left), cast("dict[str, object]", right), path, differences)
     elif isinstance(left, list) and isinstance(right, list):
-        first_items = cast("list[object]", left)
-        second_items = cast("list[object]", right)
-        if len(first_items) != len(second_items):
-            differences.append(f"{path}.length")
-        for index, (a, b) in enumerate(zip(first_items, second_items, strict=False)):
-            if len(differences) >= MAX_DIFFERENCE_PATHS:
-                break
-            _first_differences(a, b, f"{path}[{index}]", differences)
+        _difference_sequence(cast("list[object]", left), cast("list[object]", right), path, differences)
     else:
         differences.append(path)
+
+
+def _difference_mapping(
+    first: dict[str, object], second: dict[str, object], path: str, differences: list[str]
+) -> None:
+    for key in sorted(first.keys() | second.keys()):
+        if len(differences) >= MAX_DIFFERENCE_PATHS:
+            break
+        label = f"{path}.{key}"
+        if key not in first or key not in second:
+            differences.append(label)
+        else:
+            _first_differences(first[key], second[key], label, differences)
+
+
+def _difference_sequence(
+    first: list[object], second: list[object], path: str, differences: list[str]
+) -> None:
+    if len(first) != len(second):
+        differences.append(f"{path}.length")
+    for index, (a, b) in enumerate(zip(first, second, strict=False)):
+        if len(differences) >= MAX_DIFFERENCE_PATHS:
+            break
+        _first_differences(a, b, f"{path}[{index}]", differences)
 
 
 def _source_kind(source: EmbeddedRun | LegacyRunFiles) -> Literal["embedded-run", "rorb-files"]:
