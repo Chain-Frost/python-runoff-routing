@@ -213,7 +213,6 @@ def _compare_rows(  # noqa: C901 -- complete raw-row evidence validation
 
 
 def compare_corpus_case(corpus_root: Path, case_id: str) -> OfflineComparison:  # noqa: C901 -- corpus gate
-
     """Compare an eligible CMD case from the private offline corpus.
 
     Validates the recorded input and manifest checksums before computing.
