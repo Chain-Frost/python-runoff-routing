@@ -13,6 +13,7 @@
 - [S0 local reference capture](REFERENCE_CAPTURE.md)
 - [S1 CMD inspection](S1-INSPECTION.md)
 - [S1 bidirectional typed RORB model](RORB_BIDIRECTIONAL.md)
+- [S5 JSON-only project manifests](PROJECT_JSON.md)
 - [RORB behavioral audit and warning policy](BEHAVIOUR_AND_WARNINGS.md)
 - [Pull-request template](../.github/pull_request_template.md)
 
