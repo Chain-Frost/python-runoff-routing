@@ -29,7 +29,13 @@ def _spec(tmp_path: Path, *, loss_model: int = 1, expected_steps: int | None = 2
         "documentation_version": "6.31 mentioned in guide, not verified binary version",
         "catchment": "catchment.catg",
         "storm": "rain.stm",
-        "parameters": {"kc": "15", "m": "0.8", "initial_loss_mm": "20", "continuing": "2", "loss_model": loss_model},
+        "parameters": {
+            "kc": "15",
+            "m": "0.8",
+            "initial_loss_mm": "20",
+            "continuing": "0.5" if loss_model == 2 else "2",
+            "loss_model": loss_model,
+        },
         "timeout_seconds": 5,
         "provenance": {"source": "synthetic", "redistribution": "tests only"},
         "generator": {"name": "test ensemble exporter", "revision": "synthetic", "event_to_file": "sample-TP01"},
@@ -77,17 +83,36 @@ def _mock_execution(
 
 def test_one_isa_one_burst_renderer_and_ambiguous_loss_flag(tmp_path: Path) -> None:
     parameters = Parameters.from_mapping(
-        {"kc": 15, "m": "0.8", "initial_loss_mm": 20, "continuing": 2, "loss_model": 2}
+        {"kc": 15, "m": "0.8", "initial_loss_mm": 20, "continuing": "0.5", "loss_model": 2}
     )
     par = render_par(tmp_path / "a.catg", tmp_path / "b.stm", parameters)
     assert b"Lossmodel:2" in par
     assert b"ISA 1    :15,0.8" in par
-    assert b"ISA 1    :20,2" in par
+    assert b"ISA 1    :20,0.5" in par
     assert parameters.as_effective()["continuing_unit"] == "runoff_coefficient"
     with pytest.raises(ValueError, match="Only loss_model"):
         Parameters.from_mapping({"kc": 15, "m": 0.8, "initial_loss_mm": 20, "continuing": 2, "loss_model": 3})
     with pytest.raises(ValueError, match="finite"):
         Parameters.from_mapping({"kc": "NaN", "m": 0.8, "initial_loss_mm": 20, "continuing": 2, "loss_model": 1})
+
+
+@pytest.mark.parametrize("coefficient", ["0", "0.5", "1"])
+def test_valid_runoff_coefficient_bounds(coefficient: str) -> None:
+    parameters = Parameters.from_mapping(
+        {"kc": 10, "m": 0.8, "initial_loss_mm": 20, "continuing": coefficient, "loss_model": 2}
+    )
+    assert str(parameters.continuing) == coefficient
+
+
+def test_invalid_example_coefficient_rejected_before_capture(tmp_path: Path) -> None:
+    spec_path = _spec(tmp_path, loss_model=2)
+    spec = _read(spec_path)
+    spec["parameters"]["continuing"] = "2"
+    spec_path.write_text(json.dumps(spec))
+    captures = tmp_path / "captures"
+    with pytest.raises(ValueError, match="Runoff coefficient"):
+        capture_cmd(spec_path, captures, execute=True)
+    assert not captures.exists()
 
 
 def test_preflight_never_launches_or_writes(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
