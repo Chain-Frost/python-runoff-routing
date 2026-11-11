@@ -322,9 +322,7 @@ def audit_printed_nonlinear_balance(
         for q, unit in zip(downstream, eps, strict=True)
     )
     step_bounds = tuple(
-        storage_bounds[index - 1]
-        + storage_bounds[index]
-        + 1800.0 * dt_hours * (eps[index - 1] + eps[index])
+        storage_bounds[index - 1] + storage_bounds[index] + 1800.0 * dt_hours * (eps[index - 1] + eps[index])
         for index in range(1, len(eps))
     )
     if not all(math.isfinite(bound) for bound in step_bounds):
