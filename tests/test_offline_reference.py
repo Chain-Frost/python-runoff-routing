@@ -108,3 +108,21 @@ def test_gui_reference_is_not_misused(tmp_path: Path) -> None:
     report = compare_corpus_case(root, "synthetic")
     assert report.status == "unsupported"
     assert report.exact_printed_matches is None
+
+
+def test_legacy_cp1252_bytes_preserved_through_offline_comparison(tmp_path: Path) -> None:
+    root = tmp_path / "corpus"
+    _write_case(root)
+    model_path = root / "model.catg"
+    annotated = model_path.read_bytes().replace(b"C END RORB_GE", b"C \\x96 legacy label\\r\\nC END RORB_GE")
+    model_path.write_bytes(annotated)
+    catalogue_path = root / "catalogue.json"
+    catalogue = json.loads(catalogue_path.read_text(encoding="utf-8"))
+    catchment = catalogue["cases"][0]["inputs"][0]
+    catchment["fingerprint"]["sha256"] = hashlib.sha256(annotated).hexdigest()
+    catchment["fingerprint"]["size_bytes"] = len(annotated)
+    catalogue_path.write_text(json.dumps(catalogue), encoding="utf-8")
+    result = compare_corpus_case(root, "synthetic")
+    assert result.status == "compared"
+    assert result.exact_printed_matches == 4
+    assert model_path.read_bytes() == annotated

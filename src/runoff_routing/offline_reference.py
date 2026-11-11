@@ -109,6 +109,17 @@ def _read_verified(root: Path, record: Mapping[str, Any]) -> bytes:
     return data
 
 
+def _decode_legacy_input(data: bytes) -> str:
+    """Decode native fixture text without mutating the original bytes.
+
+    S1 owns the general source-aware decoder; this only unblocks offline S2.
+    """
+    try:
+        return data.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        return data.decode("cp1252")
+
+
 def _integral(samples: Sequence[float], dt_hours: float) -> float:
     return 3600.0 * dt_hours * math.fsum(0.5 * (a + b) for a, b in zip(samples, samples[1:], strict=False))
 
@@ -227,8 +238,8 @@ def compare_corpus_case(corpus_root: Path, case_id: str) -> OfflineComparison:
     inputs = {item["identity"]: item for item in case.get("inputs", ())}
     if not {"catchment", "storm", "parameters"}.issubset(inputs):
         return OfflineComparison(case_id, "unsupported", "Missing catchment/storm/CMD parameter evidence.")
-    raw_model = _read_verified(root, inputs["catchment"]).decode("utf-8-sig")
-    raw_storm = _read_verified(root, inputs["storm"]).decode("utf-8-sig")
+    raw_model = _decode_legacy_input(_read_verified(root, inputs["catchment"]))
+    raw_storm = _decode_legacy_input(_read_verified(root, inputs["storm"]))
     _read_verified(root, inputs["parameters"])
     model = parse_control_vector(raw_model)
     storm = parse_explicit_design_storm(raw_storm)

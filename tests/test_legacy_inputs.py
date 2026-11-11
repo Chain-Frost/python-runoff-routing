@@ -69,3 +69,14 @@ def test_unsupported_catchment_fails(source: str) -> None:
 def test_unsupported_storm_fails(source: str) -> None:
     with pytest.raises(LegacyInputError):
         parse_explicit_design_storm(source)
+
+
+def test_inline_comment_after_pervious_flag_is_not_numeric_data() -> None:
+    annotated = CONTROL.replace("\n0, -99\n", "\n0, -99,No impervious areas in system\n")
+    assert parse_control_vector(annotated) == parse_control_vector(CONTROL)
+
+
+def test_annotated_nonzero_impervious_flag_still_fails() -> None:
+    annotated = CONTROL.replace("\n0, -99\n", "\n1, -99,Nonzero impervious fraction\n")
+    with pytest.raises(LegacyInputError, match="all-pervious"):
+        parse_control_vector(annotated)

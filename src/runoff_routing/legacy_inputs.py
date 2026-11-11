@@ -97,7 +97,13 @@ def parse_control_vector(text: str) -> Catchment:
         message = "Missing final zero control or empty control vector."
         raise LegacyInputError(message)
     areas, index = _take_terminated(tuple(remaining), command_end)
-    if index >= len(remaining) or _tokens(remaining[index]) not in {("0", "-99"), ("0", "-99.0")}:
+    if index >= len(remaining):
+        message = "Missing explicitly all-pervious RORB_GE flag."
+        raise LegacyInputError(message)
+    # RORB Table 5-2 allows a comma-delimited annotation after the numeric record.
+    flag_fields = remaining[index].split(",", maxsplit=2)
+    flag_data = ",".join(flag_fields[:2]) if len(flag_fields) == 3 else remaining[index]
+    if _tokens(flag_data) not in {("0", "-99"), ("0", "-99.0")}:
         message = "Only explicitly all-pervious RORB_GE sources are supported."
         raise LegacyInputError(message)
     if any(line.strip() for line in remaining[index + 1:]):
