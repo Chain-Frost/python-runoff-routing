@@ -78,8 +78,7 @@ def review_volume_conventions(
         raise ValueError(message)
 
     values = tuple(
-        _finite_nonnegative(token, f"Discharge sample {index}")
-        for index, token in enumerate(native_discharge_tokens)
+        _finite_nonnegative(token, f"Discharge sample {index}") for index, token in enumerate(native_discharge_tokens)
     )
     half_units = tuple(_half_print_unit(value) for value in values)
     middle_sum = sum(values[1:-1], Decimal(0))
