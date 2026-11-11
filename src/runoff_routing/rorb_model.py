@@ -589,6 +589,7 @@ def from_dict(raw: dict[str, Any]) -> RorbModel:
 
 def from_json(text: str) -> RorbModel:
     """Load only an explicit interchange schema; JSON cannot silently carry NaN."""
+
     def reject_constant(value: str) -> None:
         message = f"Nonstandard JSON constant: {value}"
         raise ValueError(message)
