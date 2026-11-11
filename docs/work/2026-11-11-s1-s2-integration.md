@@ -27,3 +27,15 @@ The S1 `RunModel` / schema-1 JSON and S1 parsers/writers are authoritative, and 
 - Keep #3 and #4 open; PR remains draft. No merges, releases, workflow-permission changes or native executables.
 
 See [integration API, sample and feature matrix](../S1_S2_INTEGRATION.md) for the cold-start contract and staged merge order.
+
+## Exact-head public validation (2026-11-11)
+
+- Integration source/solver commit: `9e57ce29f93fa17634169d4d5a452a59e97dc44a`.
+- Hosted Windows quality [workflow run 43037231240](https://github.com/Chain-Frost/python-runoff-routing/actions/runs/43037231240): **passed** on Windows/Python **3.14.10**.
+- Repository hygiene: **67 files, 0 errors**.
+- Pinned Ruff **0.16.6** lint: **passed**; Ruff format: **58 files already formatted**.
+- Strict Pyright **1.1.414**: **0 errors, 0 warnings**.
+- Non-native, non-benchmark public pytest: **193 passed**, including the typed S1 parser/writer, S2 solver and comparison, S1-backed legacy shim and new integration round-trip tests.
+- `python -m build --wheel`: **passed**; install and import of the wheel outside the checkout: **passed**.
+- Separate authorised **private full-corpus** offline comparisons: **NOT RUN** for this integration branch. Native RORB launches: **NOT RUN**. Full numerical parity: **NOT ACCEPTED**.
+- This PR is intentionally draft. The documentation-only follow-on commit does not upgrade the scientific acceptance state.
