@@ -324,9 +324,7 @@ def parse_catg(data: bytes) -> ParsedDocument[CatchmentModel]:  # noqa: C901 -- 
                     message = "Code 7 is missing its physical print-location record"
                     raise _problem(message, line_no)
                 physical_label = lines[line_no]
-                if physical_label.strip() == "0" and not any(
-                    value == "0" for _, value in records[cursor + 2 :]
-                ):
+                if physical_label.strip() == "0" and not any(value == "0" for _, value in records[cursor + 2 :]):
                     message = "Code 7 consumed the final zero control as its missing location"
                     raise _problem(message, line_no + 1)
                 if physical_label.strip():
