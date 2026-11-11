@@ -31,7 +31,7 @@ def inspect_file(path: Path) -> Inspection:
             notes = (Diagnostic("source_changed", "Source file changed between read and parse", "error"),)
             return Inspection(suffix.removeprefix("."), "invalid", source, notes)
         fields = tuple(
-            SourceField(item.line, item.field, item.raw_token, source.lines[item.line - 1])
+            SourceField(item.line, item.field, item.source_text, source.lines[item.line - 1])
             for item in parsed.source_map
         )
         notes = (Diagnostic("execution_unverified", "Parsed syntax is not native or S2 numerical approval", "warning"),)

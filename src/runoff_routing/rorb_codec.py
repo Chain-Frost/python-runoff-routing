@@ -55,7 +55,7 @@ class SourceSpan:
 
     field: str
     line: int
-    raw_token: str
+    source_text: str
 
 
 @dataclass(frozen=True, slots=True)

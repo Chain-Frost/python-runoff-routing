@@ -100,7 +100,7 @@ def test_catchment_unchanged_source_preserves_crlf_comments_and_sha256() -> None
     assert [item.identifier for item in parsed.model.subareas] == ["area_1", "area_2"]
     assert [item.label for item in parsed.model.subareas] == ["A", "B"]
     assert [item.length_km for item in parsed.model.reaches] == [Decimal(5), Decimal(4), Decimal("2.5")]
-    assert any(span.field == "subarea_area_km2" and span.raw_token == "30.000" for span in parsed.source_map)
+    assert any(span.field == "subarea_area_km2" and span.source_text == "30.000" for span in parsed.source_map)
     edited = replace(parsed.model, title="Changed title")
     with pytest.raises(ValueError, match="cannot represent edits"):
         original_bytes(parsed, current_model=edited)
