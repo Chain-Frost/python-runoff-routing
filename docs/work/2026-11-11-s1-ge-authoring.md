@@ -10,3 +10,12 @@
 - **Next action:** Review the authoring API and run named, isolated native CMD/GE acceptance; inspect field widths and code-7 location semantics against native output. Keep issue #3 open.
 
 [Detailed authoring API](../RORB_GE_AUTHORING.md) · [Bidirectional input boundary](../RORB_BIDIRECTIONAL.md) · [Private/reference evidence contract](../REGRESSION.md).
+
+## Subsequent owner-authorised acceptance at the PR head
+
+The [bounded native/GIS campaign](2026-11-11-pr29-native-acceptance.md) tested exact head
+`a5aee07c8f84f23267f999322961d903c2b081aa`: two diagnostic-free CMD 6.44 captures have identical
+21-row ordinates/time labels and correct physical code-7 identities. Genuine Python 3.14 OGR source/wheel
+checks and supplementary QGIS 4.2.3 provider checks pass. Installed QGIS uses Python 3.12, so supported
+QGIS packaging and graphical-editor acceptance remain open. This supersedes the earlier NOT RUN status
+only for the explicitly bounded observations; S1 and numerical acceptance remain open.

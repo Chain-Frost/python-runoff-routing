@@ -1,7 +1,8 @@
 # Optional GIS authoring of RORB_GE catchments (S1)
 
-**Status:** new, limited RORB_GE 002 *source-authoring* contract. Generated files are not yet
-accepted by a native RORB_CMD or RORBwin executable. The existing source-aware
+**Status:** limited RORB_GE 002 *source-authoring* contract. A [bounded paired CMD 6.44 campaign](work/2026-11-11-pr29-native-acceptance.md)
+at PR #29 head verifies two generated files' embedded computational records, physical print identity
+and exact outputs. Graphical-editor and RORBwin acceptance remain open. The existing source-aware
 [bidirectional parser](RORB_BIDIRECTIONAL.md) and its computational ordering remain authoritative.
 
 ## Provenance and code reuse
@@ -117,9 +118,10 @@ not a coordinate transformation or source CRS inspection.
 - Tree-only GIS preprocessing does **not** disqualify existing RORB
   computational models containing diversions, rejoining routes or storage;
   those models simply cannot be authored through this optional adapter yet.
-- No RORB native executable or private fixtures are bundled or launched.
-  Synthetic parser round-tripping does not establish native acceptability.
-- Next: stage a permission-cleared native CMD 6.44/GUI reference from an
-  actual source geometry, preserve raw input hashes, and verify echoed inputs,
-  print identities, source ordering and output diagnostics before accepting
-  a named profile. Keep S1 issue #3 open until the larger stage gates pass.
+- Authoring APIs do not launch RORB; executables and private fixtures are not bundled.
+  The separate native campaign is explicit opt-in. Synthetic parser round-tripping alone
+  does not establish native acceptability.
+- The bounded CMD 6.44 replay and genuine OGR checks are recorded separately above. They do not
+  certify how an editor interprets graphical record widths or displays the drawing. Supported-Python
+  QGIS packaging, graphical-editor and further profile/feature acceptance remain open.
+  Keep S1 issue #3 open until the larger stage gates pass.
