@@ -593,6 +593,7 @@ def from_json(text: str) -> RorbModel:
     def reject_constant(value: str) -> None:
         message = f"Nonstandard JSON constant: {value}"
         raise ValueError(message)
+
     decoded: object = json.loads(text, parse_constant=reject_constant)
     if not isinstance(decoded, dict):
         message = "RORB JSON root must be an object"
