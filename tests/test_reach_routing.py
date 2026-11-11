@@ -81,3 +81,16 @@ def test_storage_uses_documented_units() -> None:
 def test_storage_overflow_fails_explicitly() -> None:
     with pytest.raises(RoutingDomainError, match="overflowed"):
         storage_volume(1e200, coefficient_k=1.0, exponent_m=2.0)
+
+
+@pytest.mark.parametrize("dt_hours", [0.5, 0.25, 0.125])
+def test_manufactured_nonlinear_endpoint_matches_independent_continuity(dt_hours: float) -> None:
+    # Set Q[0]=I[0]=0, Q[1]=1 and k=1, so continuity fixes I[1]=2/dt+1.
+    actual = route_reach((0.0, 2.0 / dt_hours + 1.0), coefficient_k=1.0, exponent_m=0.8, time_step_hours=dt_hours)
+    assert actual == pytest.approx((0.0, 1.0), abs=1e-11)
+
+
+@pytest.mark.parametrize("dt_hours", [0.5, 0.25, 0.125])
+def test_manufactured_nonlinear_equilibrium_is_unchanged(dt_hours: float) -> None:
+    actual = route_reach((2.0,) * 21, coefficient_k=1.0, exponent_m=0.8, time_step_hours=dt_hours)
+    assert actual == pytest.approx((2.0,) * 21, abs=1e-10)

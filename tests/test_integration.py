@@ -195,7 +195,7 @@ def test_storm_precision_s1_accepts_but_s2_preflight_rejects() -> None:
 def test_parsing_failures_report_role_status_and_source_line() -> None:
     par, catg, stm = _files(_run())
     with pytest.raises(RunInputError) as caught:
-        parse_run_bytes(par, catg.replace(b"\n7\nPrint A\n", b"\n11\nPrint A\n"), stm)
+        parse_run_bytes(par, catg.replace(b"\n7, Print A\nPrint A\n", b"\n11, Print A\nPrint A\n"), stm)
     assert caught.value.status == "unsupported"
     assert caught.value.role == "catchment"
     assert caught.value.line is not None
@@ -242,6 +242,35 @@ def test_reports_are_machine_readable_no_clobber_and_contain_no_native_time_clai
         write_result_json(json_target, result)
     with pytest.raises(FileExistsError):
         write_result_csv(csv_target, result)
+
+
+def test_code7_distinct_annotation_and_physical_label_roundtrip() -> None:
+    run = _run()
+    catchment = replace(
+        run.catchment,
+        controls=(run.catchment.controls[0], replace(run.catchment.controls[1], label="Graphical note")),
+        print_locations=(PrintLocation("print_1", "Physical native outlet"),),
+    )
+    updated = replace(run, catchment=catchment)
+    par, catg, stm = canonical_run_bytes(updated)
+    assert b"7, Graphical note\nPhysical native outlet\n0\n" in catg
+    parsed = parse_run_bytes(par, catg, stm)
+    assert parsed.model == updated
+    assert read_run_json(to_json(parsed.model)) == updated
+    assert parsed.model.catchment.controls[-1].label == "Graphical note"
+    assert run_model(parsed.model).prints[0].label == "Physical native outlet"
+    assert run_model(parsed.model).parity_status == "unassessed"
+
+
+def test_code7_missing_physical_record_rejected_in_integrated_reader() -> None:
+    par, catg, stm = _files(_run())
+    invalid = catg.replace(b"7, Print A\nPrint A\n0\n", b"7, Print A\n0\n")
+    assert invalid != catg
+    with pytest.raises(RunInputError) as caught:
+        parse_run_bytes(par, invalid, stm)
+    assert caught.value.status == "invalid"
+    assert caught.value.role == "catchment"
+    assert caught.value.line is not None
 
 
 def test_pure_api_never_launches_native_engines(monkeypatch: pytest.MonkeyPatch) -> None:

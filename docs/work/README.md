@@ -13,3 +13,4 @@
 | [Private bootstrap](2026-11-09-bootstrap.md) | Scaffold merged (#11); stage gates open | Unassigned | 2026-11-11 | On stage validation | Validate S0 native capture and retain the separate numerical gates; no release is implied. |
 
 [Implementation plan](../IMPLEMENTATION_PLAN.md) links all stage issues. S0-S7 remain unaccepted; S8 is deferred. Issue status and this register do not mean an agent is currently running. Review dates do not schedule background work.
+- [S1/S2 post-merge reconciliation](2026-11-11-s1-s2-postmerge-reconciliation.md): source-safe code-7 label distinction and selected S2 test coverage; numerical acceptance open.

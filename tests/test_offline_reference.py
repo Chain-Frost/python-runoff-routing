@@ -158,6 +158,7 @@ def test_cp1252_original_corpus_source_is_accepted(tmp_path: Path) -> None:
     report = compare_corpus_case(root, "synthetic")
     assert report.status == "compared"
     assert report.exact_printed_matches == 4
+    assert (root / "model.catg").read_bytes() == encoded
 
 
 def test_gui_reference_is_not_misused(tmp_path: Path) -> None:

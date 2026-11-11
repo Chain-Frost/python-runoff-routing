@@ -106,3 +106,10 @@ Use the existing Windows `quality.yml` on the draft integration PR. Run private 
 4. Run exact-head Windows 3.14 quality, build/wheel import, public integration tests, then separate private offline replay. Only then request independent numerical/domain review. No issue closure, package publication, native launches or automatic merge from this draft integration branch.
 
 This integration does **not** change S0 reference-capture machinery, hosted workflow permissions or the original S1/S2 PR branches.
+
+
+## Post-merge reconciliation (2026-11-11)
+
+The already-merged S1 code-7 fix #25 reads the native location from the **physical line following** control 7. This reconciliation preserves two independent labels: the optional inline `ControlStep.label` graphical annotation and `PrintLocation.label` on the following physical line. Typed JSON and canonical reparse retain both; `RunResult` reports the physical label. The bare `7` emitter was tested with CMD 6.44 (201 rows); the optional annotated `7, ...` form remains **native-unverified** and must not inherit that acceptance.
+
+The #21 CP1252 and annotated all-pervious transport fixes already exist in #23's byte-preserving S1 parser adapters, so no duplicate decoder or S2 grammar was imported. Unique independent nonlinear manufactured/equilibrium tests and nonzero annotated impervious rejection were ported. Kernels, loss/phase rules and strict printing budgets were not changed. The previous private 65-case S2 outcomes were **36 discrepant, 25 unreviewed, three expected failures and one incomplete**; they are *not* tests of this installed wheel. See [post-merge record](work/2026-11-11-s1-s2-postmerge-reconciliation.md). Keep #3/#4 open.

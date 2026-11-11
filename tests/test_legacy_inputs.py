@@ -104,3 +104,9 @@ def test_unsupported_catchment_fails(source: str) -> None:
 def test_unsupported_storm_fails(source: str) -> None:
     with pytest.raises(LegacyInputError):
         parse_explicit_design_storm(source)
+
+
+def test_annotated_nonzero_impervious_flag_stays_unsupported() -> None:
+    unsupported = CONTROL.replace("0, -99\n", "1, -99, No impervious areas\n")
+    with pytest.raises(LegacyInputError, match="S1 unsupported"):
+        parse_control_vector(unsupported)
