@@ -19,3 +19,7 @@ This does not establish that the empty graphical scaffold or other canonical rec
 ## Exact-head validation and merge (2026-11-11)
 
 PR #25 merged as `3575fb5`. [Windows run 43039001047](https://github.com/Chain-Frost/python-runoff-routing/actions/runs/43039001047) on its reconciled head passed Python 3.14.10, Ruff 0.16.6, strict Pyright, **101 synthetic tests**, wheel build and isolated wheel import. Corrected canonical files have **not** been submitted to the native CMD executable; the old native failure remains evidence. Next: perform one permission-cleared complete canonical replay on fingerprinted CMD 6.44 and inspect the effective inputs and output inventory. Issue #3 stays open.
+
+## Subsequent one-case native replay — 2026-11-11
+
+The above 'not yet rerun' statement was a historical snapshot and is **superseded for one case** by private [investigations PR #8](https://github.com/Chain-Frost/runoff-routing-investigations/pull/8): a staged RORB_CMD 6.44 run from the #25 corrected emitter matched **201** reference discharge ordinates, raw increment/time tokens and effective setting echoes. Private raw evidence remains outside this public repository. This does **not** validate #28's new, distinct inline graphical annotation versus physical print-location label bytes, other native/GUI profiles or S1 stage completion. **Next:** run one permission-cleared distinct-label code-7 case against the pinned CMD build and verify the echoed/output physical names; keep issue #3 open.
