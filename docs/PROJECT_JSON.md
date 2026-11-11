@@ -42,14 +42,21 @@ The alternative embedded source is a JSON object of the form `{"kind": "embedded
 from pathlib import Path
 
 from runoff_routing.project_json import (
-    EmbeddedRun, Project, import_rorb_project, load_project,
-    project_from_json, project_to_json, write_project,
+    EmbeddedRun,
+    Project,
+    import_rorb_project,
+    load_project,
+    project_from_json,
+    project_to_json,
+    write_project,
 )
 from runoff_routing.rorb_model import RunModel
 
 target = Path(r"C:\models\case\project.json")
 project = import_rorb_project(
-    target, identifier="case-one", rainfall_profile="legacy-rorb",
+    target,
+    identifier="case-one",
+    rainfall_profile="legacy-rorb",
     parameters=target.parent / "reference.par",
     catchment=target.parent / "catchment.catg",
     storm=target.parent / "storm.stm",

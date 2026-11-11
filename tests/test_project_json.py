@@ -239,7 +239,7 @@ def test_symlink_escape_rejected(tmp_path: Path) -> None:
     link = project_root / "external.txt"
     try:
         link.symlink_to(outside)
-    except (OSError, NotImplementedError):
+    except OSError, NotImplementedError:
         pytest.skip("File symlinks unavailable on this filesystem")
     asset = ExternalAsset(
         "outside",
