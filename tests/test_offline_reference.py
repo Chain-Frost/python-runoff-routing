@@ -3,6 +3,7 @@
 import hashlib
 import json
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -50,7 +51,7 @@ HYDRO = {
 
 def _write_case(root: Path) -> None:
     root.mkdir()
-    inputs = []
+    inputs: list[dict[str, Any]] = []
     for identity, filename, contents in (
         ("catchment", "model.catg", CAT.encode()),
         ("storm", "storm.stm", STM.encode()),
@@ -78,7 +79,7 @@ def _write_case(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    record = {
+    record: dict[str, Any] = {
         "schema_version": 1,
         "cases": [
             {

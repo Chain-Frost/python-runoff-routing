@@ -15,7 +15,7 @@ from dataclasses import asdict, dataclass
 from decimal import Decimal
 from itertools import pairwise
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 from runoff_routing.legacy_inputs import parse_control_vector, parse_explicit_design_storm
 from runoff_routing.single_storm import Losses, calculate_storm
@@ -119,8 +119,9 @@ def _read_verified(root: Path, record: Mapping[str, Any]) -> bytes:
     if not isinstance(relative, str) or not isinstance(fingerprint, dict):
         message = "Missing input locator or SHA-256 fingerprint."
         raise CorpusError(message)
+    checked_fingerprint = cast("Mapping[str, Any]", fingerprint)
     data = _safe_relative(root, relative).read_bytes()
-    if len(data) != fingerprint.get("size_bytes") or hashlib.sha256(data).hexdigest() != fingerprint.get("sha256"):
+    if len(data) != checked_fingerprint.get("size_bytes") or hashlib.sha256(data).hexdigest() != checked_fingerprint.get("sha256"):
         message = f"Corpus input fingerprint does not match: {relative}."
         raise CorpusError(message)
     return data
@@ -176,7 +177,11 @@ def _compare_rows(  # noqa: C901 -- complete raw-row evidence validation
             message = "Predicted hydrograph contains invalid values."
             raise CorpusError(message)
         try:
-            printed_model = Decimal(str(model)).quantize(Decimal(1).scaleb(native.as_tuple().exponent))
+            exponent = native.as_tuple().exponent
+            if not isinstance(exponent, int):
+                message = "Native discharge has a non-integer resolution exponent"
+                raise CorpusError(message)
+            printed_model = Decimal(str(model)).quantize(Decimal(1).scaleb(exponent))
         except ArithmeticError as exc:
             message = "Cannot quantize predicted discharge to printed resolution."
             raise CorpusError(message) from exc
@@ -224,7 +229,8 @@ def compare_corpus_case(corpus_root: Path, case_id: str) -> OfflineComparison:  
     if catalogue.get("schema_version") != 1:
         message = "Unsupported offline corpus catalogue schema."
         raise CorpusError(message)
-    cases = [case for case in catalogue.get("cases", ()) if case.get("case_id") == case_id]
+    catalogued_cases = cast("list[dict[str, Any]]", catalogue.get("cases", ()))
+    cases = [case for case in catalogued_cases if case.get("case_id") == case_id]
     if len(cases) != 1:
         message = "Case identifier missing or ambiguous."
         raise CorpusError(message)
@@ -244,10 +250,11 @@ def compare_corpus_case(corpus_root: Path, case_id: str) -> OfflineComparison:  
     if not isinstance(manifest, str) or not isinstance(manifest_fingerprint, dict):
         message = "Missing manifest path/fingerprint."
         raise CorpusError(message)
+    verified_manifest = cast("Mapping[str, Any]", manifest_fingerprint)
     manifest_bytes = _safe_relative(root, manifest).read_bytes()
-    if len(manifest_bytes) != manifest_fingerprint.get("size_bytes") or hashlib.sha256(
+    if len(manifest_bytes) != verified_manifest.get("size_bytes") or hashlib.sha256(
         manifest_bytes
-    ).hexdigest() != manifest_fingerprint.get("sha256"):
+    ).hexdigest() != verified_manifest.get("sha256"):
         message = "Manifest fingerprint changed."
         raise CorpusError(message)
     inputs = {item["identity"]: item for item in case.get("inputs", ())}

@@ -10,7 +10,7 @@ from runoff_routing.single_storm import (
     Control,
     Losses,
     Storm,
-    _distance_analysis,
+    distance_analysis,
     calculate_storm,
     rainfall_excess,
 )
@@ -37,7 +37,7 @@ def test_one_natural_reach_mass_and_horizon() -> None:
 
 def test_branching_average_distance_and_confluence() -> None:
     model = Catchment((Control(1, 2), Control(3), Control(1, 4), Control(4), Control(5, 3), Control(7)), (1, 3))
-    dav, factors = _distance_analysis(model)
+    dav, factors = distance_analysis(model)
     assert dav == pytest.approx((1 * 5 + 3 * 7) / 4)
     assert factors == pytest.approx((2 / dav, 4 / dav, 3 / dav))
     storm = Storm(1.0, 4, (100.0,), (3.6, 3.6))

@@ -77,17 +77,17 @@ def parse_run_bytes(par: bytes, catg: bytes, stm: bytes) -> ParsedRun:
     try:
         parameters = parse_cmd_par(par)
     except FormatProblem as exc:
-        error = RunInputError(exc.status, exc.code, str(exc), role="parameters", line=exc.line)
+        error = RunInputError(cast("InputStatus", exc.status), exc.code, str(exc), role="parameters", line=exc.line)
         raise error from exc
     try:
         catchment = parse_catg(catg)
     except FormatProblem as exc:
-        error = RunInputError(exc.status, exc.code, str(exc), role="catchment", line=exc.line)
+        error = RunInputError(cast("InputStatus", exc.status), exc.code, str(exc), role="catchment", line=exc.line)
         raise error from exc
     try:
         storm = parse_design_stm(stm)
     except FormatProblem as exc:
-        error = RunInputError(exc.status, exc.code, str(exc), role="storm", line=exc.line)
+        error = RunInputError(cast("InputStatus", exc.status), exc.code, str(exc), role="storm", line=exc.line)
         raise error from exc
     try:
         model = RunModel(parameters.model, catchment.model, storm.model)
