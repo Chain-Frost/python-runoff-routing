@@ -6,6 +6,7 @@ from pathlib import Path
 
 from .rorb_codec import FormatProblem, parse_catg, parse_design_stm
 from .rorb_documents import Diagnostic, Inspection, RorbSource, SourceField
+from .rorb_model import CatchmentModel
 from .rorb_out import inspect_output
 from .rorb_par import inspect_cmd_parameters
 
@@ -25,7 +26,7 @@ def inspect_file(path: Path) -> Inspection:
         except FormatProblem as exc:
             return Inspection(
                 suffix.removeprefix("."),
-                exc.status,
+                "unsupported" if exc.status == "unsupported" else "invalid",
                 source,
                 (Diagnostic(exc.code, str(exc), "unsupported" if exc.status == "unsupported" else "error", exc.line),),
             )
@@ -37,7 +38,7 @@ def inspect_file(path: Path) -> Inspection:
             for item in parsed.source_map
         )
         notes = (Diagnostic("execution_unverified", "Parsed syntax is not native or S2 numerical approval", "warning"),)
-        if suffix == ".catg":
+        if isinstance(parsed.model, CatchmentModel):
             return Inspection("rorb_ge_002", "parsed", source, notes, fields, catchment=parsed.model)
         return Inspection("design_explicit", "parsed", source, notes, fields, storm=parsed.model)
     if suffix in {".cat", ".dat"}:

@@ -17,13 +17,13 @@ ControlCode = Literal[1, 3, 4, 5, 7]
 
 
 def _finite(value: Decimal, label: str, *, positive: bool = False) -> None:
-    if not isinstance(value, Decimal) or not value.is_finite() or value < 0 or (positive and value == 0):
+    if type(value) is not Decimal or not value.is_finite() or value < 0 or (positive and value == 0):
         message = f"{label} must be a finite {'positive' if positive else 'nonnegative'} Decimal"
         raise ValueError(message)
 
 
 def _identity(value: str, label: str) -> None:
-    if not isinstance(value, str) or not value or value.strip() != value or any(ord(char) < 32 for char in value):
+    if not value or value.strip() != value or any(ord(char) < 32 for char in value):
         message = f"{label} must be a nonempty, unambiguous identifier"
         raise ValueError(message)
 
@@ -433,18 +433,54 @@ def to_json(model: RorbModel) -> str:
     return json.dumps(to_dict(model), ensure_ascii=False, sort_keys=True, indent=2, allow_nan=False) + "\n"
 
 
-def _object(raw: object, names: set[str]) -> dict[str, Any]:
-    if not isinstance(raw, dict) or set(raw) != names:
+def _object(raw: object, names: set[str]) -> dict[str, object]:
+    if not isinstance(raw, dict):
+        message = "Expected JSON object"
+        raise TypeError(message)
+    record = cast("dict[str, object]", raw)
+    if set(record) != names:
         message = f"Expected exact JSON object fields: {sorted(names)}"
         raise ValueError(message)
-    return cast("dict[str, Any]", raw)
+    return record
 
 
-def _items(raw: object) -> list[Any]:
+def _items(raw: object) -> list[object]:
     if not isinstance(raw, list):
         message = "Expected JSON array"
         raise TypeError(message)
-    return cast("list[Any]", raw)
+    return cast("list[object]", raw)
+
+
+def _string(value: object) -> str:
+    if not isinstance(value, str):
+        message = "Expected JSON string"
+        raise TypeError(message)
+    return value
+
+
+def _field_str(record: dict[str, object], key: str) -> str:
+    return _string(record[key])
+
+
+def _optional_str(record: dict[str, object], key: str) -> str | None:
+    raw = record[key]
+    return None if raw is None else _string(raw)
+
+
+def _integer_field(record: dict[str, object], key: str) -> int:
+    value = record[key]
+    if type(value) is not int:
+        message = f"Expected integer for {key}"
+        raise TypeError(message)
+    return value
+
+
+def _bool_field(record: dict[str, object], key: str) -> bool:
+    value = record[key]
+    if type(value) is not bool:
+        message = f"Expected boolean for {key}"
+        raise TypeError(message)
+    return value
 
 
 def _decimal(raw: object) -> Decimal:
@@ -465,8 +501,23 @@ def _decimal(raw: object) -> Decimal:
     return result
 
 
+def _routing(raw: object) -> RoutingValue:
+    record = _object(raw, {"isa", "kc", "m"})
+    return RoutingValue(_integer_field(record, "isa"), _decimal(record["kc"]), _decimal(record["m"]))
+
+
+def _loss(raw: object) -> LossValue:
+    record = _object(raw, {"isa", "burst", "initial_loss_mm", "continuing"})
+    return LossValue(
+        _integer_field(record, "isa"),
+        _integer_field(record, "burst"),
+        _decimal(record["initial_loss_mm"]),
+        _decimal(record["continuing"]),
+    )
+
+
 def _params(raw: object) -> ParameterSet:
-    d = _object(
+    record = _object(
         raw,
         {
             "catchment_reference",
@@ -480,54 +531,73 @@ def _params(raw: object) -> ParameterSet:
             "losses",
         },
     )
-    routing = tuple(
-        RoutingValue(**{**(_object(item, {"isa", "kc", "m"})), "kc": _decimal(item["kc"]), "m": _decimal(item["m"])})
-        for item in _items(d["routing"])
-    )
-    losses = tuple(
-        LossValue(
-            **{
-                **(_object(item, {"isa", "burst", "initial_loss_mm", "continuing"})),
-                "initial_loss_mm": _decimal(item["initial_loss_mm"]),
-                "continuing": _decimal(item["continuing"]),
-            }
-        )
-        for item in _items(d["losses"])
-    )
+    loss_model = _integer_field(record, "loss_model")
+    if loss_model not in (1, 2):
+        message = "Unsupported CMD loss model"
+        raise ValueError(message)
+    recognised_loss: Literal[1, 2] = 1 if loss_model == 1 else 2
     return ParameterSet(
-        d["catchment_reference"],
-        d["storm_reference"],
-        d["lumped_kc"],
-        d["verbosity"],
-        d["loss_model"],
-        d["num_isa"],
-        d["num_bursts"],
-        routing,
-        losses,
+        _field_str(record, "catchment_reference"),
+        _field_str(record, "storm_reference"),
+        _bool_field(record, "lumped_kc"),
+        _integer_field(record, "verbosity"),
+        recognised_loss,
+        _integer_field(record, "num_isa"),
+        _integer_field(record, "num_bursts"),
+        tuple(_routing(item) for item in _items(record["routing"])),
+        tuple(_loss(item) for item in _items(record["losses"])),
     )
+
+
+def _subarea(raw: object) -> SubArea:
+    record = _object(raw, {"identifier", "area_km2", "label"})
+    return SubArea(_field_str(record, "identifier"), _decimal(record["area_km2"]), _field_str(record, "label"))
+
+
+def _reach(raw: object) -> Reach:
+    record = _object(raw, {"identifier", "length_km", "label"})
+    return Reach(_field_str(record, "identifier"), _decimal(record["length_km"]), _field_str(record, "label"))
+
+
+def _control(raw: object) -> ControlStep:
+    record = _object(raw, {"code", "subarea_id", "reach_id", "print_id", "label"})
+    code = _integer_field(record, "code")
+    if code not in (1, 3, 4, 5, 7):
+        message = "Unrecognised RORB computational control code"
+        raise ValueError(message)
+    return ControlStep(
+        cast("ControlCode", code),
+        _optional_str(record, "subarea_id"),
+        _optional_str(record, "reach_id"),
+        _optional_str(record, "print_id"),
+        _field_str(record, "label"),
+    )
+
+
+def _print_location(raw: object) -> PrintLocation:
+    record = _object(raw, {"identifier", "label"})
+    return PrintLocation(_field_str(record, "identifier"), _field_str(record, "label"))
+
+
+def _storage(raw: object) -> Storage:
+    record = _object(raw, {"identifier", "kind"})
+    return Storage(_field_str(record, "identifier"), _field_str(record, "kind"))
 
 
 def _catchment(raw: object) -> CatchmentModel:
-    d = _object(raw, {"title", "subareas", "reaches", "controls", "print_locations", "storages"})
-    areas = tuple(
-        SubArea(**{**_object(item, {"identifier", "area_km2", "label"}), "area_km2": _decimal(item["area_km2"])})
-        for item in _items(d["subareas"])
+    record = _object(raw, {"title", "subareas", "reaches", "controls", "print_locations", "storages"})
+    return CatchmentModel(
+        _field_str(record, "title"),
+        tuple(_subarea(item) for item in _items(record["subareas"])),
+        tuple(_reach(item) for item in _items(record["reaches"])),
+        tuple(_control(item) for item in _items(record["controls"])),
+        tuple(_print_location(item) for item in _items(record["print_locations"])),
+        tuple(_storage(item) for item in _items(record["storages"])),
     )
-    reaches = tuple(
-        Reach(**{**_object(item, {"identifier", "length_km", "label"}), "length_km": _decimal(item["length_km"])})
-        for item in _items(d["reaches"])
-    )
-    controls = tuple(
-        ControlStep(**_object(item, {"code", "subarea_id", "reach_id", "print_id", "label"}))
-        for item in _items(d["controls"])
-    )
-    prints = tuple(PrintLocation(**_object(item, {"identifier", "label"})) for item in _items(d["print_locations"]))
-    storages = tuple(Storage(**_object(item, {"identifier", "kind"})) for item in _items(d["storages"]))
-    return CatchmentModel(d["title"], areas, reaches, controls, prints, storages)
 
 
 def _storm(raw: object) -> StormModel:
-    d = _object(
+    record = _object(
         raw,
         {
             "title",
@@ -543,16 +613,16 @@ def _storm(raw: object) -> StormModel:
         },
     )
     return StormModel(
-        d["title"],
-        _decimal(d["timestep_hours"]),
-        d["calculation_increments"],
-        d["start_increment"],
-        tuple(_decimal(item) for item in _items(d["percentages"])),
-        tuple(_decimal(item) for item in _items(d["depths_mm"])),
-        tuple(d["subarea_ids"]),
-        d["pluviograph_count"],
-        d["isa_count"],
-        d["burst_count"],
+        _field_str(record, "title"),
+        _decimal(record["timestep_hours"]),
+        _integer_field(record, "calculation_increments"),
+        _integer_field(record, "start_increment"),
+        tuple(_decimal(item) for item in _items(record["percentages"])),
+        tuple(_decimal(item) for item in _items(record["depths_mm"])),
+        tuple(_string(item) for item in _items(record["subarea_ids"])),
+        _integer_field(record, "pluviograph_count"),
+        _integer_field(record, "isa_count"),
+        _integer_field(record, "burst_count"),
     )
 
 
@@ -562,7 +632,7 @@ def from_dict(raw: dict[str, Any]) -> RorbModel:
     if type(data["schema_version"]) is not int or data["schema_version"] != SCHEMA_VERSION:
         message = "Unknown RORB JSON schema version"
         raise ValueError(message)
-    kind = data["kind"]
+    kind = _field_str(data, "kind")
     if kind not in ("parameters", "catchment", "storm", "run"):
         message = "Unknown RORB JSON model kind"
         raise ValueError(message)

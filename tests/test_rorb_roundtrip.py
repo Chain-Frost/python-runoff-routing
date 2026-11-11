@@ -5,7 +5,6 @@ from __future__ import annotations
 import hashlib
 import json
 import subprocess
-from collections.abc import Callable
 from dataclasses import replace
 from decimal import Decimal
 from pathlib import Path
@@ -170,18 +169,19 @@ def test_individual_catchment_and_storm_json_roundtrip() -> None:
         assert from_json(to_json(model)) == model
 
 
-@pytest.mark.parametrize(
-    "corruption",
-    [
-        lambda data: {**data, "schema_version": 2},
-        lambda data: {**data, "units": {"area": "m2"}},
-        lambda data: {**data, "unknown": "not permitted"},
-        lambda data: {**data, "model": {**data["model"], "verbosity": True}},
-        lambda data: {**data, "model": {**data["model"], "routing": [{"isa": 1, "kc": 12.5, "m": "0.8"}]}},
-    ],
-)
-def test_invalid_json_is_not_coerced(corruption: Callable[[dict[str, Any]], dict[str, Any]]) -> None:
-    edited = corruption(to_dict(_params()))
+@pytest.mark.parametrize("corruption", ["version", "units", "extra", "flag_type", "numeric_type"])
+def test_invalid_json_is_not_coerced(corruption: str) -> None:
+    edited: dict[str, Any] = to_dict(_params())
+    if corruption == "version":
+        edited["schema_version"] = 2
+    elif corruption == "units":
+        edited["units"] = {"area": "m2"}
+    elif corruption == "extra":
+        edited["unknown"] = "not permitted"
+    elif corruption == "flag_type":
+        edited["model"]["verbosity"] = True
+    else:
+        edited["model"]["routing"] = [{"isa": 1, "kc": 12.5, "m": "0.8"}]
     with pytest.raises((TypeError, ValueError)):
         from_dict(edited)
 

@@ -51,8 +51,13 @@ def _run(root: Path) -> None:  # noqa: C901 -- ordered immutable evidence audits
     catg = parse_catg(files["catchment"].read_bytes())
     stm = parse_design_stm(files["storm"].read_bytes())
     par = parse_cmd_par(files["parameters"].read_bytes())
-    for item in (catg, stm, par):
-        if hashlib.sha256(original_bytes(item)).hexdigest() != item.source.sha256:
+    byte_pairs = (
+        (original_bytes(catg), catg.source.sha256),
+        (original_bytes(stm), stm.source.sha256),
+        (original_bytes(par), par.source.sha256),
+    )
+    for data, original_sha256 in byte_pairs:
+        if hashlib.sha256(data).hexdigest() != original_sha256:
             message = "Unchanged original-source mode failed"
             raise ValueError(message)
     run = RunModel(par.model, catg.model, stm.model)
