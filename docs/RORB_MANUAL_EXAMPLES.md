@@ -36,7 +36,7 @@
 
 - Keep the original archive byte-for-byte and verify its SHA-256. Extract into ignored .local/rorb-manual-examples (or another dedicated, isolated local folder).
 - Do not copy sample contents into this public repository before checking applicable permissions and data provenance. Do not commit RORB executables, manuals, figures or proprietary run outputs.
-- Use [S0 reference capture](REFERENCE_CAPTURE.md) only with a **verified supported** model. The initial CMD writer accepts one ISA/one burst/lumped kc/m and separate .catg/.stm, so most manual examples need other native/manual execution and cannot be passed to the writer without extension.
+- Use [S0 reference capture](https://github.com/Chain-Frost/python-runoff-routing/blob/feat/s0-reference-capture/docs/REFERENCE_CAPTURE.md) only with a **verified supported** model. The initial CMD writer accepts one ISA/one burst/lumped kc/m and separate .catg/.stm, so most manual examples need other native/manual execution and cannot be passed to the writer without extension.
 - Use these inputs now for S1 parsing and byte-preservation tests, distinguishing combined .dat from separate catchment/storm files and retaining original control-vector order.
 - Produce new native goldens from the actual installed GUI/CMD builds in isolated working folders. Keep GUI and CMD result profiles separate. Accept complete hydrographs only after effective settings, exact inputs, engine hashes, timestep and output-site identities are verified.
 - Use melbourne_mc.pat for later historical Monte Carlo compatibility only; no Monte Carlo distribution/replay agreement is demonstrated by possessing this file.
