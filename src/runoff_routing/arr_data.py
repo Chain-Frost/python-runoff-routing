@@ -92,6 +92,10 @@ def _is_valid_depth(value: object) -> bool:
     return isinstance(value, Decimal) and value.is_finite() and value >= 0
 
 
+def _is_finite_decimal(value: object) -> bool:
+    return isinstance(value, Decimal) and value.is_finite()
+
+
 def _validate_ifd_axes(table: IFDDataset) -> None:
     """Keep probability and duration checks separate from matrix shape validation."""
     if not table.durations_min or len(table.durations_min) > MAX_DURATION_COUNT:
@@ -162,7 +166,7 @@ class LegacyARF:
         if not self.zone or keys != tuple("abcdefghi"):
             msg = "Invalid legacy ARF zone/coefficients"
             raise ARRFormatError(msg)
-        if any(not isinstance(value, Decimal) or not value.is_finite() for _, value in self.coefficients):
+        if any(not _is_finite_decimal(value) for _, value in self.coefficients):
             msg = "Invalid nonfinite legacy ARF coefficient"
             raise ARRFormatError(msg)
 
