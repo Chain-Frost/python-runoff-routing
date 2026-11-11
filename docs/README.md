@@ -9,6 +9,7 @@
 - [Compatibility contract](COMPATIBILITY.md)
 - [Regression contract](REGRESSION.md)
 - [Source register](SOURCES.md)
+- [RORB worked-example inventory](RORB_MANUAL_EXAMPLES.md)
 - [Pull-request template](../.github/pull_request_template.md)
 
 ## Work and handoff
