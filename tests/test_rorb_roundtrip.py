@@ -130,7 +130,6 @@ def test_canonical_catg_roundtrip_and_custom_id_rejection() -> None:
         serialize_catg(noncanonical)
 
 
-
 def test_code_7_physical_location_is_distinct_from_inline_annotation() -> None:
     original = _catg()
     annotated = original.replace("7, PRINT outlet\n\n0", "7, PRINT outlet\nBridge outlet\n0")
@@ -148,6 +147,7 @@ def test_code_7_requires_a_distinct_physical_location_record() -> None:
     source = _catg().replace("7, PRINT outlet\n\n0", "7, PRINT outlet\n0")
     with pytest.raises(FormatProblem, match="print-location line"):
         parse_catg(source.encode("utf-8"))
+
 
 def test_explicit_storm_original_and_canonical_roundtrips() -> None:
     payload = _stm().encode("utf-8")
