@@ -6,7 +6,7 @@
 ## What this adds
 
 - Pure `assess_printed_parity` checks **every native discharge token** against half of its individual printed last-place unit. It reports first out-of-budget index, peak indices, maximum/RMS and scaled errors, a near-zero diagnostic, independent trapezoidal outlet integrals and their printing uncertainty. No retiming or peak-only acceptance.
-- `audit_printed_linear_balance` uses *independently known prescribed inflow* and the existing `audit_reach_balance` (not a solver internal residual) to inspect printed downstream samples. It reports inferred initial/final storage, individual step residuals, global closure and analytically propagated printed-output rounding bounds. Initial storage is treated as exactly known only when the native first output equals the prescribed initial value. The sign convention is storage change + outflow - inflow.
+- `audit_printed_linear_balance` uses *independently known prescribed inflow* and the existing `audit_reach_balance` (not a solver internal residual) to inspect printed downstream samples. It exposes every step's inflow/outflow flux, inferred storage change, closure residual and propagated print-precision bound, plus the initial/final storage and global closure. Initial storage is treated as exactly known only when the native first output equals the prescribed initial value. The sign convention is storage change + outflow - inflow.
 - Source-level synthetic tests cover two grids for the same triangle, repeatability, nonzero equilibrium, near-zero tokens, malformed data, and material mismatch despite matching peak index.
 
 ## Fixed budgets and interpretation
