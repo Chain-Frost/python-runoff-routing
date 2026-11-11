@@ -143,7 +143,6 @@ def _distance_analysis(catchment: Catchment) -> tuple[float, tuple[float, ...]]:
     return dav, tuple(length / dav for length in reaches)
 
 
-
 def distance_analysis(catchment: Catchment) -> tuple[float, tuple[float, ...]]:
     """Expose the independently testable area-weighted distance factors."""
     return _distance_analysis(catchment)
