@@ -54,6 +54,7 @@ def _catg() -> str:
         "4, Join stored hydrograph\n"
         "5, 2.500, -99, Reach 3\n"
         "7, PRINT outlet\n"
+        "\n"
         "0\n"
         "C Sub Area Data\n"
         "30.000, 20.000, -99\n"
@@ -129,6 +130,25 @@ def test_canonical_catg_roundtrip_and_custom_id_rejection() -> None:
         serialize_catg(noncanonical)
 
 
+
+def test_code_7_physical_location_is_distinct_from_inline_annotation() -> None:
+    original = _catg()
+    annotated = original.replace("7, PRINT outlet\n\n0", "7, PRINT outlet\nBridge outlet\n0")
+    parsed = parse_catg(annotated.encode("utf-8"))
+    assert parsed.model.controls[-1].label == "PRINT outlet"
+    assert parsed.model.print_locations[0].label == "Bridge outlet"
+    assert any(span.field == "print_location" and span.source_text == "Bridge outlet" for span in parsed.source_map)
+    canonical = serialize_catg(parsed.model)
+    assert b"7, PRINT outlet\nBridge outlet\n0" in canonical
+    assert parse_catg(canonical).model == parsed.model
+    assert original_bytes(parsed) == annotated.encode("utf-8")
+
+
+def test_code_7_requires_a_distinct_physical_location_record() -> None:
+    source = _catg().replace("7, PRINT outlet\n\n0", "7, PRINT outlet\n0")
+    with pytest.raises(FormatProblem, match="print-location line"):
+        parse_catg(source.encode("utf-8"))
+
 def test_explicit_storm_original_and_canonical_roundtrips() -> None:
     payload = _stm().encode("utf-8")
     parsed = parse_design_stm(payload)
@@ -201,7 +221,7 @@ def test_invalid_json_is_not_coerced(corruption: str) -> None:
         (_stm().replace("0, 2", "0, 3").encode(), ".stm", "invalid"),
         (_catg().replace("3, Store hydrograph", "4, Store hydrograph").encode(), ".catg", "invalid"),
         (_catg().replace("30.000, 20.000, -99", "30.000, -99").encode(), ".catg", "invalid"),
-        (_catg().replace("7, PRINT outlet", "7, PRINT outlet\nEXTRA").encode(), ".catg", "invalid"),
+        (_catg().replace("7, PRINT outlet\n\n0", "7, PRINT outlet\n\n0\nEXTRA").encode(), ".catg", "invalid"),
         (_catg().replace("5, 2.500, -99, Reach 3", "5, 2.500, 100, Reach 3").encode(), ".catg", "invalid"),
         (_stm().replace("60.0,", "NaN,").encode(), ".stm", "invalid"),
         (_stm().replace("60.0,", "1_0.0,").encode(), ".stm", "invalid"),
@@ -263,5 +283,6 @@ def test_cp1252_labels_preserve_original_encoding() -> None:
     raw = _catg().replace("PRINT outlet", "PRINT café").encode("cp1252")
     parsed = parse_catg(raw)
     assert parsed.source.encoding == "cp1252"
-    assert parsed.model.print_locations[0].label == "PRINT café"
+    assert parsed.model.controls[-1].label == "PRINT café"
+    assert parsed.model.print_locations[0].label == ""
     assert original_bytes(parsed) == raw
