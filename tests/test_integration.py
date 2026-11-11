@@ -56,8 +56,8 @@ def _run() -> RunModel:
             1,
             1,
             1,
-            (RoutingValue(1, Decimal("0.5"), Decimal("1")),),
-            (LossValue(1, 1, Decimal("1"), Decimal("0.1")),),
+            (RoutingValue(1, Decimal("0.5"), Decimal(1)),),
+            (LossValue(1, 1, Decimal(1), Decimal("0.1")),),
         ),
         CatchmentModel(
             "Synthetic catchment",
@@ -71,7 +71,7 @@ def _run() -> RunModel:
             Decimal("0.5"),
             5,
             0,
-            (Decimal("60"), Decimal("40")),
+            (Decimal(60), Decimal(40)),
             (Decimal("20.0"),),
             ("area_1",),
         ),
@@ -136,7 +136,7 @@ def test_print_order_for_multiple_print_locations_is_not_guessed() -> None:
     catchment = CatchmentModel(
         "Two prints",
         run.catchment.subareas,
-        (*run.catchment.reaches, Reach("reach_2", Decimal("1"))),
+        (*run.catchment.reaches, Reach("reach_2", Decimal(1))),
         (
             ControlStep(1, "area_1", "reach_1"),
             ControlStep(7, print_id="print_1", label="Upstream"),
@@ -177,7 +177,7 @@ def test_underflow_and_overflow_fail_closed_at_float_boundary() -> None:
 
 def test_storm_precision_s1_accepts_but_s2_preflight_rejects() -> None:
     run = _run()
-    altered = replace(run, storm=replace(run.storm, percentages=(Decimal("60"), Decimal("40.03"))))
+    altered = replace(run, storm=replace(run.storm, percentages=(Decimal(60), Decimal("40.03"))))
     with pytest.raises(RunInputError) as caught:
         run_model(altered)
     assert caught.value.code == "storm_precision"

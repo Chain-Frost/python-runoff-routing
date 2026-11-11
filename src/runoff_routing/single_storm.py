@@ -89,7 +89,7 @@ def _check_catchment(catchment: Catchment) -> None:
             raise RoutingDomainError(message)
 
 
-def _distance_analysis(catchment: Catchment) -> tuple[float, tuple[float, ...]]:
+def _distance_analysis(catchment: Catchment) -> tuple[float, tuple[float, ...]]:  # noqa: C901 -- stack machine
     """Area-weighted final-outlet paths; kr=length/dav for natural reaches."""
     _check_catchment(catchment)
     running: dict[int, float] | None = None
@@ -170,7 +170,7 @@ def rainfall_excess(
     return tuple(excess)
 
 
-def calculate_storm(catchment: Catchment, storm: Storm, *, losses: Losses, kc: float, m: float) -> StormResult:
+def calculate_storm(catchment: Catchment, storm: Storm, *, losses: Losses, kc: float, m: float) -> StormResult:  # noqa: C901 -- control vector
     """Route one storm through the control vector using the S2 reference kernel.
 
     Supported source convention is Q[0]=0 then 1 sample per rainfall bin;

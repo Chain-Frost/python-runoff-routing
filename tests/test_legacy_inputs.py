@@ -1,6 +1,7 @@
 """Compatibility shim regression: supported S1 grammar is authoritative."""
 
 import pytest
+
 from runoff_routing.legacy_inputs import LegacyInputError, parse_control_vector, parse_explicit_design_storm
 from runoff_routing.rorb_codec import parse_catg, parse_design_stm
 from runoff_routing.single_storm import Control

@@ -3,6 +3,7 @@
 import math
 
 import pytest
+
 from runoff_routing.parity_metrics import assess_printed_parity, audit_printed_linear_balance
 from runoff_routing.reach_routing import route_reach
 
@@ -98,7 +99,7 @@ def test_balance_detects_nonconserving_native_table() -> None:
     ],
 )
 def test_invalid_precision_inputs_fail(prediction: tuple[float, ...], tokens: tuple[str, ...], dt: float) -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="printed|discharge|sample|timestep"):
         assess_printed_parity(prediction, tokens, dt_hours=dt)
 
 

@@ -1,8 +1,10 @@
 """Independent continuous linear reference and water-balance verification."""
 
 import math
+from itertools import pairwise
 
 import pytest
+
 from runoff_routing.reach_analysis import audit_reach_balance, linear_continuous_reference
 from runoff_routing.reach_routing import RoutingDomainError, route_reach
 
@@ -60,7 +62,7 @@ def test_balance_all_steps_and_closure(exponent: float) -> None:
     assert audit.maximum_step_residual_m3 == pytest.approx(0.0, abs=1e-7)
     assert all(step.end_index == i for i, step in enumerate(audit.steps, 1))
     assert audit.integrated_inflow_m3 == pytest.approx(
-        0.5 * 3600 * 0.1 * sum(a + b for a, b in zip(inflow, inflow[1:], strict=False))
+        0.5 * 3600 * 0.1 * sum(a + b for a, b in pairwise(inflow))
     )
 
 

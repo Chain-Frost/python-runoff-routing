@@ -3,6 +3,7 @@
 import math
 
 import pytest
+
 from runoff_routing.reach_routing import RoutingDomainError
 from runoff_routing.single_storm import (
     Catchment,

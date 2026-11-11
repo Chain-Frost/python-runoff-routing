@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 import pytest
+
 from runoff_routing.offline_reference import CorpusError, compare_corpus_case
 
 CAT = """SYNTHETIC CATCHMENT
@@ -77,9 +78,9 @@ def test_exact_synthetic_offline_comparison(tmp_path: Path) -> None:
     assert result.status == "compared"
     assert result.exact_printed_matches == 4
     assert result.max_absolute_error_m3_s == 0.0
-    assert result.first_native_time_token == "1.00"
-    assert result.last_native_time_token == "4.00"
-    assert result.native_peak_time_token == "2.00"
+    assert result.first_native_time_token == "1.00"  # noqa: S105 -- recorded native clock label
+    assert result.last_native_time_token == "4.00"  # noqa: S105 -- recorded native clock label
+    assert result.native_peak_time_token == "2.00"  # noqa: S105 -- recorded native clock label
     assert result.predicted_peak_elapsed_hours == 1.0
     assert result.nominal_rainfall_excess_volume_m3 == 36_000.0
     assert result.predicted_peak_index == 1

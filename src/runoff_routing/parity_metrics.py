@@ -8,6 +8,7 @@ import math
 from collections.abc import Sequence
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
+from itertools import pairwise
 
 from runoff_routing.reach_analysis import audit_reach_balance
 from runoff_routing.reach_routing import RoutingDomainError
@@ -82,15 +83,15 @@ def _read_tokens(tokens: Sequence[str]) -> tuple[tuple[float, ...], tuple[float,
             decimal = Decimal(token)
             if not decimal.is_finite():
                 msg = f"Non-finite printed discharge at sample {index}."
-                raise ValueError(msg)
+                raise ValueError(msg)  # noqa: TRY301 -- token-level source diagnostic
             exponent = decimal.as_tuple().exponent
             if not isinstance(exponent, int):
                 msg = f"Invalid printed resolution at sample {index}."
-                raise ValueError(msg)
+                raise TypeError(msg)  # noqa: TRY301 -- token-level source diagnostic
             half_unit = Decimal(5).scaleb(exponent - 1)
             value = float(decimal)
             unit = float(half_unit)
-        except (InvalidOperation, OverflowError, ValueError) as exc:
+        except (InvalidOperation, OverflowError, TypeError, ValueError) as exc:
             msg = f"Invalid printed discharge token at sample {index}."
             raise ValueError(msg) from exc
         if not decimal.is_finite() or not math.isfinite(value) or value < 0 or not math.isfinite(unit) or unit <= 0:
@@ -103,7 +104,7 @@ def _read_tokens(tokens: Sequence[str]) -> tuple[tuple[float, ...], tuple[float,
 
 def _integral(samples: Sequence[float], dt_hours: float) -> float:
     return 3600.0 * dt_hours * math.fsum(
-        (left + right) * 0.5 for left, right in zip(samples, samples[1:], strict=False)
+        (left + right) * 0.5 for left, right in pairwise(samples)
     )
 
 
@@ -111,7 +112,7 @@ def _integral_uncertainty(half_units: Sequence[float], dt_hours: float) -> float
     if len(half_units) < 2:
         return 0.0
     return 3600.0 * dt_hours * math.fsum(
-        (left + right) * 0.5 for left, right in zip(half_units, half_units[1:], strict=False)
+        (left + right) * 0.5 for left, right in pairwise(half_units)
     )
 
 

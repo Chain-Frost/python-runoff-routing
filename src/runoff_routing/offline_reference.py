@@ -13,6 +13,7 @@ import math
 from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass
 from decimal import Decimal
+from itertools import pairwise
 from pathlib import Path
 from typing import Any, Literal
 
@@ -110,13 +111,13 @@ def _read_verified(root: Path, record: Mapping[str, Any]) -> bytes:
 
 
 def _integral(samples: Sequence[float], dt_hours: float) -> float:
-    return 3600.0 * dt_hours * math.fsum(0.5 * (a + b) for a, b in zip(samples, samples[1:], strict=False))
+    return 3600.0 * dt_hours * math.fsum(0.5 * (a + b) for a, b in pairwise(samples))
 
 
 def _compare_rows(
     rows: list[list[str]], predicted: tuple[float, ...], *, case_id: str, settings: Mapping[str, Any],
     column: str, engine: Mapping[str, Any], manifest_sha: str, dav: float, excess_volume: float,
-) -> OfflineComparison:
+) -> OfflineComparison:  # noqa: C901 -- complete raw-row evidence validation
     if len(rows) != len(predicted) or any(len(row) != 3 for row in rows):
         message = "Native row count/width does not match the predicted single print location."
         raise CorpusError(message)
@@ -187,7 +188,8 @@ def _compare_rows(
     )
 
 
-def compare_corpus_case(corpus_root: Path, case_id: str) -> OfflineComparison:
+def compare_corpus_case(corpus_root: Path, case_id: str) -> OfflineComparison:  # noqa: C901 -- corpus gate
+
     """Compare an eligible CMD case from the private offline corpus.
 
     Validates the recorded input and manifest checksums before computing.
