@@ -97,7 +97,9 @@ def test_invalid_native_discharge_tokens_fail_closed(token: str) -> None:
         audit_volume_conventions([token], timestep_hours=Decimal("0.5"))
 
 
-@pytest.mark.parametrize("timestep", [Decimal(0), Decimal(-1), Decimal("NaN"), Decimal("Infinity"), Decimal("-Infinity")])
+@pytest.mark.parametrize(
+    "timestep", [Decimal(0), Decimal(-1), Decimal("NaN"), Decimal("Infinity"), Decimal("-Infinity")]
+)
 def test_invalid_timestep_fails_closed(timestep: Decimal) -> None:
     with pytest.raises(ValueError, match="Timestep"):
         audit_volume_conventions(["0.0000"], timestep_hours=timestep)
@@ -114,17 +116,13 @@ def test_ambiguous_reported_precision_is_not_forced_to_one_convention() -> None:
 @pytest.mark.parametrize("native", ["-1", "NaN", "abc", ""])
 def test_bad_native_summary_volume_rejected(native: str) -> None:
     with pytest.raises(ValueError, match="Native volume"):
-        audit_volume_conventions(
-            ["1.0000"], timestep_hours=Decimal("0.5"), native_reported_volume_text=native
-        )
+        audit_volume_conventions(["1.0000"], timestep_hours=Decimal("0.5"), native_reported_volume_text=native)
 
 
 @pytest.mark.parametrize("times", [[], ["0.00"], ["0.00", ""]])
 def test_incomplete_native_time_labels_rejected(times: list[str]) -> None:
     with pytest.raises(ValueError, match="Raw native time labels"):
-        audit_volume_conventions(
-            ["1.0000", "2.0000"], timestep_hours=Decimal("0.5"), raw_native_time_tokens=times
-        )
+        audit_volume_conventions(["1.0000", "2.0000"], timestep_hours=Decimal("0.5"), raw_native_time_tokens=times)
 
 
 def test_native_volume_conventions_do_not_depend_on_raw_label_offsets() -> None:

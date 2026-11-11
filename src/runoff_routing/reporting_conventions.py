@@ -102,9 +102,7 @@ def audit_volume_conventions(
     inclusive = factor * sum(values, Decimal(0))
     trapezoid = factor * sum(((before + after) / 2 for before, after in pairwise(values)), Decimal(0))
     inclusive_bound = factor * sum(uncertainties, Decimal(0))
-    trapezoid_bound = factor * sum(
-        ((before + after) / 2 for before, after in pairwise(uncertainties)), Decimal(0)
-    )
+    trapezoid_bound = factor * sum(((before + after) / 2 for before, after in pairwise(uncertainties)), Decimal(0))
     reported = reported_bound = None
     sample_sum_consistent = trapezoid_consistent = None
     if native_reported_volume_text is not None:
