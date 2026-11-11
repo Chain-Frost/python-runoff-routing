@@ -87,7 +87,7 @@ def _record(layer: VectorLayer, index: int, kind: str, required: tuple[str, ...]
 def _number(value: object, kind: str, index: int, field: str) -> float:
     if isinstance(value, bool):
         message = f"{kind} feature {index}: {field!r} must be numeric"
-        raise ValueError(message)
+        raise TypeError(message)
     try:
         result = float(cast("str | SupportsFloat", value))
     except (TypeError, ValueError, OverflowError) as exc:
