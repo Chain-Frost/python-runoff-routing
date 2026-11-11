@@ -54,6 +54,7 @@ def _catg() -> str:
         "4, Join stored hydrograph\n"
         "5, 2.500, -99, Reach 3\n"
         "7, PRINT outlet\n"
+        "PRINT outlet\n"
         "0\n"
         "C Sub Area Data\n"
         "30.000, 20.000, -99\n"
@@ -116,6 +117,7 @@ def test_canonical_catg_roundtrip_and_custom_id_rejection() -> None:
     exported = serialize_catg(parsed.model)
     updated = parse_catg(exported)
     assert updated.model == parsed.model
+    assert b"7\nPRINT outlet\n0\n" in exported
     assert b"C #NODES\nC 0" in exported
     assert updated.source.newline == "lf"
     custom = replace(parsed.model.subareas[0], identifier="custom")
@@ -265,3 +267,28 @@ def test_cp1252_labels_preserve_original_encoding() -> None:
     assert parsed.source.encoding == "cp1252"
     assert parsed.model.print_locations[0].label == "PRINT café"
     assert original_bytes(parsed) == raw
+
+
+def test_code7_physical_location_is_authoritative_not_inline_annotation() -> None:
+    source = _catg().replace("7, PRINT outlet\nPRINT outlet", "7, metadata only\nNative outlet")
+    parsed = parse_catg(source.encode())
+    assert parsed.model.print_locations[0].label == "Native outlet"
+    assert parsed.model.controls[-1].label == "Native outlet"
+    assert any(item.field == "print_location" and item.source_text == "Native outlet" for item in parsed.source_map)
+    assert original_bytes(parsed) == source.encode()
+    assert b"7\nNative outlet\n0\n" in serialize_catg(parsed.model)
+
+
+def test_code7_without_its_physical_location_is_invalid() -> None:
+    invalid = _catg().replace("7, PRINT outlet\nPRINT outlet\n0", "7, PRINT outlet\n0")
+    with pytest.raises(FormatProblem) as caught:
+        parse_catg(invalid.encode())
+    assert caught.value.status == "invalid"
+
+
+def test_code7_blank_physical_location_is_not_the_inline_annotation() -> None:
+    source = _catg().replace("7, PRINT outlet\nPRINT outlet", "7, metadata only\n    ")
+    parsed = parse_catg(source.encode())
+    assert parsed.model.print_locations[0].label == ""
+    assert parsed.model.controls[-1].label == ""
+    assert b"7\n\n0\n" in serialize_catg(parsed.model)

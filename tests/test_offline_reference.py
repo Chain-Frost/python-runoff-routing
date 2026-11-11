@@ -23,6 +23,7 @@ C END RORB_GE
 1
 1, 2.0, -99
 7
+OUTLET
 0
 C Areas
 10.0, -99

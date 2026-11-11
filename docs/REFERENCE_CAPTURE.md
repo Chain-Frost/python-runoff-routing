@@ -4,7 +4,7 @@ This is **evidence infrastructure**, not an independent routing solver or proof 
 
 ## Runner reuse and explicit native execution
 
-The limited one-ISA/one-burst CMD parameter rendering and isolated subprocess pattern are adapted from [ryan-tools PR #145 at f404642b](https://github.com/Chain-Frost/ryan-tools/blob/f404642bddf3b7bf8f5d71988cfa0d247d8a0e19/ryan-scripts/RORB-python/rorb_calibrate.py). Calibration ranking, observed hydrographs, plots, PyHMA, sweeps and concurrency are **not** imported. The reuse is code provenance, **not** native-run acceptance. The earlier native attempt was denied by Windows before the program started (WinError 5). The existing script's one-`.out`-in-cwd assumption remains unverified for actual supplied binaries.
+The limited one-ISA/one-burst CMD parameter rendering and isolated subprocess pattern are adapted from [ryan-tools PR #145 at f404642b](https://github.com/Chain-Frost/ryan-tools/blob/f404642bddf3b7bf8f5d71988cfa0d247d8a0e19/ryan-scripts/RORB-python/rorb_calibrate.py). Calibration ranking, observed hydrographs, plots, PyHMA, sweeps and concurrency are **not** imported. The reuse is code provenance, **not** native-run acceptance. The earlier native attempt was denied by Windows before the program started (WinError 5). The [2026-11-11 Windows campaign](work/2026-11-11-s0-native.md) subsequently demonstrated cwd output for the fingerprinted CMD 6.44 profile; other builds/models remain unverified.
 
 Install locally, then use the editable command script (or import the module):
 
@@ -55,7 +55,7 @@ The executable and all file paths are local and interpreted relative to the spec
 }
 ```
 
-The null fields are deliberate placeholders requiring **actual observed evidence** before acceptance. No numerical output or version is inferred from this example. `loss_model=1` means IL/continuing loss in mm/h; `loss_model=2` means IL/runoff coefficient. They are separate **physical models**, not alternative encodings of the same values. The initial writer supports a *single lumped kc/m, a single ISA, a single rainfall burst and a .catg/.stm pair only*. Other combinations must use a separately characterised reference workflow; do not silently export them through this writer. An `expected_steps` value is required to classify a table as complete; if unknown, the top-level outcome is `captured_unverified`.
+The null fields are deliberate placeholders requiring **actual observed evidence** before acceptance. No numerical output or version is inferred from this example. `loss_model=1` means IL/continuing loss in mm/h; `loss_model=2` means IL/runoff coefficient. They are separate **physical models**, not alternative encodings of the same values. A runoff coefficient must be between 0 and 1; the ambiguous supplied example coefficient of 2 is rejected before capture. The initial writer supports a *single lumped kc/m, a single ISA, a single rainfall burst and a .catg/.stm pair only*. Other combinations must use a separately characterised reference workflow; do not silently export them through this writer. An `expected_steps` value is required to classify a table as complete; if unknown, the top-level outcome is `captured_unverified`.
 
 ## GUI and externally executed CMD evidence
 

@@ -1,6 +1,6 @@
 # Handoff C — S1 typed model / S2 numerical prototype integration
 
-**State:** implementation in draft, all scientific acceptance gates open. **Date:** 2026-11-11. **Owner branch:** `feat/s1-s2-integration-owner-20261111`.
+**State:** implementation in draft; S1 code-7 changes reconciled; all scientific acceptance gates open. **Date:** 2026-11-11. **Owner branch:** `feat/s1-s2-integration-owner-20261111`.
 
 ## Upstream dependency map
 
@@ -39,3 +39,7 @@ See [integration API, sample and feature matrix](../S1_S2_INTEGRATION.md) for th
 - `python -m build --wheel`: **passed**; install and import of the wheel outside the checkout: **passed**.
 - Separate authorised **private full-corpus** offline comparisons: **NOT RUN** for this integration branch. Native RORB launches: **NOT RUN**. Full numerical parity: **NOT ACCEPTED**.
 - This PR is intentionally draft. The documentation-only follow-on commit does not upgrade the scientific acceptance state.
+
+## S1 upstream reconciliation (2026-11-11)
+
+S0 #12, S1 inspection #13, S1 typed API #19 and corrected native code-7 writer #25 are merged to `main`. The integration draft merges the current `main` tree (preserving all newer capture, parser, tests and policy changes) with the S2/integration-only files. Its public synthetic `.catg` fixtures now use code 7 followed by a separate physical print-location record. S2 #14/#18 and overlapping transport correction #21 remain independent and subject to review; the rejected duplicate #22 does not supply an authoritative parser. Exact-head Windows quality and private evidence must be verified separately. No numerical stage or RORB native serialization is accepted by this reconciliation.

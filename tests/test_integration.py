@@ -195,7 +195,7 @@ def test_storm_precision_s1_accepts_but_s2_preflight_rejects() -> None:
 def test_parsing_failures_report_role_status_and_source_line() -> None:
     par, catg, stm = _files(_run())
     with pytest.raises(RunInputError) as caught:
-        parse_run_bytes(par, catg.replace(b"7, Print A", b"11, Print A"), stm)
+        parse_run_bytes(par, catg.replace(b"\n7\nPrint A\n", b"\n11\nPrint A\n"), stm)
     assert caught.value.status == "unsupported"
     assert caught.value.role == "catchment"
     assert caught.value.line is not None

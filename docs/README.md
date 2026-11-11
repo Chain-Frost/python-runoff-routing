@@ -9,6 +9,12 @@
 - [Compatibility contract](COMPATIBILITY.md)
 - [Regression contract](REGRESSION.md)
 - [Source register](SOURCES.md)
+- [RORB worked-example inventory](RORB_MANUAL_EXAMPLES.md)
+- [S0 local reference capture](REFERENCE_CAPTURE.md)
+- [S1 CMD inspection](S1-INSPECTION.md)
+- [S1 bidirectional typed RORB model](RORB_BIDIRECTIONAL.md)
+- [S1/S2 integration API and capability matrix](S1_S2_INTEGRATION.md)
+- [RORB behavioral audit and warning policy](BEHAVIOUR_AND_WARNINGS.md)
 - [Pull-request template](../.github/pull_request_template.md)
 
 ## Work and handoff
@@ -16,8 +22,16 @@
 - [Work register](work/README.md)
 - [Bootstrap record](work/2026-11-09-bootstrap.md)
 - [First implementation handoff](work/S0-S1-HANDOFF.md)
+- [GUI/CMD forensics local-agent handoff](work/2026-11-11-rorb-forensics-handoff.md)
+- [GUI/CMD forensics status record](work/2026-11-11-rorb-forensics.md)
+- [S0 native evidence record](work/2026-11-11-s0-native.md)
+- [S0 capture implementation record](work/2026-11-10-s0-capture.md)
+- [S1 CMD inspection record](work/2026-11-10-s1-inspection.md)
+- [S1 typed parser work record](work/2026-11-11-s1-bidirectional.md)
+- [Native code-7 serialization work record](work/2026-11-11-s1-code7-serialization.md)
+- [S2 reach kernel work record](work/2026-11-10-s2-reach-kernel.md)
+- [S2 offline-development work record](work/2026-11-11-s2-offline-development.md)
+- [S2 printed-precision work record](work/2026-11-11-s2-parity-audit.md)
+- [S1/S2 integration work record](work/2026-11-11-s1-s2-integration.md)
 
 Future repository-owned Markdown must be linked here. Policies describe required behaviour; the roadmap describes future implementation. No source document establishes that this package has passed a numerical acceptance gate.
-
-- [S1 bidirectional typed RORB inputs and capability matrix](RORB_BIDIRECTIONAL.md): source-preserving `.par` / `.catg` / `.stm`, validated JSON and canonical subset writers.
-- [S1/S2 Python-only integration](S1_S2_INTEGRATION.md): typed run, restricted numerical execution, reports and capability gates.
