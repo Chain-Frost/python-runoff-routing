@@ -268,6 +268,7 @@ def test_cp1252_labels_preserve_original_encoding() -> None:
     assert parsed.model.print_locations[0].label == "PRINT café"
     assert original_bytes(parsed) == raw
 
+
 def test_code7_physical_location_is_authoritative_not_inline_annotation() -> None:
     source = _catg().replace("7, PRINT outlet\nPRINT outlet", "7, metadata only\nNative outlet")
     parsed = parse_catg(source.encode())
