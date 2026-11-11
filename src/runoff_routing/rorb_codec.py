@@ -119,8 +119,12 @@ def original_bytes[T](parsed: ParsedDocument[T], *, current_model: T | None = No
 
 
 def _problem(message: str, line: int | None = None, *, unsupported: bool = False) -> FormatProblem:
-    return FormatProblem("unsupported" if unsupported else "invalid",
-                         "unsupported_construct" if unsupported else "malformed_record", message, line)
+    return FormatProblem(
+        "unsupported" if unsupported else "invalid",
+        "unsupported_construct" if unsupported else "malformed_record",
+        message,
+        line,
+    )
 
 
 def _number(token: str, line: int) -> Decimal:
@@ -144,7 +148,8 @@ def _integer(token: str, line: int, *, minimum: int = 0, maximum: int = 1_000_00
 
 def _raw_records(lines: tuple[str, ...], start: int) -> list[tuple[int, str]]:
     return [
-        (index + 1, line.strip()) for index, line in enumerate(lines[start:], start=start)
+        (index + 1, line.strip())
+        for index, line in enumerate(lines[start:], start=start)
         if line.strip() and not _is_comment(line)
     ]
 
@@ -199,16 +204,21 @@ def parse_cmd_par(data: bytes) -> ParsedDocument[ParameterSet]:
     inspection = inspect_cmd_parameters(view)
     if inspection.parameters is None:
         issue = inspection.diagnostics[0]
-        raise FormatProblem("unsupported" if inspection.status == "unsupported" else "invalid",
-                            issue.code, issue.message, issue.line)
+        raise FormatProblem(
+            "unsupported" if inspection.status == "unsupported" else "invalid", issue.code, issue.message, issue.line
+        )
     original = inspection.parameters
     try:
         model = ParameterSet(
-            original.catchment_reference, original.storm_reference, original.lumped_kc, original.verbosity,
-            original.loss_model, original.num_isa, original.num_bursts,
+            original.catchment_reference,
+            original.storm_reference,
+            original.lumped_kc,
+            original.verbosity,
+            original.loss_model,
+            original.num_isa,
+            original.num_bursts,
             tuple(RoutingValue(item.isa, item.kc, item.m) for item in original.routing),
-            tuple(LossValue(item.isa, item.burst, item.initial_loss_mm, item.continuing)
-                  for item in original.losses),
+            tuple(LossValue(item.isa, item.burst, item.initial_loss_mm, item.continuing) for item in original.losses),
         )
     except ValueError as exc:
         raise _problem(str(exc)) from exc
@@ -219,8 +229,7 @@ def parse_cmd_par(data: bytes) -> ParsedDocument[ParameterSet]:
 def _graphical(lines: tuple[str, ...]) -> tuple[int, tuple[str, ...]]:
     """Validate marker/known nonzero storage features; never infer computational order from nodes."""
     versions = [
-        (index, line.strip()) for index, line in enumerate(lines)
-        if re.fullmatch(r"C RORB_GE \d+", line.strip())
+        (index, line.strip()) for index, line in enumerate(lines) if re.fullmatch(r"C RORB_GE \d+", line.strip())
     ]
     boundaries = [index for index, line in enumerate(lines) if line.strip() == "C END RORB_GE"]
     if len(versions) != 1 or versions[0][1] != "C RORB_GE 002":
@@ -230,7 +239,7 @@ def _graphical(lines: tuple[str, ...]) -> tuple[int, tuple[str, ...]]:
         message = "Missing or repeated RORB_GE completion marker"
         raise _problem(message)
     end = boundaries[0]
-    header = lines[:end + 1]
+    header = lines[: end + 1]
     for section in ("#NODES", "#REACHES", "#STORAGES", "#INFLOW/OUTFLOW"):
         markers = [index for index, line in enumerate(header) if line.strip() == f"C {section}"]
         if len(markers) != 1 or markers[0] + 1 >= len(header):
@@ -339,7 +348,9 @@ def parse_catg(data: bytes) -> ParsedDocument[CatchmentModel]:  # noqa: C901 -- 
         model = CatchmentModel(
             lines[0].strip(),
             tuple(SubArea(f"area_{index + 1}", area, names[index]) for index, area in enumerate(areas)),
-            tuple(reaches), tuple(controls), tuple(prints),
+            tuple(reaches),
+            tuple(controls),
+            tuple(prints),
         )
     except ValueError as exc:
         raise _problem(str(exc)) from exc
@@ -392,7 +403,12 @@ def parse_design_stm(data: bytes) -> ParsedDocument[StormModel]:  # noqa: C901 -
         raise _problem(message, records[final_index][0])
     try:
         model = StormModel(
-            lines[0].strip(), dt, horizon, start, percentages, depths,
+            lines[0].strip(),
+            dt,
+            horizon,
+            start,
+            percentages,
+            depths,
             tuple(f"area_{index + 1}" for index in range(len(depths))),
         )
     except ValueError as exc:
@@ -401,7 +417,8 @@ def parse_design_stm(data: bytes) -> ParsedDocument[StormModel]:  # noqa: C901 -
         SourceSpan("timestep_hours", header_line, header_fields[0]),
         SourceSpan("calculation_increments", header_line, header_fields[1]),
         SourceSpan("start_increment", timing_line, timing_fields[0]),
-        *percent_spans, *depth_spans,
+        *percent_spans,
+        *depth_spans,
     )
     return ParsedDocument("design_explicit", source, model, spans)
 
@@ -458,9 +475,13 @@ def serialize_cmd_par(model: ParameterSet) -> bytes:
         message = "Canonical CMD references cannot contain tabs or surrounding spaces"
         raise ValueError(message)
     lines = [
-        "# BEGIN", f"Cat file :{model.catchment_reference}", f"Stm file :{model.storm_reference}",
-        f"Lumped kc:{'T' if model.lumped_kc else 'F'}", f"Verbosity:{model.verbosity}",
-        f"Lossmodel:{model.loss_model}", f"Num ISA  :{model.num_isa}",
+        "# BEGIN",
+        f"Cat file :{model.catchment_reference}",
+        f"Stm file :{model.storm_reference}",
+        f"Lumped kc:{'T' if model.lumped_kc else 'F'}",
+        f"Verbosity:{model.verbosity}",
+        f"Lossmodel:{model.loss_model}",
+        f"Num ISA  :{model.num_isa}",
     ]
     lines.extend(f"ISA {item.isa:<5}:{item.kc},{item.m}" for item in model.routing)
     lines.append(f"Num burst:{model.num_bursts}")
@@ -473,9 +494,18 @@ def serialize_catg(model: CatchmentModel) -> bytes:
     model.__post_init__()
     _canonical_ids(model)
     lines = [
-        _safe_label(model.title), "C RORB_GE 002",
-        "C #NODES", "C 0", "C #REACHES", "C 0", "C #STORAGES", "C 0",
-        "C #INFLOW/OUTFLOW", "C 0", "C END RORB_GE", "1",
+        _safe_label(model.title),
+        "C RORB_GE 002",
+        "C #NODES",
+        "C 0",
+        "C #REACHES",
+        "C 0",
+        "C #STORAGES",
+        "C 0",
+        "C #INFLOW/OUTFLOW",
+        "C 0",
+        "C END RORB_GE",
+        "1",
     ]
     reaches = {reach.identifier: reach for reach in model.reaches}
     for step in model.controls:
@@ -487,11 +517,16 @@ def serialize_catg(model: CatchmentModel) -> bytes:
             lines.append(f"{step.code}, {reaches[step.reach_id].length_km}, -99, {label}")
         else:
             lines.append(f"{step.code}, {label}")
-    lines.extend([
-        "0", "C Sub Area Data",
-        ", ".join([*(str(item.area_km2) for item in model.subareas), "-99"]),
-        "C Impervious Fraction Data", "0, -99", "",
-    ])
+    lines.extend(
+        [
+            "0",
+            "C Sub Area Data",
+            ", ".join([*(str(item.area_km2) for item in model.subareas), "-99"]),
+            "C Impervious Fraction Data",
+            "0, -99",
+            "",
+        ]
+    )
     return "\n".join(lines).encode("utf-8")
 
 
@@ -500,7 +535,8 @@ def serialize_design_stm(model: StormModel) -> bytes:
     model.__post_init__()
     _canonical_ids(model)
     lines = [
-        _safe_label(model.title), "DESIGN",
+        _safe_label(model.title),
+        "DESIGN",
         f"{model.timestep_hours},{model.calculation_increments},1,1,1,-99",
         f"{model.start_increment},{len(model.percentages)}",
         "Temporal pattern (% of depth)",
@@ -557,10 +593,14 @@ def to_s2_payload(model: RunModel) -> S2Payload:
         for step in catchment.controls
     )
     return S2Payload(
-        steps, tuple(_as_float(item.area_km2) for item in catchment.subareas),
-        _as_float(storm.timestep_hours), storm.calculation_increments,
+        steps,
+        tuple(_as_float(item.area_km2) for item in catchment.subareas),
+        _as_float(storm.timestep_hours),
+        storm.calculation_increments,
         tuple(_as_float(value) for value in storm.percentages),
         tuple(_as_float(value) for value in storm.depths_mm),
-        _as_float(parameters.losses[0].initial_loss_mm), _as_float(parameters.losses[0].continuing),
-        _as_float(parameters.routing[0].kc), _as_float(parameters.routing[0].m),
+        _as_float(parameters.losses[0].initial_loss_mm),
+        _as_float(parameters.losses[0].continuing),
+        _as_float(parameters.routing[0].kc),
+        _as_float(parameters.routing[0].m),
     )

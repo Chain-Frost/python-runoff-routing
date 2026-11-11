@@ -24,7 +24,9 @@ def inspect_file(path: Path) -> Inspection:
             parsed = parse_catg(payload) if suffix == ".catg" else parse_design_stm(payload)
         except FormatProblem as exc:
             return Inspection(
-                suffix.removeprefix("."), exc.status, source,
+                suffix.removeprefix("."),
+                exc.status,
+                source,
                 (Diagnostic(exc.code, str(exc), "unsupported" if exc.status == "unsupported" else "error", exc.line),),
             )
         if source.sha256 != parsed.source.sha256:
@@ -40,10 +42,14 @@ def inspect_file(path: Path) -> Inspection:
         return Inspection("design_explicit", "parsed", source, notes, fields, storm=parsed.model)
     if suffix in {".cat", ".dat"}:
         return Inspection(
-            suffix.removeprefix("."), "unsupported", source,
+            suffix.removeprefix("."),
+            "unsupported",
+            source,
             (Diagnostic("fixture_required", "Combined/text grammar is not characterised", "unsupported"),),
         )
     return Inspection(
-        "unknown", "unsupported", source,
+        "unknown",
+        "unsupported",
+        source,
         (Diagnostic("unknown_extension", "File type is not a supported RORB inspection format", "unsupported"),),
     )

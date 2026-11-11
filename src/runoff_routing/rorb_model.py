@@ -189,9 +189,13 @@ def validate_catchment(model: CatchmentModel) -> None:  # noqa: C901 -- explicit
     stack: list[set[str]] = []
     for step in model.controls:
         if step.code == 1:
-            if (area_cursor >= len(areas) or reach_cursor >= len(reaches)
-                    or step.subarea_id != areas[area_cursor] or step.reach_id != reaches[reach_cursor]
-                    or step.print_id is not None):
+            if (
+                area_cursor >= len(areas)
+                or reach_cursor >= len(reaches)
+                or step.subarea_id != areas[area_cursor]
+                or step.reach_id != reaches[reach_cursor]
+                or step.print_id is not None
+            ):
                 message = "Code 1 must consume the next subarea and reach exactly once"
                 raise ValueError(message)
             if running is not None and not stack:
@@ -201,8 +205,13 @@ def validate_catchment(model: CatchmentModel) -> None:  # noqa: C901 -- explicit
             area_cursor += 1
             reach_cursor += 1
         elif step.code == 5:
-            if (running is None or reach_cursor >= len(reaches) or step.reach_id != reaches[reach_cursor]
-                    or step.subarea_id is not None or step.print_id is not None):
+            if (
+                running is None
+                or reach_cursor >= len(reaches)
+                or step.reach_id != reaches[reach_cursor]
+                or step.subarea_id is not None
+                or step.print_id is not None
+            ):
                 message = "Code 5 requires a running hydrograph and the next reach"
                 raise ValueError(message)
             reach_cursor += 1
@@ -212,8 +221,10 @@ def validate_catchment(model: CatchmentModel) -> None:  # noqa: C901 -- explicit
                 raise ValueError(message)
             stack.append(set(running))
         elif step.code == 4:
-            if running is None or not stack or any(
-                value is not None for value in (step.reach_id, step.subarea_id, step.print_id)
+            if (
+                running is None
+                or not stack
+                or any(value is not None for value in (step.reach_id, step.subarea_id, step.print_id))
             ):
                 message = "Code 4 requires a stored and a running hydrograph"
                 raise ValueError(message)
@@ -223,16 +234,28 @@ def validate_catchment(model: CatchmentModel) -> None:  # noqa: C901 -- explicit
                 raise ValueError(message)
             running = stored | running
         elif step.code == 7:
-            if (running is None or print_cursor >= len(prints) or step.print_id != prints[print_cursor]
-                    or step.reach_id is not None or step.subarea_id is not None):
+            if (
+                running is None
+                or print_cursor >= len(prints)
+                or step.print_id != prints[print_cursor]
+                or step.reach_id is not None
+                or step.subarea_id is not None
+            ):
                 message = "Code 7 must reference the next explicit print location"
                 raise ValueError(message)
             print_cursor += 1
         else:
             message = f"Unsupported control code {step.code}"
             raise ValueError(message)
-    if (stack or running != set(areas) or area_cursor != len(areas) or reach_cursor != len(reaches)
-            or print_cursor != len(prints) or not prints or model.controls[-1].code != 7):
+    if (
+        stack
+        or running != set(areas)
+        or area_cursor != len(areas)
+        or reach_cursor != len(reaches)
+        or print_cursor != len(prints)
+        or not prints
+        or model.controls[-1].code != 7
+    ):
         message = "Unbalanced catchment vector or missing final complete outlet print"
         raise ValueError(message)
 
@@ -261,10 +284,13 @@ def validate_storm(model: StormModel) -> None:
         message = "Storm title is required"
         raise ValueError(message)
     _finite(model.timestep_hours, "storm timestep", positive=True)
-    if (type(model.calculation_increments) is not int or type(model.start_increment) is not int
-            or model.start_increment < 0
-            or model.calculation_increments < model.start_increment + len(model.percentages)
-            or model.calculation_increments > 1_000_000):
+    if (
+        type(model.calculation_increments) is not int
+        or type(model.start_increment) is not int
+        or model.start_increment < 0
+        or model.calculation_increments < model.start_increment + len(model.percentages)
+        or model.calculation_increments > 1_000_000
+    ):
         message = "Storm horizon must cover all defined rainfall intervals"
         raise ValueError(message)
     if (model.pluviograph_count, model.isa_count, model.burst_count) != (1, 1, 1):
@@ -308,10 +334,14 @@ RorbModel = ParameterSet | CatchmentModel | StormModel | RunModel
 def _units(kind: str, loss_model: int = 1) -> dict[str, str]:
     common = {"area": "km2", "reach_length": "km", "time": "hour", "rainfall_depth": "mm"}
     if kind in ("parameters", "run"):
-        common.update({
-            "kc": "RORB_coefficient", "m": "dimensionless", "initial_loss": "mm",
-            "continuing": "mm/hour" if loss_model == 1 else "runoff_coefficient",
-        })
+        common.update(
+            {
+                "kc": "RORB_coefficient",
+                "m": "dimensionless",
+                "initial_loss": "mm",
+                "continuing": "mm/hour" if loss_model == 1 else "runoff_coefficient",
+            }
+        )
     if kind in ("storm", "run"):
         common["temporal_pattern"] = "percent"
     return common
@@ -319,13 +349,21 @@ def _units(kind: str, loss_model: int = 1) -> dict[str, str]:
 
 def _parameter_data(model: ParameterSet) -> dict[str, Any]:
     return {
-        "catchment_reference": model.catchment_reference, "storm_reference": model.storm_reference,
-        "lumped_kc": model.lumped_kc, "verbosity": model.verbosity, "loss_model": model.loss_model,
-        "num_isa": model.num_isa, "num_bursts": model.num_bursts,
+        "catchment_reference": model.catchment_reference,
+        "storm_reference": model.storm_reference,
+        "lumped_kc": model.lumped_kc,
+        "verbosity": model.verbosity,
+        "loss_model": model.loss_model,
+        "num_isa": model.num_isa,
+        "num_bursts": model.num_bursts,
         "routing": [{"isa": item.isa, "kc": str(item.kc), "m": str(item.m)} for item in model.routing],
         "losses": [
-            {"isa": item.isa, "burst": item.burst, "initial_loss_mm": str(item.initial_loss_mm),
-             "continuing": str(item.continuing)}
+            {
+                "isa": item.isa,
+                "burst": item.burst,
+                "initial_loss_mm": str(item.initial_loss_mm),
+                "continuing": str(item.continuing),
+            }
             for item in model.losses
         ],
     }
@@ -343,8 +381,13 @@ def _catchment_data(model: CatchmentModel) -> dict[str, Any]:
             for item in model.reaches
         ],
         "controls": [
-            {"code": item.code, "subarea_id": item.subarea_id, "reach_id": item.reach_id,
-             "print_id": item.print_id, "label": item.label}
+            {
+                "code": item.code,
+                "subarea_id": item.subarea_id,
+                "reach_id": item.reach_id,
+                "print_id": item.print_id,
+                "label": item.label,
+            }
             for item in model.controls
         ],
         "print_locations": [{"identifier": item.identifier, "label": item.label} for item in model.print_locations],
@@ -354,12 +397,16 @@ def _catchment_data(model: CatchmentModel) -> dict[str, Any]:
 
 def _storm_data(model: StormModel) -> dict[str, Any]:
     return {
-        "title": model.title, "timestep_hours": str(model.timestep_hours),
-        "calculation_increments": model.calculation_increments, "start_increment": model.start_increment,
+        "title": model.title,
+        "timestep_hours": str(model.timestep_hours),
+        "calculation_increments": model.calculation_increments,
+        "start_increment": model.start_increment,
         "percentages": [str(value) for value in model.percentages],
         "depths_mm": [str(value) for value in model.depths_mm],
-        "subarea_ids": list(model.subarea_ids), "pluviograph_count": model.pluviograph_count,
-        "isa_count": model.isa_count, "burst_count": model.burst_count,
+        "subarea_ids": list(model.subarea_ids),
+        "pluviograph_count": model.pluviograph_count,
+        "isa_count": model.isa_count,
+        "burst_count": model.burst_count,
     }
 
 
@@ -368,7 +415,8 @@ def to_dict(model: RorbModel) -> dict[str, Any]:
     if isinstance(model, RunModel):
         kind = "run"
         body = {
-            "parameters": _parameter_data(model.parameters), "catchment": _catchment_data(model.catchment),
+            "parameters": _parameter_data(model.parameters),
+            "catchment": _catchment_data(model.catchment),
             "storm": _storm_data(model.storm),
         }
         loss_model = model.parameters.loss_model
@@ -418,43 +466,93 @@ def _decimal(raw: object) -> Decimal:
 
 
 def _params(raw: object) -> ParameterSet:
-    d = _object(raw, {"catchment_reference", "storm_reference", "lumped_kc", "verbosity", "loss_model",
-                      "num_isa", "num_bursts", "routing", "losses"})
+    d = _object(
+        raw,
+        {
+            "catchment_reference",
+            "storm_reference",
+            "lumped_kc",
+            "verbosity",
+            "loss_model",
+            "num_isa",
+            "num_bursts",
+            "routing",
+            "losses",
+        },
+    )
     routing = tuple(
         RoutingValue(**{**(_object(item, {"isa", "kc", "m"})), "kc": _decimal(item["kc"]), "m": _decimal(item["m"])})
         for item in _items(d["routing"])
     )
     losses = tuple(
-        LossValue(**{**(_object(item, {"isa", "burst", "initial_loss_mm", "continuing"})),
-                     "initial_loss_mm": _decimal(item["initial_loss_mm"]), "continuing": _decimal(item["continuing"])})
+        LossValue(
+            **{
+                **(_object(item, {"isa", "burst", "initial_loss_mm", "continuing"})),
+                "initial_loss_mm": _decimal(item["initial_loss_mm"]),
+                "continuing": _decimal(item["continuing"]),
+            }
+        )
         for item in _items(d["losses"])
     )
-    return ParameterSet(d["catchment_reference"], d["storm_reference"], d["lumped_kc"], d["verbosity"],
-                        d["loss_model"], d["num_isa"], d["num_bursts"], routing, losses)
+    return ParameterSet(
+        d["catchment_reference"],
+        d["storm_reference"],
+        d["lumped_kc"],
+        d["verbosity"],
+        d["loss_model"],
+        d["num_isa"],
+        d["num_bursts"],
+        routing,
+        losses,
+    )
 
 
 def _catchment(raw: object) -> CatchmentModel:
     d = _object(raw, {"title", "subareas", "reaches", "controls", "print_locations", "storages"})
-    areas = tuple(SubArea(**{**_object(item, {"identifier", "area_km2", "label"}),
-                            "area_km2": _decimal(item["area_km2"])}) for item in _items(d["subareas"]))
-    reaches = tuple(Reach(**{**_object(item, {"identifier", "length_km", "label"}),
-                             "length_km": _decimal(item["length_km"])}) for item in _items(d["reaches"]))
-    controls = tuple(ControlStep(**_object(item, {"code", "subarea_id", "reach_id", "print_id", "label"}))
-                     for item in _items(d["controls"]))
-    prints = tuple(PrintLocation(**_object(item, {"identifier", "label"}))
-                   for item in _items(d["print_locations"]))
+    areas = tuple(
+        SubArea(**{**_object(item, {"identifier", "area_km2", "label"}), "area_km2": _decimal(item["area_km2"])})
+        for item in _items(d["subareas"])
+    )
+    reaches = tuple(
+        Reach(**{**_object(item, {"identifier", "length_km", "label"}), "length_km": _decimal(item["length_km"])})
+        for item in _items(d["reaches"])
+    )
+    controls = tuple(
+        ControlStep(**_object(item, {"code", "subarea_id", "reach_id", "print_id", "label"}))
+        for item in _items(d["controls"])
+    )
+    prints = tuple(PrintLocation(**_object(item, {"identifier", "label"})) for item in _items(d["print_locations"]))
     storages = tuple(Storage(**_object(item, {"identifier", "kind"})) for item in _items(d["storages"]))
     return CatchmentModel(d["title"], areas, reaches, controls, prints, storages)
 
 
 def _storm(raw: object) -> StormModel:
-    d = _object(raw, {"title", "timestep_hours", "calculation_increments", "start_increment", "percentages",
-                      "depths_mm", "subarea_ids", "pluviograph_count", "isa_count", "burst_count"})
+    d = _object(
+        raw,
+        {
+            "title",
+            "timestep_hours",
+            "calculation_increments",
+            "start_increment",
+            "percentages",
+            "depths_mm",
+            "subarea_ids",
+            "pluviograph_count",
+            "isa_count",
+            "burst_count",
+        },
+    )
     return StormModel(
-        d["title"], _decimal(d["timestep_hours"]), d["calculation_increments"], d["start_increment"],
+        d["title"],
+        _decimal(d["timestep_hours"]),
+        d["calculation_increments"],
+        d["start_increment"],
         tuple(_decimal(item) for item in _items(d["percentages"])),
         tuple(_decimal(item) for item in _items(d["depths_mm"])),
-        tuple(d["subarea_ids"]), d["pluviograph_count"], d["isa_count"], d["burst_count"],
+        tuple(d["subarea_ids"]),
+        d["pluviograph_count"],
+        d["isa_count"],
+        d["burst_count"],
     )
 
 
@@ -478,8 +576,10 @@ def from_dict(raw: dict[str, Any]) -> RorbModel:
     else:
         d = _object(body, {"parameters", "catchment", "storm"})
         model = RunModel(_params(d["parameters"]), _catchment(d["catchment"]), _storm(d["storm"]))
-    loss_model = model.parameters.loss_model if isinstance(model, RunModel) else (
-        model.loss_model if isinstance(model, ParameterSet) else 1
+    loss_model = (
+        model.parameters.loss_model
+        if isinstance(model, RunModel)
+        else (model.loss_model if isinstance(model, ParameterSet) else 1)
     )
     if data["units"] != _units(kind, loss_model):
         message = "RORB JSON units do not match the explicit model unit contract"

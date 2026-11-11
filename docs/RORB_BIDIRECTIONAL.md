@@ -19,8 +19,14 @@ All model classes are frozen and slot-based. Values at file and JSON boundaries 
 from pathlib import Path
 
 from runoff_routing.rorb_codec import (
-    original_bytes, parse_catg, parse_cmd_par, parse_design_stm,
-    serialize_catg, serialize_cmd_par, serialize_design_stm, write_new,
+    original_bytes,
+    parse_catg,
+    parse_cmd_par,
+    parse_design_stm,
+    serialize_catg,
+    serialize_cmd_par,
+    serialize_design_stm,
+    write_new,
 )
 from runoff_routing.rorb_model import RunModel, from_json, to_json
 
@@ -31,11 +37,11 @@ storm = parse_design_stm((folder / "storm.stm").read_bytes())
 assert original_bytes(catchment) == (folder / "catchment.catg").read_bytes()
 
 run = RunModel(par.model, catchment.model, storm.model)
-interchange = to_json(run)                # can be stored, transported, reviewed, edited
+interchange = to_json(run)  # can be stored, transported, reviewed, edited
 restored = from_json(interchange)
 assert isinstance(restored, RunModel)
 
-output = folder / "canonical"              # create this directory explicitly
+output = folder / "canonical"  # create this directory explicitly
 write_new(output / "reference.par", serialize_cmd_par(restored.parameters))
 write_new(output / "catchment.catg", serialize_catg(restored.catchment))
 write_new(output / "storm.stm", serialize_design_stm(restored.storm))

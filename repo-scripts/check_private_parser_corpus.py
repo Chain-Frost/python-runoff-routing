@@ -93,7 +93,11 @@ if __name__ == "__main__":
         message = "Accepts zero or one explicit private corpus directory"
         raise ValueError(message)
     default = (
-        Path(__file__).absolute().parents[2] / "runoff-routing-investigations" /
-        "tests" / "fixtures" / "rorb" / "native-corpus"
+        Path(__file__).absolute().parents[2]
+        / "runoff-routing-investigations"
+        / "tests"
+        / "fixtures"
+        / "rorb"
+        / "native-corpus"
     )
     _run(Path(sys.argv[1]) if len(sys.argv) == 2 else default)

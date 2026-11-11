@@ -79,7 +79,13 @@ def _stm() -> str:
 
 def _params() -> ParameterSet:
     return ParameterSet(
-        "subfolder\\model.catg", r"C:\storms\design.stm", True, 3, 1, 1, 1,
+        "subfolder\\model.catg",
+        r"C:\storms\design.stm",
+        True,
+        3,
+        1,
+        1,
+        1,
         (RoutingValue(1, Decimal("12.0"), Decimal("0.8")),),
         (LossValue(1, 1, Decimal(24), Decimal("5.0")),),
     )
@@ -171,8 +177,7 @@ def test_individual_catchment_and_storm_json_roundtrip() -> None:
         lambda data: {**data, "units": {"area": "m2"}},
         lambda data: {**data, "unknown": "not permitted"},
         lambda data: {**data, "model": {**data["model"], "verbosity": True}},
-        lambda data: {**data, "model": {**data["model"], "routing": [
-            {"isa": 1, "kc": 12.5, "m": "0.8"}]}},
+        lambda data: {**data, "model": {**data["model"], "routing": [{"isa": 1, "kc": 12.5, "m": "0.8"}]}},
     ],
 )
 def test_invalid_json_is_not_coerced(corruption: Callable[[dict[str, Any]], dict[str, Any]]) -> None:
@@ -197,8 +202,7 @@ def test_invalid_json_is_not_coerced(corruption: Callable[[dict[str, Any]], dict
         (_catg().replace("3, Store hydrograph", "4, Store hydrograph").encode(), ".catg", "invalid"),
         (_catg().replace("30.000, 20.000, -99", "30.000, -99").encode(), ".catg", "invalid"),
         (_catg().replace("7, PRINT outlet", "7, PRINT outlet\nEXTRA").encode(), ".catg", "invalid"),
-        (_catg().replace("5, 2.500, -99, Reach 3", "5, 2.500, 100, Reach 3").encode(),
-         ".catg", "invalid"),
+        (_catg().replace("5, 2.500, -99, Reach 3", "5, 2.500, 100, Reach 3").encode(), ".catg", "invalid"),
         (_stm().replace("60.0,", "NaN,").encode(), ".stm", "invalid"),
         (_stm().replace("60.0,", "1_0.0,").encode(), ".stm", "invalid"),
         (_stm().replace("100.00,90.0,-99", "100.00,-99,90.0").encode(), ".stm", "invalid"),
