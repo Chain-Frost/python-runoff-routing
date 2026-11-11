@@ -3,6 +3,7 @@
 import math
 
 import pytest
+
 from runoff_routing.parity_metrics import audit_printed_nonlinear_balance
 from runoff_routing.reach_routing import RoutingDomainError, route_reach
 
@@ -53,7 +54,8 @@ def test_nonzero_equilibrium_balance_is_exact() -> None:
         exponent_m=0.8,
         dt_hours=0.5,
     )
-    assert report.steps_within_budget and report.closure_within_budget
+    assert report.steps_within_budget
+    assert report.closure_within_budget
     assert report.closure_residual_m3 == 0.0
     assert report.initial_inferred_storage_m3 == report.final_inferred_storage_m3
     assert report.inflow_integral_m3 == report.outflow_integral_m3
