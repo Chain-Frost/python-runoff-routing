@@ -1,6 +1,6 @@
 # S1/S2 Handoff C integration — readiness and dependency contract
 
-**2026-11-11 status: BLOCKED.** This is independent documentation and a conflict-free integration plan, **not** a working parser-to-solver bridge. The Handoff C start condition requires a *reviewed and stable* S1 typed API and canonical serializers. Those are now drafted in PR #19, but have **not** passed quality and review gates.
+**2026-11-11 status: BLOCKED.** This is independent documentation and a conflict-free integration plan, **not** a working parser-to-solver bridge. The Handoff C start condition requires a *reviewed and stable* S1 typed API and canonical serializers. Those are now drafted in PR #19; latest-head Windows quality **passed**, but independent interface review and agreement are still pending.
 
 **Authoritative assignment:** https://github.com/Chain-Frost/runoff-routing-investigations/blob/docs/2026-11-11-s1-s2-agent-handoffs/docs/work/2026-11-11-s1-s2-integration-handoff.md
 
@@ -12,7 +12,7 @@ The investigations repo and native corpus are private while this Python reposito
 | --- | --- | --- | --- |
 | S0 provenance | [#12](https://github.com/Chain-Frost/python-runoff-routing/pull/12): 0d964e81c2f992c0097a8a4d7c16455abe327cd8 | main | Draft; native acceptance separately open; do not touch |
 | S1 inspection parent | [#13](https://github.com/Chain-Frost/python-runoff-routing/pull/13): 06081dd645eebecb6ec273259e129adaa80b960f | Stacked on S0 #12, parent 07a54f931c441f3363b572ecc2a1dd0df3a79464 | CMD single-burst .par ParameterModel and partial .out, no catchment/storm domain |
-| **S1 bidirectional handoff A** | **[#19](https://github.com/Chain-Frost/python-runoff-routing/pull/19): 6403e8c6845bf4512720bba85e58f00fe6b720ec** | Stacked on S1 #13 | **RunModel, typed parameter/catchment/storm models, source-aware .catg/.stm/.par parsers, canonical serializers, JSON schema 1 and preliminary S2Payload exist. Draft, zero submitted reviews. Windows quality failed: 25 strict Pyright errors; wheel/build steps skipped.** |
+| **S1 bidirectional handoff A** | **[#19](https://github.com/Chain-Frost/python-runoff-routing/pull/19): f356ec51a470ae1ab9e6919d7c4e5744674a3b38** | Stacked on S1 #13 | **RunModel, typed parameter/catchment/storm models, source-aware .catg/.stm/.par parsers, canonical serializers, JSON schema 1 and preliminary S2Payload exist. Draft, zero submitted reviews. At the updated head, Windows quality, strict Pyright, wheel build and outside-checkout import **passed**; earlier head failed 25 Pyright checks.** |
 | S2 computation parent | [#14](https://github.com/Chain-Frost/python-runoff-routing/pull/14): 78d94926172c40ff11ccd4a3bc4c8b028cf5b689 | main | Independent pure single-storm kernel, temporary Catchment/Control/Storm/Losses, legacy_inputs fixture readers, private offline comparison; unaccepted numeric equivalence |
 | **S2 handoff B audit** | **[#18](https://github.com/Chain-Frost/python-runoff-routing/pull/18): 53021ff23ccb4ee46ddf9a528775b14220d7051e** | Stacked on S2 #14 | Printed-precision and linear balance diagnostics, 13 supplementary synthetic checks. Draft, no review; target quality and private comparison not accepted |
 | This document | feat/s1-s2-integration-readiness, started at main 4498f7f466eb34a35d5eecf35844aa5bd4d7dcf7 | main | Readiness plan only, no duplicate model/grammar/numerical code |
@@ -65,8 +65,8 @@ No upstream branch is modified by this main-based readiness PR. **S0 #12 → sta
 
 ## Current readiness validation and exact blocker
 
-- **S1 #19 Windows quality run [43030412072](https://github.com/Chain-Frost/python-runoff-routing/actions/runs/43030412072): FAILED at head 6403e8c6845bf4512720bba85e58f00fe6b720ec.** Ruff lint/format passed; strict Pyright failed with **25 errors** in `check_private_parser_corpus.py`, `rorb_inspect.py`, `rorb_model.py` and `test_rorb_roundtrip.py`. Wheel build/import were skipped. No review submissions recorded.
+- **S1 #19 latest Windows quality [43031259081](https://github.com/Chain-Frost/python-runoff-routing/actions/runs/43031259081): PASS at head f356ec51a470ae1ab9e6919d7c4e5744674a3b38.** The strict checks, wheel build and outside-checkout wheel verification all passed. The earlier [run 43030412072](https://github.com/Chain-Frost/python-runoff-routing/actions/runs/43030412072) at head 6403e8c6845bf4512720bba85e58f00fe6b720ec failed 25 Pyright checks; that failure was superseded. **No submitted reviews or agreed data-contract sign-off** at this snapshot.
 - **S2 #18:** reported 13 supplementary synthetic diagnostic tests; Windows/Python 3.14, full private corpus and native parity remain unaccepted.
 - **This document-only readiness branch:** no application code or tests changed, and no source test run is claimed. It cannot be treated as Handoff C completion.
 
-**Next action:** S1 #19 owner resolves 25 strict typing findings, records full Windows/wheel checks and obtains an agreed reviewed typed model/serializer interface. Re-read fresh #19/#18 heads, then create a pinned stack and implement the single `run_model` adapter with tests.
+**Next action:** Obtain explicit S1 typed model/serializer contract review and agreement, then re-read fresh #19/#18 heads and build the pinned `run_model` integration stack. The latest quality result is green but does not itself constitute API sign-off.
