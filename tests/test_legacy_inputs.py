@@ -57,7 +57,9 @@ def test_control_sample_order_and_lengths() -> None:
 
 
 def test_original_bytes_accept_cp1252_and_annotated_pervious_data() -> None:
-    coded = CONTROL.replace("7\nPRINT\n", "7\nCafé\n").replace("0, -99\n", "0, -99, No impervious areas\n")
+    coded = CONTROL.replace("7\nPRINT\n", "7\nCafé\n").replace(
+        "C Impervious Fraction Data\n0, -99\n", "C Impervious Fraction Data\n0, -99, No impervious areas\n"
+    )
     assert parse_control_bytes(coded.encode("cp1252")) == parse_control_vector(CONTROL)
     storm = STORM.replace("Sample", "Café rainfall")
     assert parse_explicit_design_storm_bytes(storm.encode("cp1252")) == parse_explicit_design_storm(STORM)
