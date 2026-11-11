@@ -431,7 +431,7 @@ def _first_differences(left: object, right: object, path: str, differences: list
         second_items = cast("list[object]", right)
         if len(first_items) != len(second_items):
             differences.append(f"{path}.length")
-        for index, (a, b) in enumerate(zip(first_items, second_items)):
+        for index, (a, b) in enumerate(zip(first_items, second_items, strict=False)):
             if len(differences) >= MAX_DIFFERENCE_PATHS:
                 break
             _first_differences(a, b, f"{path}[{index}]", differences)
