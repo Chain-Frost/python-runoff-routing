@@ -277,14 +277,16 @@ def parse_catg(data: bytes) -> ParsedDocument[CatchmentModel]:  # noqa: C901 -- 
     prints: list[PrintLocation] = []
     spans: list[SourceSpan] = []
     end_index: int | None = None
-    for index, (line_no, raw) in enumerate(records[1:], start=1):
+    cursor = 1
+    while cursor < len(records):
+        line_no, raw = records[cursor]
         code_token = raw.split(",", maxsplit=1)[0].strip()
         code = _integer(code_token, line_no, minimum=0)
         if code == 0:
             if raw != "0":
                 message = "The terminating zero control must be a complete record"
                 raise _problem(message, line_no)
-            end_index = index + 1
+            end_index = cursor + 1
             break
         if code not in (1, 3, 4, 5, 7):
             message = f"Uncharacterised numerical control code {code}"
@@ -316,12 +318,34 @@ def parse_catg(data: bytes) -> ParsedDocument[CatchmentModel]:  # noqa: C901 -- 
                 raise _problem(message, line_no)
             label = parts[1] if len(parts) == 2 else ""
             if code == 7:
+                # Item 3.1 is the NEXT PHYSICAL record, not the text
+                # following a comma on the control line.
+                if line_no >= len(lines):
+                    message = "Code 7 is missing its physical print-location record"
+                    raise _problem(message, line_no)
+                physical_label = lines[line_no]
+                if physical_label.strip() == "0" and not any(value == "0" for _, value in records[cursor + 2 :]):
+                    message = "Code 7 consumed the final zero control as its missing location"
+                    raise _problem(message, line_no + 1)
+                if physical_label.strip():
+                    if _is_comment(physical_label):
+                        message = "Comment-prefixed print locations are not characterised"
+                        raise _problem(message, line_no + 1, unsupported=True)
+                    if cursor + 1 >= len(records) or records[cursor + 1][0] != line_no + 1:
+                        message = "Code 7 print location must immediately follow its control"
+                        raise _problem(message, line_no + 1)
+                    label = physical_label.strip()
+                    cursor += 1
+                else:
+                    label = ""
                 print_id = f"print_{len(prints) + 1}"
                 prints.append(PrintLocation(print_id, label))
                 controls.append(ControlStep(7, None, None, print_id, label))
+                spans.append(SourceSpan("print_location", line_no + 1, physical_label))
             else:
                 controls.append(ControlStep(cast("ControlCode", code), None, None, None, label))
         spans.append(SourceSpan("control", line_no, code_token))
+        cursor += 1
     if end_index is None:
         message = "Missing zero control vector terminator"
         raise _problem(message)
@@ -515,6 +539,9 @@ def serialize_catg(model: CatchmentModel) -> bytes:
                 message = "Missing reach identity"
                 raise ValueError(message)
             lines.append(f"{step.code}, {reaches[step.reach_id].length_km}, -99, {label}")
+        elif step.code == 7:
+            # The native code 7 label is a separate character record.
+            lines.extend(("7", label))
         else:
             lines.append(f"{step.code}, {label}")
     lines.extend(

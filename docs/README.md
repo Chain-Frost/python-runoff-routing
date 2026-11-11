@@ -27,5 +27,6 @@
 - [S0 capture implementation record](work/2026-11-10-s0-capture.md)
 - [S1 CMD inspection record](work/2026-11-10-s1-inspection.md)
 - [S1 typed parser work record](work/2026-11-11-s1-bidirectional.md)
+- [Native code-7 serialization work record](work/2026-11-11-s1-code7-serialization.md)
 
 Future repository-owned Markdown must be linked here. Policies describe required behaviour; the roadmap describes future implementation. No source document establishes that this package has passed a numerical acceptance gate.
