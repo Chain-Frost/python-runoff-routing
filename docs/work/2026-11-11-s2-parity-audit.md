@@ -30,3 +30,11 @@ A Linux / Python 3.13.5 supplemental check exercised 13 synthetic test cases aga
 A separate **private** read-only campaign driver imports this public API and the existing S2 `compare_corpus_case` to inventory the 65 catalogue cases and inspect the four supplemental linear cases, retaining full CSV/JSON under ignored local output. No private files are bundled here; the private campaign and its review must be executed in an owner-authorised checkout.
 
 Next: run that campaign with a real Windows/Python 3.14 installed source branch, check all statuses/hashes, then investigate the already observed strict nonlinear one-reach discrepancy with a manufactured single-step and constant-flow control. Keep S2 issue #4 and PR #14 draft; no merge, release, hosted workflow or native execution.
+
+## Offline adapter repair, 2026-11-11
+
+Source base 53021ff. Added strict UTF-8/BOM then CP1252 decoding for legacy inputs and recognised the documented all-pervious flag annotation. No numerical kernel or tolerance changes. Windows Python 3.14.6: 98 tests passed; build and isolated installed-wheel campaign completed. Existing full-suite static gates remain failing (24 Ruff findings before final edits; 8 Pyright findings), so this is not acceptance-ready.
+
+Private runner base 50790dc also corrected its six-line prescribed-inflow grammar. Installed wheel: 941 indexed files verified; four supplemental linear checks pass; all 65 catalogue records retained: 36 compared, 25 skipped-unreviewed, 3 expected-failure, 1 invalid incomplete reference. Comparisons remain exploratory and numerical acceptance open. Full private output retained under ignored .local/s2-adapter-repair-wheel in the investigations audit checkout.
+
+Next: review full ordinate mismatches and isolated nonlinear storage; repair static findings before integration or merge.

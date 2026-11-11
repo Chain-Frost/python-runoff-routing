@@ -34,7 +34,8 @@ def _numbers(text: str) -> tuple[float, ...]:
 
 def _payload_lines(text: str) -> tuple[str, ...]:
     return tuple(
-        line.strip() for line in text.splitlines()
+        line.strip()
+        for line in text.splitlines()
         if line.strip() and not line.lstrip().startswith("C ") and line.strip() != "C"
     )
 
@@ -67,7 +68,11 @@ def parse_control_vector(text: str) -> Catchment:
         message = "Expected exactly one RORB_GE completion marker."
         raise LegacyInputError(message)
     boundary = next(i for i, line in enumerate(lines) if line.strip() == "C END RORB_GE")
-    remaining = [line.strip() for line in lines[boundary + 1:] if line.strip() and not line.lstrip().startswith("C ") and line.strip() != "C"]
+    remaining = [
+        line.strip()
+        for line in lines[boundary + 1 :]
+        if line.strip() and not line.lstrip().startswith("C ") and line.strip() != "C"
+    ]
     if len(remaining) < 4 or remaining[0] != "1":
         message = "Only RORB_GE natural reach type 1 is supported."
         raise LegacyInputError(message)
@@ -97,10 +102,10 @@ def parse_control_vector(text: str) -> Catchment:
         message = "Missing final zero control or empty control vector."
         raise LegacyInputError(message)
     areas, index = _take_terminated(tuple(remaining), command_end)
-    if index >= len(remaining) or _tokens(remaining[index]) not in {("0", "-99"), ("0", "-99.0")}:
+    if index >= len(remaining) or not _pervious_flag(remaining[index]):
         message = "Only explicitly all-pervious RORB_GE sources are supported."
         raise LegacyInputError(message)
-    if any(line.strip() for line in remaining[index + 1:]):
+    if any(line.strip() for line in remaining[index + 1 :]):
         message = "Unexpected data after the pervious-area flag."
         raise LegacyInputError(message)
     return Catchment(tuple(controls), areas)
@@ -144,3 +149,10 @@ def parse_explicit_design_storm(text: str) -> Storm:
         message = "Unexpected trailing storm records."
         raise LegacyInputError(message)
     return Storm(dt, int(horizon), percentages, depths)
+
+
+def _pervious_flag(text: str) -> bool:
+    fields = text.split(",", maxsplit=2)
+    if len(fields) == 3 and fields[2].strip() != "No impervious areas in system":
+        return False
+    return _numbers(",".join(fields[:2])) == (0.0, -99.0)

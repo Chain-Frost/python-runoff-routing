@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 import pytest
-from runoff_routing.offline_reference import CorpusError, compare_corpus_case
+from runoff_routing.offline_reference import CorpusError, compare_corpus_case, decode_legacy_source
 
 CAT = """RORB_GE
 C END RORB_GE
@@ -28,9 +28,14 @@ C rainfall depths
 3.6, -99
 """
 PAR = "# BEGIN\n# END\n"
-HYDRO = {"tables": [{"columns": ["Inc", "Time", "Hyd001"], "rows": [
-    ["1", "1.00", "0.000"], ["2", "2.00", "5.000"], ["3", "3.00", "5.000"], ["4", "4.00", "0.000"]
-]}]}
+HYDRO = {
+    "tables": [
+        {
+            "columns": ["Inc", "Time", "Hyd001"],
+            "rows": [["1", "1.00", "0.000"], ["2", "2.00", "5.000"], ["3", "3.00", "5.000"], ["4", "4.00", "0.000"]],
+        }
+    ]
+}
 
 
 def _write_case(root: Path) -> None:
@@ -42,23 +47,53 @@ def _write_case(root: Path) -> None:
         ("parameters", "reference.par", PAR.encode()),
     ):
         (root / filename).write_bytes(contents)
-        inputs.append({"identity": identity, "path": filename, "fingerprint": {
-            "sha256": hashlib.sha256(contents).hexdigest(), "size_bytes": len(contents)}})
-    manifest = b'{}\n'
+        inputs.append(
+            {
+                "identity": identity,
+                "path": filename,
+                "fingerprint": {"sha256": hashlib.sha256(contents).hexdigest(), "size_bytes": len(contents)},
+            }
+        )
+    manifest = b"{}\n"
     (root / "manifest.json").write_bytes(manifest)
     raw_hydro = json.dumps(HYDRO).encode()
     (root / "hydrographs.json").write_bytes(raw_hydro)
-    (root / "FILE_INDEX.json").write_text(json.dumps({"files": {"hydrographs.json": {
-        "sha256": hashlib.sha256(raw_hydro).hexdigest(), "size_bytes": len(raw_hydro)}}}), encoding="utf-8")
-    record = {"schema_version": 1, "cases": [{
-        "case_id": "synthetic", "capture_outcome": "success", "manifest": "manifest.json",
-        "manifest_fingerprint": {"sha256": hashlib.sha256(manifest).hexdigest(), "size_bytes": len(manifest)},
-        "hydrographs": "hydrographs.json", "inputs": inputs,
-        "engine": {"kind": "RORB_CMD", "executable": {"sha256": "example-only"}},
-        "effective_settings": {"timestep_hours": "1", "cmd_writer": {
-            "kc": "0", "m": "1", "initial_loss_mm": "0", "continuing": "0",
-            "loss_model": 1, "num_isa": 1, "num_bursts": 1}}
-    }]}
+    (root / "FILE_INDEX.json").write_text(
+        json.dumps(
+            {
+                "files": {
+                    "hydrographs.json": {"sha256": hashlib.sha256(raw_hydro).hexdigest(), "size_bytes": len(raw_hydro)}
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    record = {
+        "schema_version": 1,
+        "cases": [
+            {
+                "case_id": "synthetic",
+                "capture_outcome": "success",
+                "manifest": "manifest.json",
+                "manifest_fingerprint": {"sha256": hashlib.sha256(manifest).hexdigest(), "size_bytes": len(manifest)},
+                "hydrographs": "hydrographs.json",
+                "inputs": inputs,
+                "engine": {"kind": "RORB_CMD", "executable": {"sha256": "example-only"}},
+                "effective_settings": {
+                    "timestep_hours": "1",
+                    "cmd_writer": {
+                        "kc": "0",
+                        "m": "1",
+                        "initial_loss_mm": "0",
+                        "continuing": "0",
+                        "loss_model": 1,
+                        "num_isa": 1,
+                        "num_bursts": 1,
+                    },
+                },
+            }
+        ],
+    }
     (root / "catalogue.json").write_text(json.dumps(record), encoding="utf-8")
 
 
@@ -108,3 +143,20 @@ def test_gui_reference_is_not_misused(tmp_path: Path) -> None:
     report = compare_corpus_case(root, "synthetic")
     assert report.status == "unsupported"
     assert report.exact_printed_matches is None
+
+
+@pytest.mark.parametrize("raw", [b"Area km\xb2", b"Area km\xc2\xb2", b"\xef\xbb\xbfArea km\xc2\xb2"])
+def test_legacy_source_encoding(raw: bytes) -> None:
+    assert decode_legacy_source(raw) == "Area km\u00b2"
+
+
+def test_legacy_source_undefined_cp1252_is_rejected() -> None:
+    with pytest.raises(UnicodeDecodeError):
+        decode_legacy_source(b"\x81")
+
+
+def test_annotated_pervious_flag_matches_unannotated() -> None:
+    from runoff_routing.legacy_inputs import parse_control_vector
+
+    annotated = CAT.replace("\n0, -99\n", "\n0, -99,No impervious areas in system\n")
+    assert parse_control_vector(annotated) == parse_control_vector(CAT)
