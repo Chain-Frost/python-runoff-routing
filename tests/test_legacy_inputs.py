@@ -1,6 +1,7 @@
 """Characterised, strictly delimited RORB_GE and storm fixture input subset."""
 
 import pytest
+
 from runoff_routing.legacy_inputs import LegacyInputError, parse_control_vector, parse_explicit_design_storm
 from runoff_routing.single_storm import Control
 
@@ -46,26 +47,32 @@ def test_explicit_design_storm() -> None:
     assert storm.depths_mm == (10, 20)
 
 
-@pytest.mark.parametrize("source", [
-    CONTROL.replace("C END RORB_GE", "C END"),
-    CONTROL.replace("1\n1, 2.0", "2\n1, 2.0"),
-    CONTROL.replace("5, 1.0", "2, 1.0"),
-    CONTROL.replace("1.0, 3.0, -99", "1.0, 3.0"),
-    CONTROL.replace("0, -99", "1, -99"),
-    CONTROL.replace("1, 3.0", "1, nan"),
-])
+@pytest.mark.parametrize(
+    "source",
+    [
+        CONTROL.replace("C END RORB_GE", "C END"),
+        CONTROL.replace("1\n1, 2.0", "2\n1, 2.0"),
+        CONTROL.replace("5, 1.0", "2, 1.0"),
+        CONTROL.replace("1.0, 3.0, -99", "1.0, 3.0"),
+        CONTROL.replace("0, -99", "1, -99"),
+        CONTROL.replace("1, 3.0", "1, nan"),
+    ],
+)
 def test_unsupported_catchment_fails(source: str) -> None:
     with pytest.raises(LegacyInputError):
         parse_control_vector(source)
 
 
-@pytest.mark.parametrize("source", [
-    STORM.replace("DESIGN", "FIT"),
-    STORM.replace("0, 2", "0, 3"),
-    STORM.replace("1, 1, 1, -99", "2, 1, 1, -99"),
-    STORM.replace("10.0, 20.0, -99.00", "10.0, bad, -99.00"),
-    STORM.replace("20.0, 80.0, -99.00", "20.0, 80.0"),
-])
+@pytest.mark.parametrize(
+    "source",
+    [
+        STORM.replace("DESIGN", "FIT"),
+        STORM.replace("0, 2", "0, 3"),
+        STORM.replace("1, 1, 1, -99", "2, 1, 1, -99"),
+        STORM.replace("10.0, 20.0, -99.00", "10.0, bad, -99.00"),
+        STORM.replace("20.0, 80.0, -99.00", "20.0, 80.0"),
+    ],
+)
 def test_unsupported_storm_fails(source: str) -> None:
     with pytest.raises(LegacyInputError):
         parse_explicit_design_storm(source)

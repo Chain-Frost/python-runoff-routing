@@ -3,6 +3,7 @@
 import math
 
 import pytest
+
 from runoff_routing.reach_routing import RoutingDomainError, route_reach, storage_volume
 
 
@@ -42,8 +43,8 @@ def test_stepwise_continuity_is_independent_of_solver(exponent: float) -> None:
         delta_storage = storage_volume(out[index], coefficient_k=k, exponent_m=exponent) - storage_volume(
             out[index - 1], coefficient_k=k, exponent_m=exponent
         )
-        average_net_flow = 0.5 * 3600.0 * dt_hours * (
-            input_values[index - 1] + input_values[index] - out[index - 1] - out[index]
+        average_net_flow = (
+            0.5 * 3600.0 * dt_hours * (input_values[index - 1] + input_values[index] - out[index - 1] - out[index])
         )
         assert delta_storage == pytest.approx(average_net_flow, rel=1e-9, abs=1e-7)
         assert out[index] >= 0.0
@@ -80,3 +81,17 @@ def test_storage_uses_documented_units() -> None:
 def test_storage_overflow_fails_explicitly() -> None:
     with pytest.raises(RoutingDomainError, match="overflowed"):
         storage_volume(1e200, coefficient_k=1.0, exponent_m=2.0)
+
+
+@pytest.mark.parametrize("dt", [0.5, 0.25, 0.125])
+def test_manufactured_nonlinear_endpoint(dt: float) -> None:
+    # Choose Q1=1 first. Continuity then requires I1=2/dt+1 with Q0=I0=0.
+    # Since 1**m=1 this endpoint is independent of root-finder implementation.
+    output = route_reach((0.0, 2.0 / dt + 1.0), coefficient_k=1.0, exponent_m=0.8, time_step_hours=dt)
+    assert output == pytest.approx((0.0, 1.0), abs=1e-11)
+
+
+@pytest.mark.parametrize("dt", [0.5, 0.25, 0.125])
+def test_nonlinear_nonzero_equilibrium(dt: float) -> None:
+    output = route_reach((2.0,) * 21, coefficient_k=1.0, exponent_m=0.8, time_step_hours=dt)
+    assert output == pytest.approx((2.0,) * 21, abs=1e-10)

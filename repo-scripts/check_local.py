@@ -15,7 +15,7 @@ COMMANDS: tuple[tuple[str, ...], ...] = (
 
 
 def main() -> int:
-    if sys.version_info < (3, 14):
+    if tuple(sys.version_info)[:2] < (3, 14):
         print("Python 3.14 or newer is required for this check suite.", file=sys.stderr)
         return 2
     for arguments in COMMANDS:

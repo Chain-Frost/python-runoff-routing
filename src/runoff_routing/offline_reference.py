@@ -13,8 +13,9 @@ import math
 from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass
 from decimal import Decimal
+from itertools import pairwise
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 from runoff_routing.legacy_inputs import parse_control_vector, parse_explicit_design_storm
 from runoff_routing.single_storm import Losses, calculate_storm
@@ -126,6 +127,7 @@ def _read_verified(root: Path, record: Mapping[str, Any]) -> bytes:
     if not isinstance(relative, str) or not isinstance(fingerprint, dict):
         message = "Missing input locator or SHA-256 fingerprint."
         raise CorpusError(message)
+    fingerprint = cast("dict[str, Any]", fingerprint)
     data = _safe_relative(root, relative).read_bytes()
     if len(data) != fingerprint.get("size_bytes") or hashlib.sha256(data).hexdigest() != fingerprint.get("sha256"):
         message = f"Corpus input fingerprint does not match: {relative}."
@@ -134,7 +136,7 @@ def _read_verified(root: Path, record: Mapping[str, Any]) -> bytes:
 
 
 def _integral(samples: Sequence[float], dt_hours: float) -> float:
-    return 3600.0 * dt_hours * math.fsum(0.5 * (a + b) for a, b in zip(samples, samples[1:], strict=False))
+    return 3600.0 * dt_hours * math.fsum(0.5 * (a + b) for a, b in pairwise(samples))
 
 
 def _compare_rows(
@@ -163,27 +165,12 @@ def _compare_rows(
     expected: list[float] = []
     exact_matches = 0
     for index, (row, model) in enumerate(zip(rows, predicted, strict=True)):
-        try:
-            native = Decimal(row[2])
-            increment = int(row[0])
-            printed_time = Decimal(row[1])
-        except (ValueError, ArithmeticError) as exc:
-            message = "Non-numeric raw reference record."
-            raise CorpusError(message) from exc
-        if not native.is_finite() or native < 0 or not printed_time.is_finite():
-            message = "Native hydrograph contains non-finite/negative reference tokens."
-            raise CorpusError(message)
-        if increment != index + 1:
-            message = "Unexpected CMD increment sequence."
-            raise CorpusError(message)
-        if index and printed_time <= Decimal(rows[index - 1][1]):
-            message = "Non-increasing native time labels."
-            raise CorpusError(message)
+        native = _native_row(row, index, rows)
         if not math.isfinite(model) or model < 0:
             message = "Predicted hydrograph contains invalid values."
             raise CorpusError(message)
         try:
-            printed_model = Decimal(str(model)).quantize(Decimal(1).scaleb(native.as_tuple().exponent))
+            printed_model = Decimal(str(model)).quantize(Decimal(1).scaleb(int(native.as_tuple().exponent)))
         except ArithmeticError as exc:
             message = "Cannot quantize predicted discharge to printed resolution."
             raise CorpusError(message) from exc
@@ -246,17 +233,7 @@ def compare_corpus_case(corpus_root: Path, case_id: str) -> OfflineComparison:
     parameters = settings.get("cmd_writer", {})
     if parameters.get("loss_model") != 1 or parameters.get("num_isa") != 1 or parameters.get("num_bursts") != 1:
         return OfflineComparison(case_id, "unsupported", "Only one-ISA IL/CL single-burst DESIGN is supported.")
-    manifest = case.get("manifest")
-    manifest_fingerprint = case.get("manifest_fingerprint", {})
-    if not isinstance(manifest, str) or not isinstance(manifest_fingerprint, dict):
-        message = "Missing manifest path/fingerprint."
-        raise CorpusError(message)
-    manifest_bytes = _safe_relative(root, manifest).read_bytes()
-    if len(manifest_bytes) != manifest_fingerprint.get("size_bytes") or hashlib.sha256(
-        manifest_bytes
-    ).hexdigest() != manifest_fingerprint.get("sha256"):
-        message = "Manifest fingerprint changed."
-        raise CorpusError(message)
+    manifest_bytes = _manifest_bytes(root, case)
     inputs = {item["identity"]: item for item in case.get("inputs", ())}
     if not {"catchment", "storm", "parameters"}.issubset(inputs):
         return OfflineComparison(case_id, "unsupported", "Missing catchment/storm/CMD parameter evidence.")
@@ -300,3 +277,39 @@ def compare_corpus_case(corpus_root: Path, case_id: str) -> OfflineComparison:
             for excess, area in zip(result.rainfall_excess_mm, model.areas_km2, strict=True)
         ),
     )
+
+
+def _native_row(row: list[str], index: int, rows: list[list[str]]) -> Decimal:
+    try:
+        native = Decimal(row[2])
+        increment = int(row[0])
+        printed_time = Decimal(row[1])
+    except (ValueError, ArithmeticError) as exc:
+        message = "Non-numeric raw reference record."
+        raise CorpusError(message) from exc
+    if not native.is_finite() or native < 0 or not printed_time.is_finite():
+        message = "Native hydrograph contains non-finite/negative reference tokens."
+        raise CorpusError(message)
+    if increment != index + 1:
+        message = "Unexpected CMD increment sequence."
+        raise CorpusError(message)
+    if index and printed_time <= Decimal(rows[index - 1][1]):
+        message = "Non-increasing native time labels."
+        raise CorpusError(message)
+    return native
+
+
+def _manifest_bytes(root: Path, case: Mapping[str, Any]) -> bytes:
+    manifest = case.get("manifest")
+    manifest_fingerprint = case.get("manifest_fingerprint", {})
+    if not isinstance(manifest, str) or not isinstance(manifest_fingerprint, dict):
+        message = "Missing manifest path/fingerprint."
+        raise CorpusError(message)
+    manifest_fingerprint = cast("dict[str, Any]", manifest_fingerprint)
+    manifest_bytes = _safe_relative(root, manifest).read_bytes()
+    if len(manifest_bytes) != manifest_fingerprint.get("size_bytes") or hashlib.sha256(
+        manifest_bytes
+    ).hexdigest() != manifest_fingerprint.get("sha256"):
+        message = "Manifest fingerprint changed."
+        raise CorpusError(message)
+    return manifest_bytes

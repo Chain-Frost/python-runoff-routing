@@ -106,35 +106,17 @@ def _distance_analysis(catchment: Catchment) -> tuple[float, tuple[float, ...]]:
                 source_index += 1
                 reaches.append(command.reach_length_km)
             case 3:
-                if running is None:
-                    message = "Cannot store an uninitialised running hydrograph."
-                    raise RoutingDomainError(message)
+                running = _running_paths(running)
                 stack.append(dict(running))
             case 4:
-                if running is None or not stack:
-                    message = "Confluence has no running/stored hydrographs."
-                    raise RoutingDomainError(message)
-                previous = stack.pop()
-                if previous.keys() & running.keys():
-                    message = "A subarea would be counted twice at a confluence."
-                    raise RoutingDomainError(message)
-                running = previous | running
+                running = _join_paths(running, stack)
             case 5:
-                if running is None:
-                    message = "Cannot route an uninitialised hydrograph."
-                    raise RoutingDomainError(message)
+                running = _running_paths(running)
                 running = {index: distance + command.reach_length_km for index, distance in running.items()}
                 reaches.append(command.reach_length_km)
             case 7:
-                if running is None:
-                    message = "Cannot print an uninitialised hydrograph."
-                    raise RoutingDomainError(message)
-    if source_index != len(catchment.areas_km2) or stack:
-        message = "Control vector does not consume each source exactly once or leaves stored flows."
-        raise RoutingDomainError(message)
-    if running is None or set(running) != set(range(source_index)):
-        message = "Final printed outlet must contain each subarea once."
-        raise RoutingDomainError(message)
+                running = _running_paths(running)
+    running = _final_paths(catchment, source_index, running, stack)
     total_area = math.fsum(catchment.areas_km2)
     dav = math.fsum(area * running[index] for index, area in enumerate(catchment.areas_km2)) / total_area
     if not math.isfinite(dav) or dav <= 0:
@@ -143,9 +125,7 @@ def _distance_analysis(catchment: Catchment) -> tuple[float, tuple[float, ...]]:
     return dav, tuple(length / dav for length in reaches)
 
 
-def rainfall_excess(
-    rainfall_mm: Sequence[float], *, losses: Losses, timestep_hours: float
-) -> tuple[float, ...]:
+def rainfall_excess(rainfall_mm: Sequence[float], *, losses: Losses, timestep_hours: float) -> tuple[float, ...]:
     """Pervious IL/CL applied to individual rainfall bins; no carryover CL.
 
     Initial loss is exhausted before CL applies to residual rain in that bin.
@@ -178,6 +158,30 @@ def calculate_storm(catchment: Catchment, storm: Storm, *, losses: Losses, kc: f
     requiring a different phase, multiple ISAs, non-natural reaches, lateral
     inflows or special storage are not supported by this API.
     """
+    _check_storm(catchment, storm, kc, m)
+    dav, factors = _distance_analysis(catchment)
+    excesses = tuple(
+        rainfall_excess(
+            tuple(percent * depth / 100 for percent in storm.percentages),
+            losses=losses,
+            timestep_hours=storm.timestep_hours,
+        )
+        for depth in storm.depths_mm
+    )
+    count = storm.calculation_increments + 1
+    sources = tuple(
+        tuple(
+            [0.0]
+            + [depth * area / (3.6 * storm.timestep_hours) for depth in excess]
+            + [0.0] * (count - len(excess) - 1)
+        )
+        for area, excess in zip(catchment.areas_km2, excesses, strict=True)
+    )
+    outputs = _route_vector(catchment, sources, factors, kc, m, storm.timestep_hours)
+    return StormResult(tuple(outputs), excesses, sources, dav, factors, storm.timestep_hours)
+
+
+def _check_storm(catchment: Catchment, storm: Storm, kc: float, m: float) -> None:
     _check_finite_nonnegative(kc, "kc")
     if not math.isfinite(m) or m <= 0:
         message = "m must be finite and positive."
@@ -198,21 +202,16 @@ def calculate_storm(catchment: Catchment, storm: Storm, *, losses: Losses, kc: f
     if not math.isclose(math.fsum(storm.percentages), 100, rel_tol=0, abs_tol=0.01):
         message = "Temporal pattern percentages must total 100 within printed precision."
         raise RoutingDomainError(message)
-    dav, factors = _distance_analysis(catchment)
-    excesses = tuple(
-        rainfall_excess(
-            tuple(percent * depth / 100 for percent in storm.percentages),
-            losses=losses,
-            timestep_hours=storm.timestep_hours,
-        )
-        for depth in storm.depths_mm
-    )
-    count = storm.calculation_increments + 1
-    sources = tuple(
-        tuple([0.0] + [depth * area / (3.6 * storm.timestep_hours) for depth in excess] +
-              [0.0] * (count - len(excess) - 1))
-        for area, excess in zip(catchment.areas_km2, excesses, strict=True)
-    )
+
+
+def _route_vector(
+    catchment: Catchment,
+    sources: tuple[tuple[float, ...], ...],
+    factors: tuple[float, ...],
+    kc: float,
+    m: float,
+    dt: float,
+) -> list[tuple[float, ...]]:
     routed: tuple[float, ...] | None = None
     stack: list[tuple[float, ...]] = []
     outputs: list[tuple[float, ...]] = []
@@ -222,16 +221,15 @@ def calculate_storm(catchment: Catchment, storm: Storm, *, losses: Losses, kc: f
         match command.code:
             case 1:
                 routed = route_reach(
-                    sources[source_index], coefficient_k=kc * factors[factor_index], exponent_m=m,
-                    time_step_hours=storm.timestep_hours,
+                    sources[source_index],
+                    coefficient_k=kc * factors[factor_index],
+                    exponent_m=m,
+                    time_step_hours=dt,
                 )
                 source_index += 1
                 factor_index += 1
             case 3:
-                if routed is None:
-                    message = "No running hydrograph to store."
-                    raise RoutingDomainError(message)
-                stack.append(routed)
+                stack.append(_running_flow(routed))
             case 4:
                 if routed is None or not stack:
                     message = "No stored hydrograph to join."
@@ -243,8 +241,10 @@ def calculate_storm(catchment: Catchment, storm: Storm, *, losses: Losses, kc: f
                     message = "No running hydrograph to route."
                     raise RoutingDomainError(message)
                 routed = route_reach(
-                    routed, coefficient_k=kc * factors[factor_index], exponent_m=m,
-                    time_step_hours=storm.timestep_hours,
+                    routed,
+                    coefficient_k=kc * factors[factor_index],
+                    exponent_m=m,
+                    time_step_hours=dt,
                 )
                 factor_index += 1
             case 7:
@@ -252,4 +252,44 @@ def calculate_storm(catchment: Catchment, storm: Storm, *, losses: Losses, kc: f
                     message = "No running hydrograph to print."
                     raise RoutingDomainError(message)
                 outputs.append(routed)
-    return StormResult(tuple(outputs), excesses, sources, dav, factors, storm.timestep_hours)
+    return outputs
+
+
+def _final_paths(
+    catchment: Catchment,
+    source_index: int,
+    running: dict[int, float] | None,
+    stack: list[dict[int, float]],
+) -> dict[int, float]:
+    if source_index != len(catchment.areas_km2) or stack:
+        message = "Control vector does not consume each source exactly once or leaves stored flows."
+        raise RoutingDomainError(message)
+    if running is None or set(running) != set(range(source_index)):
+        message = "Final printed outlet must contain each subarea once."
+        raise RoutingDomainError(message)
+    return running
+
+
+def _join_paths(running: dict[int, float] | None, stack: list[dict[int, float]]) -> dict[int, float]:
+    if running is None or not stack:
+        message = "Confluence has no running/stored hydrographs."
+        raise RoutingDomainError(message)
+    previous = stack.pop()
+    if previous.keys() & running.keys():
+        message = "A subarea would be counted twice at a confluence."
+        raise RoutingDomainError(message)
+    return previous | running
+
+
+def _running_flow(flow: tuple[float, ...] | None) -> tuple[float, ...]:
+    if flow is None:
+        message = "No running hydrograph to store."
+        raise RoutingDomainError(message)
+    return flow
+
+
+def _running_paths(paths: dict[int, float] | None) -> dict[int, float]:
+    if paths is None:
+        message = "Cannot operate on an uninitialised running hydrograph."
+        raise RoutingDomainError(message)
+    return paths

@@ -8,6 +8,7 @@ import math
 from collections.abc import Sequence
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
+from itertools import pairwise
 
 from runoff_routing.reach_analysis import audit_reach_balance
 from runoff_routing.reach_routing import RoutingDomainError
@@ -80,13 +81,7 @@ def _read_tokens(tokens: Sequence[str]) -> tuple[tuple[float, ...], tuple[float,
     for index, token in enumerate(tokens):
         try:
             decimal = Decimal(token)
-            if not decimal.is_finite():
-                msg = f"Non-finite printed discharge at sample {index}."
-                raise ValueError(msg)
-            exponent = decimal.as_tuple().exponent
-            if not isinstance(exponent, int):
-                msg = f"Invalid printed resolution at sample {index}."
-                raise ValueError(msg)
+            exponent = _finite_exponent(decimal, index)
             half_unit = Decimal(5).scaleb(exponent - 1)
             value = float(decimal)
             unit = float(half_unit)
@@ -102,17 +97,13 @@ def _read_tokens(tokens: Sequence[str]) -> tuple[tuple[float, ...], tuple[float,
 
 
 def _integral(samples: Sequence[float], dt_hours: float) -> float:
-    return 3600.0 * dt_hours * math.fsum(
-        (left + right) * 0.5 for left, right in zip(samples, samples[1:], strict=False)
-    )
+    return 3600.0 * dt_hours * math.fsum((left + right) * 0.5 for left, right in pairwise(samples))
 
 
 def _integral_uncertainty(half_units: Sequence[float], dt_hours: float) -> float:
     if len(half_units) < 2:
         return 0.0
-    return 3600.0 * dt_hours * math.fsum(
-        (left + right) * 0.5 for left, right in zip(half_units, half_units[1:], strict=False)
-    )
+    return 3600.0 * dt_hours * math.fsum((left + right) * 0.5 for left, right in pairwise(half_units))
 
 
 def assess_printed_parity(
@@ -135,9 +126,7 @@ def assess_printed_parity(
     first: int | None = None
     near_zero = 0.0
     maximum_scaled = 0.0
-    for index, (predicted, reference, half_unit) in enumerate(
-        zip(predictions, native, half_units, strict=True)
-    ):
+    for index, (predicted, reference, half_unit) in enumerate(zip(predictions, native, half_units, strict=True)):
         if not math.isfinite(predicted) or predicted < 0:
             msg = f"Predicted discharge at sample {index} is invalid."
             raise ValueError(msg)
@@ -172,8 +161,12 @@ def assess_printed_parity(
 
 
 def audit_printed_linear_balance(
-    prescribed_inflow_m3_s: Sequence[float], printed_inflow_tokens: Sequence[str],
-    printed_outflow_tokens: Sequence[str], *, coefficient_k: float, dt_hours: float,
+    prescribed_inflow_m3_s: Sequence[float],
+    printed_inflow_tokens: Sequence[str],
+    printed_outflow_tokens: Sequence[str],
+    *,
+    coefficient_k: float,
+    dt_hours: float,
 ) -> PrintedLinearBalance:
     """Audit native printed linear reach balance using *known exact* forcing.
 
@@ -199,7 +192,10 @@ def audit_printed_linear_balance(
             msg = f"Prescribed inflow is not reproduced by the native upstream print at sample {index}."
             raise ValueError(msg)
     audit = audit_reach_balance(
-        prescribed_inflow_m3_s, downstream, coefficient_k=coefficient_k, exponent_m=1.0,
+        prescribed_inflow_m3_s,
+        downstream,
+        coefficient_k=coefficient_k,
+        exponent_m=1.0,
         time_step_hours=dt_hours,
     )
     # The initial storage is exact when the printed first output equals the
@@ -208,13 +204,16 @@ def audit_printed_linear_balance(
         eps = (0.0, *eps[1:])
     half_step = dt_hours * 0.5
     step_bounds = tuple(
-        3600.0 * ((coefficient_k + half_step) * eps[index]
-                  + abs(coefficient_k - half_step) * eps[index - 1])
+        3600.0 * ((coefficient_k + half_step) * eps[index] + abs(coefficient_k - half_step) * eps[index - 1])
         for index in range(1, len(eps))
     )
     outside = next(
-        (step.end_index for step, bound in zip(audit.steps, step_bounds, strict=True)
-         if abs(step.residual_m3) > bound + 1e-9), None
+        (
+            step.end_index
+            for step, bound in zip(audit.steps, step_bounds, strict=True)
+            if abs(step.residual_m3) > bound + 1e-9
+        ),
+        None,
     )
     global_bound = _integral_uncertainty(eps, dt_hours) + 3600.0 * coefficient_k * (eps[0] + eps[-1])
     steps = tuple(
@@ -243,3 +242,11 @@ def audit_printed_linear_balance(
         closure_within_budget=abs(audit.closure_residual_m3) <= global_bound + 1e-9,
         steps_within_budget=outside is None,
     )
+
+
+def _finite_exponent(value: Decimal, index: int) -> int:
+    exponent = value.as_tuple().exponent
+    if not value.is_finite() or not isinstance(exponent, int):
+        msg = f"Non-finite printed discharge at sample {index}."
+        raise ValueError(msg)
+    return exponent

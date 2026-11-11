@@ -79,24 +79,10 @@ def parse_control_vector(text: str) -> Catchment:
     controls: list[Control] = []
     command_end: int | None = None
     for index, line in enumerate(remaining[1:], start=1):
-        fields = _tokens(line.split(",", maxsplit=3)[0])
-        if len(fields) != 1 or not fields[0].isascii() or not fields[0].isdecimal():
-            message = "Invalid RORB control-code field."
-            raise LegacyInputError(message)
-        code = int(fields[0])
+        code, length = _control_record(line)
         if code == 0:
             command_end = index + 1
             break
-        if code not in {1, 3, 4, 5, 7}:
-            message = f"Uncharacterised control code {code}."
-            raise LegacyInputError(message)
-        length = 0.0
-        if code in {1, 5}:
-            numeric = _numbers(",".join(line.split(",")[:3]))
-            if len(numeric) != 3 or numeric[2] != -99.0:
-                message = "Expected natural reach length followed by -99."
-                raise LegacyInputError(message)
-            length = numeric[1]
         controls.append(Control(cast("ControlCode", code), length))
     if command_end is None or not controls:
         message = "Missing final zero control or empty control vector."
@@ -156,3 +142,22 @@ def _pervious_flag(text: str) -> bool:
     if len(fields) == 3 and fields[2].strip() != "No impervious areas in system":
         return False
     return _numbers(",".join(fields[:2])) == (0.0, -99.0)
+
+
+def _control_record(line: str) -> tuple[int, float]:
+    fields = _tokens(line.split(",", maxsplit=3)[0])
+    if len(fields) != 1 or not fields[0].isascii() or not fields[0].isdecimal():
+        message = "Invalid RORB control-code field."
+        raise LegacyInputError(message)
+    code = int(fields[0])
+    if code not in {0, 1, 3, 4, 5, 7}:
+        message = f"Uncharacterised control code {code}."
+        raise LegacyInputError(message)
+    length = 0.0
+    if code in {1, 5}:
+        numeric = _numbers(",".join(line.split(",")[:3]))
+        if len(numeric) != 3 or numeric[2] != -99.0:
+            message = "Expected natural reach length followed by -99."
+            raise LegacyInputError(message)
+        length = numeric[1]
+    return code, length

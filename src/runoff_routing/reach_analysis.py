@@ -90,9 +90,7 @@ def linear_continuous_reference(
         # Positive convex weights avoid cancellation of approximately equal
         # inflow/outflow values when dt/k is extremely small.
         next_outflow = (
-            decay * output[-1]
-            + (total_input_weight - ramp_weight) * previous_inflow
-            + ramp_weight * current_inflow
+            decay * output[-1] + (total_input_weight - ramp_weight) * previous_inflow + ramp_weight * current_inflow
         )
         if not math.isfinite(next_outflow) or next_outflow < 0.0:
             message = "Continuous linear-storage reference produced an invalid discharge."

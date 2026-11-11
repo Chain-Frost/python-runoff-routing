@@ -3,8 +3,11 @@
 import hashlib
 import json
 from pathlib import Path
+from typing import Any
 
 import pytest
+
+from runoff_routing.legacy_inputs import parse_control_vector
 from runoff_routing.offline_reference import CorpusError, compare_corpus_case, decode_legacy_source
 
 CAT = """RORB_GE
@@ -40,7 +43,7 @@ HYDRO = {
 
 def _write_case(root: Path) -> None:
     root.mkdir()
-    inputs = []
+    inputs: list[dict[str, Any]] = []
     for identity, filename, contents in (
         ("catchment", "model.catg", CAT.encode()),
         ("storm", "storm.stm", STM.encode()),
@@ -68,7 +71,7 @@ def _write_case(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    record = {
+    record: dict[str, Any] = {
         "schema_version": 1,
         "cases": [
             {
@@ -103,9 +106,9 @@ def test_exact_synthetic_offline_comparison(tmp_path: Path) -> None:
     assert result.status == "compared"
     assert result.exact_printed_matches == 4
     assert result.max_absolute_error_m3_s == 0.0
-    assert result.first_native_time_token == "1.00"
-    assert result.last_native_time_token == "4.00"
-    assert result.native_peak_time_token == "2.00"
+    assert result.first_native_time_token == "1.00"  # noqa: S105 -- raw hydrograph time label, not a credential
+    assert result.last_native_time_token == "4.00"  # noqa: S105 -- raw hydrograph time label, not a credential
+    assert result.native_peak_time_token == "2.00"  # noqa: S105 -- raw hydrograph time label, not a credential
     assert result.predicted_peak_elapsed_hours == 1.0
     assert result.nominal_rainfall_excess_volume_m3 == 36_000.0
     assert result.predicted_peak_index == 1
@@ -156,7 +159,5 @@ def test_legacy_source_undefined_cp1252_is_rejected() -> None:
 
 
 def test_annotated_pervious_flag_matches_unannotated() -> None:
-    from runoff_routing.legacy_inputs import parse_control_vector
-
     annotated = CAT.replace("\n0, -99\n", "\n0, -99,No impervious areas in system\n")
     assert parse_control_vector(annotated) == parse_control_vector(CAT)

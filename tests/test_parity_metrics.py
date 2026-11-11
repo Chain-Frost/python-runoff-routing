@@ -3,6 +3,7 @@
 import math
 
 import pytest
+
 from runoff_routing.parity_metrics import assess_printed_parity, audit_printed_linear_balance
 from runoff_routing.reach_routing import route_reach
 
@@ -77,8 +78,11 @@ def test_balance_detects_nonconserving_native_table() -> None:
     incoming = (0.0, 10.0, 0.0, 0.0)
     outgoing = ("0.0000", "2.0000", "3.2000", "1.9160")
     balance = audit_printed_linear_balance(
-        incoming, ("0.0000", "10.0000", "0.0000", "0.0000"),
-        outgoing, coefficient_k=1.0, dt_hours=0.5,
+        incoming,
+        ("0.0000", "10.0000", "0.0000", "0.0000"),
+        outgoing,
+        coefficient_k=1.0,
+        dt_hours=0.5,
     )
     assert not balance.steps_within_budget
     assert balance.first_outside_step_budget_index == 3
@@ -98,13 +102,16 @@ def test_balance_detects_nonconserving_native_table() -> None:
     ],
 )
 def test_invalid_precision_inputs_fail(prediction: tuple[float, ...], tokens: tuple[str, ...], dt: float) -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r".+"):
         assess_printed_parity(prediction, tokens, dt_hours=dt)
 
 
 def test_printed_upstream_requires_matching_prescribed_inflow() -> None:
     with pytest.raises(ValueError, match="Prescribed inflow"):
         audit_printed_linear_balance(
-            (0.0, 5.0), ("0.0000", "4.9990"), ("0.0000", "1.0000"),
-            coefficient_k=1.0, dt_hours=0.5,
+            (0.0, 5.0),
+            ("0.0000", "4.9990"),
+            ("0.0000", "1.0000"),
+            coefficient_k=1.0,
+            dt_hours=0.5,
         )

@@ -3,22 +3,20 @@
 import math
 
 import pytest
+
 from runoff_routing.reach_routing import RoutingDomainError
 from runoff_routing.single_storm import (
     Catchment,
     Control,
     Losses,
     Storm,
-    _distance_analysis,
     calculate_storm,
     rainfall_excess,
 )
 
 
 def test_initial_loss_crossing_and_dry_bins() -> None:
-    assert rainfall_excess((2.0, 2.0, 10.0, 0.0), losses=Losses(3.0, 2.0), timestep_hours=1) == (
-        0.0, 0.0, 8.0, 0.0
-    )
+    assert rainfall_excess((2.0, 2.0, 10.0, 0.0), losses=Losses(3.0, 2.0), timestep_hours=1) == (0.0, 0.0, 8.0, 0.0)
 
 
 def test_no_loss_when_zero() -> None:
@@ -38,7 +36,10 @@ def test_one_natural_reach_mass_and_horizon() -> None:
 
 def test_branching_average_distance_and_confluence() -> None:
     model = Catchment((Control(1, 2), Control(3), Control(1, 4), Control(4), Control(5, 3), Control(7)), (1, 3))
-    dav, factors = _distance_analysis(model)
+    analysis = calculate_storm(
+        model, Storm(1.0, 1, (100.0,), (0.0,) * len(model.areas_km2)), losses=Losses(0.0, 0.0), kc=0.0, m=1.0
+    )
+    dav, factors = analysis.average_distance_km, analysis.route_factors
     assert dav == pytest.approx((1 * 5 + 3 * 7) / 4)
     assert factors == pytest.approx((2 / dav, 4 / dav, 3 / dav))
     storm = Storm(1.0, 4, (100.0,), (3.6, 3.6))

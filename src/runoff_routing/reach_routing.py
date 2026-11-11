@@ -109,9 +109,7 @@ def _nonlinear_root(
         previous_inflow=previous_inflow,
         current_inflow=current_inflow,
     )
-    f_upper = _residual(
-        upper, coefficient_k=coefficient_k, exponent_m=exponent_m, half_step=half_step, target=target
-    )
+    f_upper = _residual(upper, coefficient_k=coefficient_k, exponent_m=exponent_m, half_step=half_step, target=target)
     side = 0
     tolerance = 1e-12 * max(1.0, abs(target))
     for _ in range(256):

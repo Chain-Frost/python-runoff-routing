@@ -38,3 +38,13 @@ Source base 53021ff. Added strict UTF-8/BOM then CP1252 decoding for legacy inpu
 Private runner base 50790dc also corrected its six-line prescribed-inflow grammar. Installed wheel: 941 indexed files verified; four supplemental linear checks pass; all 65 catalogue records retained: 36 compared, 25 skipped-unreviewed, 3 expected-failure, 1 invalid incomplete reference. Comparisons remain exploratory and numerical acceptance open. Full private output retained under ignored .local/s2-adapter-repair-wheel in the investigations audit checkout.
 
 Next: review full ordinate mismatches and isolated nonlinear storage; repair static findings before integration or merge.
+
+## Quality gates and nonlinear controls, 2026-11-11
+
+The follow-up batch fixes all observed static findings without weakening Ruff families or Pyright. Validation, stack execution and reference record checks are split into focused functions; the strict reach algorithm and numerical tolerances are unchanged. Tests use the public storm result for average distance instead of a private helper.
+
+Windows Python 3.14.6: repository hygiene, Ruff 0.16.6 lint/format, strict Pyright (0 errors) and 104 tests passed. Six manufactured nonlinear checks cover exact Q1=1 endpoints and nonzero equilibrium at 0.5/0.25/0.125 h. Seven private cached nonlinear tests passed against this source, reproducing the original strict mismatch and independent bisection agreement.
+
+Build and installed-wheel campaign rerun passed execution: 941 indexed files; four supplemental linear passes; 65 catalogue outcomes (36 compared, 25 skipped-unreviewed, 3 expected-failure, 1 invalid). All 36 computed cases fail the printed-precision hypothesis. Complete JSON and all 41 CSV files are byte/structure identical to the preceding adapter-repair run. Private output: ignored .local/s2-quality-wheel in the audit checkout. This confirms the refactor did not alter computed evidence.
+
+S1 PR #19 at f356ec5 has a successful hosted Windows check. S2 native compatibility remains open. Next: obtain explicit opt-in for bounded manufactured native nonlinear probes before inferring a legacy stopping profile; preserve strict kernel and fixed tolerances meanwhile.
