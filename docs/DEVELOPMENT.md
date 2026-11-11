@@ -25,11 +25,11 @@ py -3.14 -m build
 
 The first command runs repository hygiene, Ruff lint/format checks, strict Pyright, then non-native/non-benchmark tests. It stops on failure and does not install dependencies or launch reference programs. `check_local.cmd` is the double-click, pause-at-end equivalent. The source-only hygiene check can also run independently: `python repo-scripts/check_repository.py`.
 
-The build command is a separate package milestone check. Install the wheel outside the repository, verify import location and exercise the selected public API there. Record source and wheel outcomes separately. The current namespace contains no solver; a build or scaffold test does not establish numerical validity.
+The build command is a separate package milestone check. Install the wheel outside the repository, verify import location and exercise the selected public API there. Record source and wheel outcomes separately. Main has S0 capture and S1 restricted parser APIs but no accepted numerical solver; a build or parser check does not establish numerical validity.
 
 Documentation changes require relative-link and factual-claim review. Numerical/parser changes require focused tests plus affected prior-stage regressions and native evidence where the contract changes. Linux checks are useful but never replace Windows/Python 3.14 acceptance. Report every missing tool, failed check and unexpected skip; do not downgrade the target interpreter to manufacture a pass.
 
-The planning/scaffold PR needs these local quality checks and a Windows/Python 3.14 package/install smoke check before acceptance. It does not need to wait for RORB runner, hydrological or Monte Carlo validation: those are separate S0-S7 gates.
+Planning/scaffold and S0/S1 code have merged after recorded Windows quality and package checks. These do not close independent S0-S7 native, hydrological or numerical acceptance gates.
 
 ## CI policy for the public repository (owner-approved 2026-11-10)
 

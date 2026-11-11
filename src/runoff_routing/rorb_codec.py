@@ -602,6 +602,9 @@ def _as_float(value: Decimal) -> float:
     if not math.isfinite(number):
         message = "Decimal boundary value cannot be represented as a finite float"
         raise ValueError(message)
+    if value != 0 and number == 0.0:
+        message = "Nonzero Decimal boundary value underflowed to zero"
+        raise ValueError(message)
     return number
 
 

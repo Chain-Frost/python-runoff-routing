@@ -1,6 +1,6 @@
 # S1 native-verified code 7 physical print-location layout
 
-**Date:** 2026-11-11. **Ownership:** S1 parser/writer, stacked on draft PR #19. Evidence: private [targeted S1/S2 investigation](https://github.com/Chain-Frost/runoff-routing-investigations/blob/audit/targeted-s1-s2-20261111/docs/work/2026-11-11-targeted-s1-s2.md).
+**Date:** 2026-11-11. **Ownership:** S1 parser/writer; merged PR #25 (`3575fb5`), after parent PR #19. Evidence: private [targeted S1/S2 investigation](https://github.com/Chain-Frost/runoff-routing-investigations/blob/audit/targeted-s1-s2-20261111/docs/work/2026-11-11-targeted-s1-s2.md).
 
 ## Failure
 
@@ -15,3 +15,7 @@ The native CMD 6.44 run of the previous S1 canonical .catg failed because the wr
 - Existing RORB_GE input bytes and private captures remain unchanged. Initial native input failure remains a failure; **native re-execution of the corrected writer has not occurred**.
 
 This does not establish that the empty graphical scaffold or other canonical records are accepted by RORB. No numerical solver, tolerances, corpus, native runner, CI workflow, merge or release is changed. Keep S1 issue #3 and its stage draft open.
+
+## Exact-head validation and merge (2026-11-11)
+
+PR #25 merged as `3575fb5`. [Windows run 43039001047](https://github.com/Chain-Frost/python-runoff-routing/actions/runs/43039001047) on its reconciled head passed Python 3.14.10, Ruff 0.16.6, strict Pyright, **101 synthetic tests**, wheel build and isolated wheel import. Corrected canonical files have **not** been submitted to the native CMD executable; the old native failure remains evidence. Next: perform one permission-cleared complete canonical replay on fingerprinted CMD 6.44 and inspect the effective inputs and output inventory. Issue #3 stays open.
