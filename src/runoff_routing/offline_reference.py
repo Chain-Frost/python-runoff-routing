@@ -121,7 +121,9 @@ def _read_verified(root: Path, record: Mapping[str, Any]) -> bytes:
         raise CorpusError(message)
     checked_fingerprint = cast("Mapping[str, Any]", fingerprint)
     data = _safe_relative(root, relative).read_bytes()
-    if len(data) != checked_fingerprint.get("size_bytes") or hashlib.sha256(data).hexdigest() != checked_fingerprint.get("sha256"):
+    if len(data) != checked_fingerprint.get("size_bytes") or hashlib.sha256(
+        data
+    ).hexdigest() != checked_fingerprint.get("sha256"):
         message = f"Corpus input fingerprint does not match: {relative}."
         raise CorpusError(message)
     return data

@@ -35,8 +35,7 @@ def parse_control_vector(text: str) -> Catchment:
         raise LegacyInputError(message) from exc
     lengths = {reach.identifier: _float(reach.length_km) for reach in model.reaches}
     controls = tuple(
-        Control(step.code, lengths[step.reach_id] if step.reach_id is not None else 0.0)
-        for step in model.controls
+        Control(step.code, lengths[step.reach_id] if step.reach_id is not None else 0.0) for step in model.controls
     )
     return Catchment(controls, tuple(_float(area.area_km2) for area in model.subareas))
 
