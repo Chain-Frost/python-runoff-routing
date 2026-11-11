@@ -45,7 +45,7 @@ def _half_print_unit(value: Decimal) -> Decimal:
     exponent = value.as_tuple().exponent
     if not isinstance(exponent, int):
         message = "A finite Decimal token must have an integral printed exponent."
-        raise ValueError(message)
+        raise TypeError(message)
     return Decimal("0.5").scaleb(exponent)
 
 
@@ -54,7 +54,7 @@ def review_volume_conventions(
     *,
     timestep_hours: str,
     profile_id: str,
-    native_reported_volume_token: str | None = None,
+    reported_volume_text: str | None = None,
     raw_native_time_tokens: Sequence[str] | None = None,
 ) -> VolumeConventionReview:
     """Audit independent sample-volume conventions using raw printed precision.
@@ -95,8 +95,8 @@ def review_volume_conventions(
     reported_bound = None
     native_consistent = None
     physical_consistent = None
-    if native_reported_volume_token is not None:
-        reported = _finite_nonnegative(native_reported_volume_token, "Native reported volume")
+    if reported_volume_text is not None:
+        reported = _finite_nonnegative(reported_volume_text, "Native reported volume")
         reported_bound = _half_print_unit(reported)
         native_consistent = abs(reported - native_candidate) <= reported_bound + native_candidate_bound
         physical_consistent = abs(reported - physical_integral) <= reported_bound + physical_bound
@@ -105,7 +105,7 @@ def review_volume_conventions(
         profile_id=profile_id,
         raw_native_time_tokens=tuple(raw_native_time_tokens) if raw_native_time_tokens is not None else None,
         sample_index_elapsed_hours=tuple(index * dt for index in range(len(values))),
-        native_volume_token=native_reported_volume_token,
+        native_volume_token=reported_volume_text,
         native_reported_volume_m3=reported,
         native_inclusive_sum_candidate_m3=native_candidate,
         physical_horizon_trapezoid_m3=physical_integral,

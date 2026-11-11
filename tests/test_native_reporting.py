@@ -12,7 +12,7 @@ def test_full_weight_sum_differs_from_physical_trapezoid() -> None:
         ("2.0000",) * 21,
         timestep_hours="0.5",
         profile_id="CMD-6.44-example",
-        native_reported_volume_token="75600",
+        reported_volume_text="75600",
         raw_native_time_tokens=tuple(f"{(index + 1) / 2:.2f}" for index in range(21)),
     )
     assert review.native_inclusive_sum_candidate_m3 == Decimal(75600)
@@ -51,7 +51,7 @@ def test_scientific_printed_precision_is_not_an_exact_scalar_assertion() -> None
         ("2.0000",) * 21,
         timestep_hours="0.5",
         profile_id="RORB-CMD-v6.44-pinned-build",
-        native_reported_volume_token="7.56E+04",
+        reported_volume_text="7.56E+04",
     )
     assert review.native_report_printing_bound_m3 == 50
     assert review.native_sum_consistent_with_report is True
@@ -60,7 +60,7 @@ def test_scientific_printed_precision_is_not_an_exact_scalar_assertion() -> None
 
 def test_all_zero_hydrograph_keeps_both_volumes_zero() -> None:
     review = review_volume_conventions(
-        ("0", "0", "0"), timestep_hours="1.0", profile_id="test", native_reported_volume_token="0"
+        ("0", "0", "0"), timestep_hours="1.0", profile_id="test", reported_volume_text="0"
     )
     assert review.native_inclusive_sum_candidate_m3 == 0
     assert review.physical_horizon_trapezoid_m3 == 0
