@@ -1,4 +1,4 @@
-# S6-P0: offline ARR 2026v1 IFD intake
+# S6-P0: offline ARR 2026v1 and legacy ARR2016 Data Hub intake
 
 **Status:** source ingestion and matrix validation only. This is **not** a rainfall hyetograph generator, hydraulic/numerical acceptance, an ARR compliance certificate, or a RORB adapter. [Issue #33](https://github.com/Chain-Frost/python-runoff-routing/issues/33) is a first slice of [S6 #8](https://github.com/Chain-Frost/python-runoff-routing/issues/8). The separate [draft source contract](https://github.com/Chain-Frost/python-runoff-routing/pull/34) remains under review.
 
@@ -10,8 +10,9 @@ Reviewed 2026-11-11 against the production [ARR Data Hub changelog](https://data
 | --- | --- | --- | --- |
 | 2026v1 JSON | Mandatory `datahub_version: "2026v1"` | `input_data.Latitude/Longitude/Centroid_Used`, optional explicitly named `Outlet Latitude`/`Outlet Longitude`; `layers.RecIFD` exactly `index` (integer minutes), `columns` (numeric AEP %), `data` (mm depths) for three named default baseline tables | Other `layers` recorded as `unprocessed_layers`; selected All IFD/CC adjusted tables remain unprocessed pending inspected schemas |
 | 2026v1 TXT | `Data Hub Version,2026v1` and `[STARTTXT]` | `[INPUTDATA]`; `[RECIFD]` with `[RECCURRENTBASELINE]`, `[RECHISTORICALBASELINE]`, `[RECNATIVEBASELINE]`, optional `*_META`; `Datasets` metadata kept raw and single-source release year parsed if unambiguous | Other section markers inventoried but not interpreted; unexpected `RECIFD` headings and missing delimiters rejected |
-| Legacy TXT input-only synthetic compatibility profile | Explicit `legacy_profile="2019v1"`; absent or exactly matching version line | `[STARTTXT]`, `[INPUTDATA]` latitude/longitude and optional `Centroid_Used`, `[ENDTXT]`, no rainfall table | **Not** a verified general-purpose 2019 parser. Unknown sections rejected. Missing source version is stored as `null`, never invented from profile |
-| Legacy JSON / 2016 IFD | Not accepted | Nothing | Explicit incompatible/unknown-version error |
+| Legacy ARR2016-era TXT | Explicit `legacy_profile="arr2016"`, unversioned legacy file, per-layer `Version` metadata | `[INPUTDATA]`, `[LOSSES]`, `[LONGARF]`, `[TP]`, `[ATP]`, five `[PREBURST*]` paired `depth (ratio)` matrices | Recognised `[RIVREG]`, `[BOMIFD]`, `[CCF]`, `[BASEFLOW]` and embedded patterns are preserved but not used. [Detailed legacy contract](ARR_LEGACY_TXT.md) |
+| Legacy input-only synthetic compatibility profile | Explicit `legacy_profile="2019v1"`; absent or exactly matching version line | `[INPUTDATA]` only | Retained for compatibility; no hydrological values or false inferred version |
+| Legacy JSON / standalone BOM 2016 IFD | Not accepted | Nothing | No invented JSON schema or assumption that legacy Data Hub contains BOM IFD |
 | CSV/ZIP for IFD and temporal patterns | Not accepted | Nothing | Separate S6-P1 safe-archive and field-matrix contract required |
 
 The real production JSON `RecIFD` table has rows and columns of **numeric JSON values**, not literal `"1%"`, `"2EY"`, ARI years or fractions. AEP is retained as a `Decimal` percentage, without implicit probability conversions. The exact TXT header is `min (h)\AEP(%)`, with duration labels like `5 (0.08)`; the importer takes the integer minutes and does not recalculate using the rounded hours annotation. Baseline names must match the observed canonical three names; native may be absent for regional envelopes. JSON lacks the `Datasets` metadata shown by the TXT export, so JSON cannot legitimately infer provider/release year.
@@ -27,7 +28,7 @@ from runoff_routing.arr_import import read_arr_file
 from runoff_routing.arr_report import inventory_csv, inventory_json, write_new
 
 result = read_arr_file(Path(r"C:\data\arr_export.json"), captured_at="2026-11-11")
-assert result.capability in {"ifd_validated", "location_only"}
+assert result.capability in {"ifd_validated", "location_only", "legacy_layers_validated"}
 write_new(Path(r"C:\data\arr_inventory.json"), inventory_json(result))
 write_new(Path(r"C:\data\arr_inventory.csv"), inventory_csv(result))
 ```
@@ -42,10 +43,14 @@ You can opt into a **local, read-only replay** of the public example or an appro
 | --- | --- | --- | --- | --- | --- |
 | 2026v1 default current/historical/native IFD JSON | Yes | Yes | Structure, axes and depths | No | No |
 | 2026v1 default current/historical/native IFD TXT | Yes | Yes | Structure, axes and depths | No | No |
+| Historical ARR2016-era TXT losses, ARF, TP regions, preburst depths and ratios | Yes, opt-in | Yes | Shape, source units, axes and values | No | No |
+| Historical region, BOMIFD no-data, CCF and baseflow sections | Yes | Raw only | Marker/metadata integrity | No | No |
 | 2019v1 explicit legacy input-only TXT profile | Yes | Location only | Input format only | No | No |
 | 2026v1 All IFD, BOM original and climate SSP/year products | Layer name only | No | No | No | No |
 | TP ZIP/CSV, point/areal bins and pattern IDs | Link/section only | No | No | No | No |
-| Storm loss, preburst ratio vs derived depth, ARF and adjusted losses | Layer/section only | No | No | No | No |
+| 2026v1 storm loss, preburst ratio vs derived depth, ARF and adjusted losses | Layer/section only | No | No | No | No |
 | Storm generation, S6→S2/RORB/TUFLOW adapters | No | No | No | No | No |
+
+**Legacy ARR2016-era TXT** is implemented as a separate source profile; see [the historical TXT format and API contract](ARR_LEGACY_TXT.md). Imported preburst depths and ratios, storm losses, ARF coefficients and TP *region IDs* are not rainfall events. Legacy BoM IFD rainfall depths typically require a separate BoM IFD export.
 
 **Next slices:** S6-P1 inspect authenticated/permission-cleared TP ZIP/CSV samples, enforce member/path/size constraints, preserve event IDs and bins; S6-P2 inspect selected All IFD and CC IFD JSON/TXT/CSV plus climate/loss/preburst/ARF methods and jurisdictions; S6-P3 explicit event generation and independent numerical comparisons. No S2/RORB contract change is implied by this PR.

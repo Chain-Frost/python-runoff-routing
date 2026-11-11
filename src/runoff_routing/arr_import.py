@@ -133,9 +133,11 @@ def _make_source(
     locator: str | None,
     captured_at: str | None,
     compatibility_profile: str | None = None,
+    encoding: str = "utf-8-sig",
 ) -> DataHubSource:
     return DataHubSource(
-        fmt, version, hashlib.sha256(raw).hexdigest(), len(raw), locator, captured_at, compatibility_profile
+        fmt, version, hashlib.sha256(raw).hexdigest(), len(raw), locator, captured_at, compatibility_profile,
+        encoding=encoding,
     )
 
 
@@ -307,7 +309,10 @@ def _txt_version(lines: list[str], start_pos: int, legacy_profile: str | None) -
     if version == "2026v1":
         if legacy_profile is not None:
             _problem("Legacy profile cannot reinterpret ARR 2026v1 TXT")
-    elif not (legacy_profile == "2019v1" and version in (None, "2019v1")):
+    elif not (
+        (legacy_profile == "2019v1" and version in (None, "2019v1"))
+        or (legacy_profile == "arr2016" and version is None)
+    ):
         _problem(f"Unsupported/undeclared ARR TXT version {version!r}; explicit legacy profile required")
     return version
 
@@ -318,18 +323,42 @@ def parse_arr_txt(
     locator: str | None = None,
     captured_at: str | None = None,
     legacy_profile: str | None = None,
+    legacy_encoding: str = "utf-8-sig",
 ) -> ARRDocument:
-    """Read 2026v1 IFD TXT or opt-in location-only legacy 2019 TXT profile."""
-    lines = [line.strip() for line in _readable(raw).splitlines()]
+    """Read 2026v1 IFD TXT or explicit, separate legacy ARR2016/2019 profiles."""
+    if legacy_encoding not in {"utf-8-sig", "cp1252"}:
+        _problem(f"Unsupported legacy input encoding {legacy_encoding!r}")
+    if legacy_encoding != "utf-8-sig" and legacy_profile != "arr2016":
+        _problem("CP1252 requires explicit legacy arr2016 profile")
+    if not raw or len(raw) > MAX_SOURCE_BYTES:
+        _problem("ARR input is empty or exceeds the 8 MiB offline intake limit")
+    try:
+        decoded = raw.decode(legacy_encoding)
+    except UnicodeDecodeError as exc:
+        _problem(f"ARR input must be decodable as {legacy_encoding}", cause=exc)
+    lines = [line.strip() for line in decoded.splitlines()]
     if not lines or not lines[0].startswith("Results - ARR Data Hub"):
         _problem("Unrecognised ARR TXT header")
     payload = _marked(lines, "[STARTTXT]", "[ENDTXT]", required=True)
     if payload is None:
         _problem("Missing STARTTXT section")
     start_pos, end_pos = lines.index("[STARTTXT]"), lines.index("[ENDTXT]")
-    if any(line for line in lines[end_pos + 1 :]):
+    trailing = [line for line in lines[end_pos + 1 :] if line]
+    embedded_patterns = bool(trailing and trailing[0] == "[STARTPATTERNS]")
+    if trailing and not (legacy_profile == "arr2016" and embedded_patterns):
         _problem("Trailing content after ENDTXT")
+    if embedded_patterns and (len(trailing) < 2 or trailing.count("[STARTPATTERNS]") != 1):
+        _problem("Malformed embedded legacy temporal patterns; import ZIP/CSV separately")
     version = _txt_version(lines, start_pos, legacy_profile)
+    if legacy_profile == "arr2016":
+        from runoff_routing.arr_legacy import parse_legacy_sections
+
+        return parse_legacy_sections(
+            raw,
+            payload,
+            source=_make_source(raw, "txt", version, locator, captured_at, "arr2016_txt", legacy_encoding),
+            embedded_patterns=embedded_patterns,
+        )
     is_legacy = legacy_profile == "2019v1"
     location = _input_section(payload, legacy=is_legacy)
     if is_legacy:
@@ -366,6 +395,7 @@ def read_arr_file(
     locator: str | None = None,
     captured_at: str | None = None,
     legacy_profile: str | None = None,
+    legacy_encoding: str = "utf-8-sig",
 ) -> ARRDocument:
     """Read at most 8 MiB from a local file; preserve exact bytes and path spelling."""
     with path.open("rb") as stream:
@@ -374,9 +404,15 @@ def read_arr_file(
         _problem("ARR file exceeds 8 MiB offline intake limit")
     source_locator = locator if locator is not None else str(path.absolute())
     if path.suffix.lower() == ".json":
-        if legacy_profile is not None:
-            _problem("Legacy TXT profile is not valid for JSON")
+        if legacy_profile is not None or legacy_encoding != "utf-8-sig":
+            _problem("Legacy TXT profile/encoding is not valid for JSON")
         return parse_arr_json(raw, locator=source_locator, captured_at=captured_at)
     if path.suffix.lower() in {".txt", ".text"}:
-        return parse_arr_txt(raw, locator=source_locator, captured_at=captured_at, legacy_profile=legacy_profile)
+        return parse_arr_txt(
+            raw,
+            locator=source_locator,
+            captured_at=captured_at,
+            legacy_profile=legacy_profile,
+            legacy_encoding=legacy_encoding,
+        )
     _problem(f"Unsupported ARR file extension {path.suffix!r}; ZIP and CSV are later workpacks")

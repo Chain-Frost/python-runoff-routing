@@ -19,3 +19,9 @@ Production source: [2026v1 changelog](https://data.arr-software.org/changelog), 
 - Exact implementation branch head and CI evidence are recorded on the implementation PR; this work record must not be interpreted as a stage gate.
 
 See [S6-P0 format/capability matrix](../ARR_S6_P0.md). Remaining implementation phases are S6-P1 (safe temporal-pattern files), S6-P2 (jurisdiction/climate/loss policy) and S6-P3 (explicit storm generation and route adapters).
+
+## Extension — historical ARR2016 TXT support (2026-11-11)
+
+Implemented in the existing independent draft implementation PR #38, not PR #34 or the S1/S2 branches. Added the opt-in `arr2016` profile, typed source-faithful `LOSSES`, `LONGARF`, point/areal TP **regional IDs**, five paired-depth-and-ratio `PREBURST*` tables, and explicit unprocessed legacy `RIVREG`, `BOMIFD`, `CCF`, `BASEFLOW`/TUFLOW embedded patterns. Layer `Version` remains separate from the absent historical top-level Data Hub version. Added fail-closed `-50` missing sentinel handling and opt-in Windows CP1252 text decoding. The implementation does not invent missing BoM IFD depths or apply any historic RCP or current SSP uplift.
+
+Documentation: [legacy format and limits](../ARR_LEGACY_TXT.md). Tests: `tests/test_arr_legacy.py` using synthetic fixtures. Initial local supplementary Linux/Python 3.13 checks: **67 focused tests passed** (`test_arr_legacy.py`, `test_arr_data.py`). Windows/Python 3.14 strict Ruff/Pyright and installed-wheel acceptance require final PR-head CI. No native RORBwin or hydrological acceptance has been claimed; legacy JSON and native parity remain explicitly open.
