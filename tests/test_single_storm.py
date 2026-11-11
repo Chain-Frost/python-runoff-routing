@@ -17,9 +17,7 @@ from runoff_routing.single_storm import (
 
 
 def test_initial_loss_crossing_and_dry_bins() -> None:
-    assert rainfall_excess((2.0, 2.0, 10.0, 0.0), losses=Losses(3.0, 2.0), timestep_hours=1) == (
-        0.0, 0.0, 8.0, 0.0
-    )
+    assert rainfall_excess((2.0, 2.0, 10.0, 0.0), losses=Losses(3.0, 2.0), timestep_hours=1) == (0.0, 0.0, 8.0, 0.0)
 
 
 def test_no_loss_when_zero() -> None:

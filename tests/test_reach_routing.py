@@ -43,8 +43,8 @@ def test_stepwise_continuity_is_independent_of_solver(exponent: float) -> None:
         delta_storage = storage_volume(out[index], coefficient_k=k, exponent_m=exponent) - storage_volume(
             out[index - 1], coefficient_k=k, exponent_m=exponent
         )
-        average_net_flow = 0.5 * 3600.0 * dt_hours * (
-            input_values[index - 1] + input_values[index] - out[index - 1] - out[index]
+        average_net_flow = (
+            0.5 * 3600.0 * dt_hours * (input_values[index - 1] + input_values[index] - out[index - 1] - out[index])
         )
         assert delta_storage == pytest.approx(average_net_flow, rel=1e-9, abs=1e-7)
         assert out[index] >= 0.0

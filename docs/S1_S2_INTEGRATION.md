@@ -10,12 +10,20 @@ S1 `RunModel` is the sole input-domain authority; its numbers are `Decimal` and 
 from pathlib import Path
 
 from runoff_routing.integration import (
-    parse_run_bytes, read_run_json, run_model,
-    write_result_csv, write_result_json,
+    parse_run_bytes,
+    read_run_json,
+    run_model,
+    write_result_csv,
+    write_result_json,
 )
 from runoff_routing.rorb_codec import (
-    parse_catg, parse_cmd_par, parse_design_stm,
-    serialize_catg, serialize_cmd_par, serialize_design_stm, write_new,
+    parse_catg,
+    parse_cmd_par,
+    parse_design_stm,
+    serialize_catg,
+    serialize_cmd_par,
+    serialize_design_stm,
+    write_new,
 )
 from runoff_routing.rorb_model import RunModel, to_json
 
@@ -36,9 +44,14 @@ par, catg, stm = (
     serialize_catg(restored.catchment),
     serialize_design_stm(restored.storm),
 )
-assert RunModel(
-    parse_cmd_par(par).model, parse_catg(catg).model, parse_design_stm(stm).model,
-) == restored
+assert (
+    RunModel(
+        parse_cmd_par(par).model,
+        parse_catg(catg).model,
+        parse_design_stm(stm).model,
+    )
+    == restored
+)
 write_new(source / "canonical.par", par)
 write_new(source / "canonical.catg", catg)
 write_new(source / "canonical.stm", stm)

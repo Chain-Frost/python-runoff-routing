@@ -70,11 +70,27 @@ class OfflineComparison:
         """Complete, row-ordered comparison data without native-time modification."""
         buffer = io.StringIO(newline="")
         writer = csv.writer(buffer, lineterminator="\n")
-        writer.writerow(("sample_index", "native_increment", "native_time", "native_discharge_token",
-                         "predicted_m3_s", "signed_error_m3_s"))
+        writer.writerow(
+            (
+                "sample_index",
+                "native_increment",
+                "native_time",
+                "native_discharge_token",
+                "predicted_m3_s",
+                "signed_error_m3_s",
+            )
+        )
         for row in self.differences:
-            writer.writerow((row.row, row.raw_increment, row.raw_time, row.expected_token,
-                             row.predicted_m3_s, row.signed_difference_m3_s))
+            writer.writerow(
+                (
+                    row.row,
+                    row.raw_increment,
+                    row.raw_time,
+                    row.expected_token,
+                    row.predicted_m3_s,
+                    row.signed_difference_m3_s,
+                )
+            )
         return buffer.getvalue()
 
     def to_json(self, *, include_ordinates: bool = False) -> str:
@@ -115,8 +131,16 @@ def _integral(samples: Sequence[float], dt_hours: float) -> float:
 
 
 def _compare_rows(  # noqa: C901 -- complete raw-row evidence validation
-    rows: list[list[str]], predicted: tuple[float, ...], *, case_id: str, settings: Mapping[str, Any],
-    column: str, engine: Mapping[str, Any], manifest_sha: str, dav: float, excess_volume: float,
+    rows: list[list[str]],
+    predicted: tuple[float, ...],
+    *,
+    case_id: str,
+    settings: Mapping[str, Any],
+    column: str,
+    engine: Mapping[str, Any],
+    manifest_sha: str,
+    dav: float,
+    excess_volume: float,
 ) -> OfflineComparison:
     if len(rows) != len(predicted) or any(len(row) != 3 for row in rows):
         message = "Native row count/width does not match the predicted single print location."
@@ -222,8 +246,9 @@ def compare_corpus_case(corpus_root: Path, case_id: str) -> OfflineComparison:  
         message = "Missing manifest path/fingerprint."
         raise CorpusError(message)
     manifest_bytes = _safe_relative(root, manifest).read_bytes()
-    if (len(manifest_bytes) != manifest_fingerprint.get("size_bytes") or
-            hashlib.sha256(manifest_bytes).hexdigest() != manifest_fingerprint.get("sha256")):
+    if len(manifest_bytes) != manifest_fingerprint.get("size_bytes") or hashlib.sha256(
+        manifest_bytes
+    ).hexdigest() != manifest_fingerprint.get("sha256"):
         message = "Manifest fingerprint changed."
         raise CorpusError(message)
     inputs = {item["identity"]: item for item in case.get("inputs", ())}
@@ -238,9 +263,11 @@ def compare_corpus_case(corpus_root: Path, case_id: str) -> OfflineComparison:  
         message = "Mismatch between stored storm and effective timestep."
         raise CorpusError(message)
     result = calculate_storm(
-        model, storm,
+        model,
+        storm,
         losses=Losses(float(parameters["initial_loss_mm"]), float(parameters["continuing"])),
-        kc=float(parameters["kc"]), m=float(parameters["m"]),
+        kc=float(parameters["kc"]),
+        m=float(parameters["m"]),
     )
     index = json.loads((root / "FILE_INDEX.json").read_text(encoding="utf-8"))
     hydrograph_path = case["hydrographs"]
@@ -254,12 +281,16 @@ def compare_corpus_case(corpus_root: Path, case_id: str) -> OfflineComparison:  
     if len(tables) != 1 or len(result.outlets_m3_s) != 1 or tables[0].get("columns") != ["Inc", "Time", "Hyd001"]:
         return OfflineComparison(case_id, "unsupported", "Print-location identity/shape not characterised.")
     return _compare_rows(
-        tables[0]["rows"], result.outlets_m3_s[0], case_id=case_id,
-        settings=settings, column="Hyd001", engine=engine,
-        manifest_sha=hashlib.sha256(manifest_bytes).hexdigest(), dav=result.average_distance_km,
+        tables[0]["rows"],
+        result.outlets_m3_s[0],
+        case_id=case_id,
+        settings=settings,
+        column="Hyd001",
+        engine=engine,
+        manifest_sha=hashlib.sha256(manifest_bytes).hexdigest(),
+        dav=result.average_distance_km,
         excess_volume=math.fsum(
-            math.fsum(excess) * 1000.0 * area for excess, area in zip(
-                result.rainfall_excess_mm, model.areas_km2, strict=True
-            )
+            math.fsum(excess) * 1000.0 * area
+            for excess, area in zip(result.rainfall_excess_mm, model.areas_km2, strict=True)
         ),
     )

@@ -58,27 +58,33 @@ def test_explicit_design_storm() -> None:
     assert len(parse_design_stm(STORM.encode()).model.percentages) == len(storm.percentages)
 
 
-@pytest.mark.parametrize("source", [
-    CONTROL.replace("C END RORB_GE", "C END"),
-    CONTROL.replace("1\n1, 2.0", "2\n1, 2.0"),
-    CONTROL.replace("5, 1.0", "2, 1.0"),
-    CONTROL.replace("1.0, 3.0, -99", "1.0, 3.0"),
-    CONTROL.replace("0, -99", "1, -99"),
-    CONTROL.replace("1, 3.0", "1, nan"),
-    CONTROL.replace("C #STORAGES\nC 0", "C #STORAGES\nC 1"),
-])
+@pytest.mark.parametrize(
+    "source",
+    [
+        CONTROL.replace("C END RORB_GE", "C END"),
+        CONTROL.replace("1\n1, 2.0", "2\n1, 2.0"),
+        CONTROL.replace("5, 1.0", "2, 1.0"),
+        CONTROL.replace("1.0, 3.0, -99", "1.0, 3.0"),
+        CONTROL.replace("0, -99", "1, -99"),
+        CONTROL.replace("1, 3.0", "1, nan"),
+        CONTROL.replace("C #STORAGES\nC 0", "C #STORAGES\nC 1"),
+    ],
+)
 def test_unsupported_catchment_fails(source: str) -> None:
     with pytest.raises(LegacyInputError):
         parse_control_vector(source)
 
 
-@pytest.mark.parametrize("source", [
-    STORM.replace("DESIGN", "FIT"),
-    STORM.replace("0, 2", "0, 3"),
-    STORM.replace("1, 1, 1, -99", "2, 1, 1, -99"),
-    STORM.replace("10.0, 20.0, -99.00", "10.0, bad, -99.00"),
-    STORM.replace("20.0, 80.0, -99.00", "20.0, 80.0"),
-])
+@pytest.mark.parametrize(
+    "source",
+    [
+        STORM.replace("DESIGN", "FIT"),
+        STORM.replace("0, 2", "0, 3"),
+        STORM.replace("1, 1, 1, -99", "2, 1, 1, -99"),
+        STORM.replace("10.0, 20.0, -99.00", "10.0, bad, -99.00"),
+        STORM.replace("20.0, 80.0, -99.00", "20.0, 80.0"),
+    ],
+)
 def test_unsupported_storm_fails(source: str) -> None:
     with pytest.raises(LegacyInputError):
         parse_explicit_design_storm(source)

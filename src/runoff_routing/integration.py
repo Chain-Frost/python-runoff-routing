@@ -234,16 +234,12 @@ def run_model(model: RunModel) -> RunResult:
         raise error
     prints = tuple(
         PrintedHydrograph(location.identifier, location.label, values)
-        for location, values in zip(
-            model.catchment.print_locations, numerical.outlets_m3_s, strict=True
-        )
+        for location, values in zip(model.catchment.print_locations, numerical.outlets_m3_s, strict=True)
     )
     return RunResult(prints, numerical)
 
 
-def assess_recorded_print(
-    result: RunResult, native_discharge_tokens: Sequence[str], *, print_id: str
-) -> PrintedParity:
+def assess_recorded_print(result: RunResult, native_discharge_tokens: Sequence[str], *, print_id: str) -> PrintedParity:
     """Reuse S2's all-ordinate comparator for an *explicitly identified* print.
 
     The caller must independently establish native column identity, phase,
@@ -254,7 +250,9 @@ def assess_recorded_print(
         message = f"The print_id {print_id!r} does not uniquely identify a calculated outlet"
         error = RunInputError("invalid", "print_identity", message, role="catchment")
         raise error
-    return assess_printed_parity(matching[0].discharge_m3_s, native_discharge_tokens, dt_hours=result.numerical.dt_hours)
+    return assess_printed_parity(
+        matching[0].discharge_m3_s, native_discharge_tokens, dt_hours=result.numerical.dt_hours
+    )
 
 
 def write_result_json(path: Path, result: RunResult) -> None:

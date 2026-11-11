@@ -16,9 +16,7 @@ def test_continuous_linear_ramp_exact_solution() -> None:
 
 
 def test_continuous_linear_constant_inflow_is_equilibrium() -> None:
-    assert linear_continuous_reference((3.0,) * 6, coefficient_k=2.0, time_step_hours=0.25) == pytest.approx(
-        (3.0,) * 6
-    )
+    assert linear_continuous_reference((3.0,) * 6, coefficient_k=2.0, time_step_hours=0.25) == pytest.approx((3.0,) * 6)
 
 
 def test_continuous_linear_no_storage_is_identity() -> None:
@@ -61,9 +59,7 @@ def test_balance_all_steps_and_closure(exponent: float) -> None:
     assert audit.closure_residual_m3 == pytest.approx(0.0, abs=1e-7)
     assert audit.maximum_step_residual_m3 == pytest.approx(0.0, abs=1e-7)
     assert all(step.end_index == i for i, step in enumerate(audit.steps, 1))
-    assert audit.integrated_inflow_m3 == pytest.approx(
-        0.5 * 3600 * 0.1 * sum(a + b for a, b in pairwise(inflow))
-    )
+    assert audit.integrated_inflow_m3 == pytest.approx(0.5 * 3600 * 0.1 * sum(a + b for a, b in pairwise(inflow)))
 
 
 def test_balance_detects_nonconserving_routing() -> None:
@@ -106,4 +102,4 @@ def test_continuous_reference_rejects_invalid_parameters() -> None:
     with pytest.raises(RoutingDomainError):
         linear_continuous_reference((0.0, 1.0), coefficient_k=1, time_step_hours=0)
     with pytest.raises(RoutingDomainError):
-        linear_continuous_reference((0.0, float('inf')), coefficient_k=1, time_step_hours=1)
+        linear_continuous_reference((0.0, float("inf")), coefficient_k=1, time_step_hours=1)

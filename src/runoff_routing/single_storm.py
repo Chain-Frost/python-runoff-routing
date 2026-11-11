@@ -143,9 +143,7 @@ def _distance_analysis(catchment: Catchment) -> tuple[float, tuple[float, ...]]:
     return dav, tuple(length / dav for length in reaches)
 
 
-def rainfall_excess(
-    rainfall_mm: Sequence[float], *, losses: Losses, timestep_hours: float
-) -> tuple[float, ...]:
+def rainfall_excess(rainfall_mm: Sequence[float], *, losses: Losses, timestep_hours: float) -> tuple[float, ...]:
     """Pervious IL/CL applied to individual rainfall bins; no carryover CL.
 
     Initial loss is exhausted before CL applies to residual rain in that bin.
@@ -209,8 +207,11 @@ def calculate_storm(catchment: Catchment, storm: Storm, *, losses: Losses, kc: f
     )
     count = storm.calculation_increments + 1
     sources = tuple(
-        tuple([0.0] + [depth * area / (3.6 * storm.timestep_hours) for depth in excess] +
-              [0.0] * (count - len(excess) - 1))
+        tuple(
+            [0.0]
+            + [depth * area / (3.6 * storm.timestep_hours) for depth in excess]
+            + [0.0] * (count - len(excess) - 1)
+        )
         for area, excess in zip(catchment.areas_km2, excesses, strict=True)
     )
     routed: tuple[float, ...] | None = None
@@ -222,7 +223,9 @@ def calculate_storm(catchment: Catchment, storm: Storm, *, losses: Losses, kc: f
         match command.code:
             case 1:
                 routed = route_reach(
-                    sources[source_index], coefficient_k=kc * factors[factor_index], exponent_m=m,
+                    sources[source_index],
+                    coefficient_k=kc * factors[factor_index],
+                    exponent_m=m,
                     time_step_hours=storm.timestep_hours,
                 )
                 source_index += 1
@@ -243,7 +246,9 @@ def calculate_storm(catchment: Catchment, storm: Storm, *, losses: Losses, kc: f
                     message = "No running hydrograph to route."
                     raise RoutingDomainError(message)
                 routed = route_reach(
-                    routed, coefficient_k=kc * factors[factor_index], exponent_m=m,
+                    routed,
+                    coefficient_k=kc * factors[factor_index],
+                    exponent_m=m,
                     time_step_hours=storm.timestep_hours,
                 )
                 factor_index += 1
