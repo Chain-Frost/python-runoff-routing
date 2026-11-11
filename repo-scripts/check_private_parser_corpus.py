@@ -20,7 +20,7 @@ def _index_audit(root: Path) -> int:
     raw: object = json.loads((root / "FILE_INDEX.json").read_text(encoding="utf-8"))
     if not isinstance(raw, dict):
         message = "Private corpus index must be a JSON object"
-        raise ValueError(message)
+        raise TypeError(message)
     index = cast("dict[str, Any]", raw)
     entries = cast("dict[str, dict[str, Any]]", index["files"])
     for name, expected in entries.items():
@@ -36,7 +36,7 @@ def _inputs(root: Path, case_name: str) -> dict[str, Path]:
     raw: object = json.loads((root / "catalogue.json").read_text(encoding="utf-8"))
     if not isinstance(raw, dict):
         message = "Private corpus catalogue must be an object"
-        raise ValueError(message)
+        raise TypeError(message)
     catalogue = cast("dict[str, Any]", raw)
     matches = [item for item in catalogue["cases"] if item["case_id"] == case_name]
     if len(matches) != 1:
@@ -45,7 +45,7 @@ def _inputs(root: Path, case_name: str) -> dict[str, Path]:
     return {item["identity"]: root / item["path"] for item in matches[0]["inputs"]}
 
 
-def _run(root: Path) -> None:
+def _run(root: Path) -> None:  # noqa: C901 -- ordered immutable evidence audits
     count = _index_audit(root)
     files = _inputs(root, "review-design-baseline")
     catg = parse_catg(files["catchment"].read_bytes())

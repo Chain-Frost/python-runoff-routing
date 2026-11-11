@@ -36,7 +36,7 @@ _NUMBER = re.compile(r"[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eEdD][+-]?[0-9]+
 _AREA_NAME = re.compile(r"Sub-area\s+(\S+)", re.IGNORECASE)
 
 
-class FormatProblem(ValueError):
+class RorbFormatError(ValueError):
     """A source error with a stable unsupported/invalid distinction."""
 
     def __init__(self, status: Status, code: str, message: str, line: int | None = None) -> None:
@@ -46,13 +46,16 @@ class FormatProblem(ValueError):
         self.line = line
 
 
+FormatProblem = RorbFormatError
+
+
 @dataclass(frozen=True, slots=True)
 class SourceSpan:
     """One-based source location and original semantic token."""
 
     field: str
     line: int
-    token: str
+    raw_token: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -75,7 +78,9 @@ class SourceDocument:
                 content = data.decode("cp1252")
             except UnicodeDecodeError as exc:
                 message = "Undecodable RORB source bytes"
-                raise FormatProblem("invalid", "source_encoding", message) from exc
+                status: Status = "invalid"
+                code = "source_encoding"
+                raise RorbFormatError(status, code, message) from exc
             encoding = "cp1252"
         crlf = b"\r\n" in data
         bare_lf = b"\n" in data.replace(b"\r\n", b"")
@@ -121,7 +126,8 @@ def _problem(message: str, line: int | None = None, *, unsupported: bool = False
 def _number(token: str, line: int) -> Decimal:
     clean = token.strip()
     if _NUMBER.fullmatch(clean) is None:
-        raise _problem(f"Invalid numeric token {token!r}", line)
+        message = f"Invalid numeric token {token!r}"
+        raise _problem(message, line)
     try:
         return decimal_number(clean)
     except ValueError as exc:
@@ -131,7 +137,8 @@ def _number(token: str, line: int) -> Decimal:
 def _integer(token: str, line: int, *, minimum: int = 0, maximum: int = 1_000_000) -> int:
     value = _number(token, line)
     if value != value.to_integral_value() or not minimum <= value <= maximum:
-        raise _problem(f"Expected integer in [{minimum}, {maximum}]: {token!r}", line)
+        message = f"Expected integer in [{minimum}, {maximum}]: {token!r}"
+        raise _problem(message, line)
     return int(value)
 
 
@@ -152,7 +159,8 @@ def _csv(line: str, location: int) -> list[str]:
     if tokens and not tokens[-1]:
         tokens.pop()
     if not tokens or any(not token for token in tokens):
-        raise _problem("Missing or empty comma-separated numeric field", location)
+        message = "Missing or empty comma-separated numeric field"
+        raise _problem(message, location)
     return tokens
 
 
@@ -169,15 +177,19 @@ def _terminated(
             value = _number(token, line)
             if value == -99:
                 if not values or token_index != len(tokens) - 1:
-                    raise _problem(f"Malformed -99 terminator in {category}", line)
+                    message = f"Malformed -99 terminator in {category}"
+                    raise _problem(message, line)
                 return tuple(values), index + 1, tuple(spans)
             if value < 0:
-                raise _problem(f"Negative {category} value", line)
+                message = f"Negative {category} value"
+                raise _problem(message, line)
             if len(values) >= 100_000:
-                raise _problem(f"Excessive {category} sequence length", line)
+                message = f"Excessive {category} sequence length"
+                raise _problem(message, line)
             values.append(value)
             spans.append(SourceSpan(category, line, token))
-    raise _problem(f"Missing -99 terminator in {category}")
+    message = f"Missing -99 terminator in {category}"
+    raise _problem(message)
 
 
 def parse_cmd_par(data: bytes) -> ParsedDocument[ParameterSet]:
@@ -212,21 +224,26 @@ def _graphical(lines: tuple[str, ...]) -> tuple[int, tuple[str, ...]]:
     ]
     boundaries = [index for index, line in enumerate(lines) if line.strip() == "C END RORB_GE"]
     if len(versions) != 1 or versions[0][1] != "C RORB_GE 002":
-        raise _problem("Only a single RORB_GE 002 graphical header is characterised", unsupported=True)
+        message = "Only a single RORB_GE 002 graphical header is characterised"
+        raise _problem(message, unsupported=True)
     if len(boundaries) != 1 or versions[0][0] >= boundaries[0]:
-        raise _problem("Missing or repeated RORB_GE completion marker")
+        message = "Missing or repeated RORB_GE completion marker"
+        raise _problem(message)
     end = boundaries[0]
     header = lines[:end + 1]
     for section in ("#NODES", "#REACHES", "#STORAGES", "#INFLOW/OUTFLOW"):
         markers = [index for index, line in enumerate(header) if line.strip() == f"C {section}"]
         if len(markers) != 1 or markers[0] + 1 >= len(header):
-            raise _problem(f"Missing or repeated graphical {section} section")
+            message = f"Missing or repeated graphical {section} section"
+            raise _problem(message)
         count_line = header[markers[0] + 1].strip()
         if not count_line.startswith("C "):
-            raise _problem(f"Malformed graphical {section} count", markers[0] + 2)
+            message = f"Malformed graphical {section} count"
+            raise _problem(message, markers[0] + 2)
         count = _integer(count_line[2:].strip(), markers[0] + 2, maximum=100_000)
         if count > 0 and section in ("#STORAGES", "#INFLOW/OUTFLOW"):
-            raise _problem(f"Graphical {section} feature is not characterised", markers[0] + 2, unsupported=True)
+            message = f"Graphical {section} feature is not characterised"
+            raise _problem(message, markers[0] + 2, unsupported=True)
     return end, header
 
 
@@ -235,13 +252,16 @@ def parse_catg(data: bytes) -> ParsedDocument[CatchmentModel]:  # noqa: C901 -- 
     source = SourceDocument.from_bytes(data)
     lines = source.lines
     if not lines:
-        raise _problem("Empty RORB_GE catchment")
+        message = "Empty RORB_GE catchment"
+        raise _problem(message)
     end, graphics = _graphical(lines)
     records = _raw_records(lines, end + 1)
     if not records:
-        raise _problem("Missing RORB_GE computation records")
+        message = "Missing RORB_GE computation records"
+        raise _problem(message)
     if records[0][1] != "1":
-        raise _problem("Only natural reach-type header 1 is supported", records[0][0], unsupported=True)
+        message = "Only natural reach-type header 1 is supported"
+        raise _problem(message, records[0][0], unsupported=True)
     controls: list[ControlStep] = []
     reaches: list[Reach] = []
     names: list[str] = []
@@ -253,19 +273,23 @@ def parse_catg(data: bytes) -> ParsedDocument[CatchmentModel]:  # noqa: C901 -- 
         code = _integer(code_token, line_no, minimum=0)
         if code == 0:
             if raw != "0":
-                raise _problem("The terminating zero control must be a complete record", line_no)
+                message = "The terminating zero control must be a complete record"
+                raise _problem(message, line_no)
             end_index = index + 1
             break
         if code not in (1, 3, 4, 5, 7):
-            raise _problem(f"Uncharacterised numerical control code {code}", line_no, unsupported=True)
+            message = f"Uncharacterised numerical control code {code}"
+            raise _problem(message, line_no, unsupported=True)
         parts = [part.strip() for part in raw.split(",", maxsplit=3)]
         label = ""
         if code in (1, 5):
             if len(parts) < 3 or _number(parts[2], line_no) != -99:
-                raise _problem("Natural reach needs code, positive length, -99", line_no)
+                message = "Natural reach needs code, positive length, -99"
+                raise _problem(message, line_no)
             length = _number(parts[1], line_no)
             if length <= 0:
-                raise _problem("Natural reach length must be positive", line_no)
+                message = "Natural reach length must be positive"
+                raise _problem(message, line_no)
             label = parts[3] if len(parts) == 4 else ""
             reach_id = f"reach_{len(reaches) + 1}"
             reaches.append(Reach(reach_id, length, label))
@@ -279,7 +303,8 @@ def parse_catg(data: bytes) -> ParsedDocument[CatchmentModel]:  # noqa: C901 -- 
             spans.append(SourceSpan(f"reach_{len(reaches)}", line_no, parts[1]))
         else:
             if len(parts) > 2:
-                raise _problem("Stack/print controls accept no numeric operands", line_no)
+                message = "Stack/print controls accept no numeric operands"
+                raise _problem(message, line_no)
             label = parts[1] if len(parts) == 2 else ""
             if code == 7:
                 print_id = f"print_{len(prints) + 1}"
@@ -289,21 +314,27 @@ def parse_catg(data: bytes) -> ParsedDocument[CatchmentModel]:  # noqa: C901 -- 
                 controls.append(ControlStep(cast("ControlCode", code), None, None, None, label))
         spans.append(SourceSpan("control", line_no, code_token))
     if end_index is None:
-        raise _problem("Missing zero control vector terminator")
+        message = "Missing zero control vector terminator"
+        raise _problem(message)
     areas, next_index, area_spans = _terminated(records, end_index, "subarea_area_km2")
     spans.extend(area_spans)
     if next_index >= len(records):
-        raise _problem("Missing explicit impervious-data sentinel")
+        message = "Missing explicit impervious-data sentinel"
+        raise _problem(message)
     impervious_line, impervious = records[next_index]
     flag = [token.strip() for token in impervious.split(",", maxsplit=2)]
     if len(flag) < 2 or _number(flag[1], impervious_line) != -99:
-        raise _problem("Expected impervious flag followed by -99", impervious_line)
+        message = "Expected impervious flag followed by -99"
+        raise _problem(message, impervious_line)
     if _number(flag[0], impervious_line) != 0:
-        raise _problem("Impervious fractions require a different model dialect", impervious_line, unsupported=True)
+        message = "Impervious fractions require a different model dialect"
+        raise _problem(message, impervious_line, unsupported=True)
     if next_index + 1 != len(records):
-        raise _problem("Trailing catchment data after impervious sentinel", records[next_index + 1][0])
+        message = "Trailing catchment data after impervious sentinel"
+        raise _problem(message, records[next_index + 1][0])
     if len(areas) != len(names):
-        raise _problem(f"Subarea count {len(areas)} differs from source controls {len(names)}")
+        message = f"Subarea count {len(areas)} differs from source controls {len(names)}"
+        raise _problem(message)
     try:
         model = CatchmentModel(
             lines[0].strip(),
@@ -315,41 +346,50 @@ def parse_catg(data: bytes) -> ParsedDocument[CatchmentModel]:  # noqa: C901 -- 
     return ParsedDocument("rorb_ge_002", source, model, tuple(spans), graphics)
 
 
-def parse_design_stm(data: bytes) -> ParsedDocument[StormModel]:
+def parse_design_stm(data: bytes) -> ParsedDocument[StormModel]:  # noqa: C901 -- distinct DESIGN input contracts
     """Strict explicit single-burst DESIGN storm reader, preserving percentages and depth tokens."""
     source = SourceDocument.from_bytes(data)
     lines = source.lines
     if len(lines) < 4 or lines[1].strip() != "DESIGN":
-        raise _problem("Only title followed by an explicit DESIGN storm is supported", unsupported=True)
+        message = "Only title followed by an explicit DESIGN storm is supported"
+        raise _problem(message, unsupported=True)
     records = _raw_records(lines, 2)
     if len(records) < 4:
-        raise _problem("Missing explicit DESIGN storm records")
+        message = "Missing explicit DESIGN storm records"
+        raise _problem(message)
     header_line, header = records[0]
     header_fields = _csv(header, header_line)
     if len(header_fields) != 6:
-        raise _problem("Expected six DESIGN metadata values", header_line)
+        message = "Expected six DESIGN metadata values"
+        raise _problem(message, header_line)
     dt = _number(header_fields[0], header_line)
     horizon = _integer(header_fields[1], header_line, minimum=1)
     flags = tuple(_integer(token, header_line, minimum=-99) for token in header_fields[2:])
     if flags != (1, 1, 1, -99):
-        raise _problem("Multiple pluviographs, ISAs or bursts not characterised", header_line, unsupported=True)
+        message = "Multiple pluviographs, ISAs or bursts not characterised"
+        raise _problem(message, header_line, unsupported=True)
     timing_line, timing = records[1]
     timing_fields = _csv(timing, timing_line)
     if len(timing_fields) != 2:
-        raise _problem("Expected start increment and rainfall-bin count", timing_line)
+        message = "Expected start increment and rainfall-bin count"
+        raise _problem(message, timing_line)
     start = _integer(timing_fields[0], timing_line)
     count = _integer(timing_fields[1], timing_line, minimum=1)
     if start != 0:
-        raise _problem("Nonzero burst start requires a different storm convention", timing_line, unsupported=True)
+        message = "Nonzero burst start requires a different storm convention"
+        raise _problem(message, timing_line, unsupported=True)
     marker_line, marker = records[2]
     if marker.casefold() != "temporal pattern (% of depth)":
-        raise _problem("Missing temporal pattern marker", marker_line)
+        message = "Missing temporal pattern marker"
+        raise _problem(message, marker_line)
     percentages, next_index, percent_spans = _terminated(records, 3, "temporal_percent")
     if len(percentages) != count:
-        raise _problem("Temporal pattern length does not match the declared rainfall-bin count", timing_line)
+        message = "Temporal pattern length does not match the declared rainfall-bin count"
+        raise _problem(message, timing_line)
     depths, final_index, depth_spans = _terminated(records, next_index, "rainfall_depth_mm")
     if final_index != len(records):
-        raise _problem("Trailing records after the DESIGN rainfall depths", records[final_index][0])
+        message = "Trailing records after the DESIGN rainfall depths"
+        raise _problem(message, records[final_index][0])
     try:
         model = StormModel(
             lines[0].strip(), dt, horizon, start, percentages, depths,
@@ -377,7 +417,8 @@ def parse_bytes(
         return parse_catg(data)
     if extension == "stm":
         return parse_design_stm(data)
-    raise _problem(f"Uncharacterised RORB input dialect: {extension}", unsupported=True)
+    message = f"Uncharacterised RORB input dialect: {extension}"
+    raise _problem(message, unsupported=True)
 
 
 def read_file(path: Path) -> ParsedDocument[ParameterSet] | ParsedDocument[CatchmentModel] | ParsedDocument[StormModel]:

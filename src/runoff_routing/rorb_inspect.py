@@ -22,16 +22,16 @@ def inspect_file(path: Path) -> Inspection:
         try:
             payload = path.read_bytes()
             parsed = parse_catg(payload) if suffix == ".catg" else parse_design_stm(payload)
-            if source.sha256 != parsed.source.sha256:
-                message = "Source file changed between read and parse"
-                raise FormatProblem("invalid", "source_changed", message)
         except FormatProblem as exc:
             return Inspection(
                 suffix.removeprefix("."), exc.status, source,
                 (Diagnostic(exc.code, str(exc), "unsupported" if exc.status == "unsupported" else "error", exc.line),),
             )
+        if source.sha256 != parsed.source.sha256:
+            notes = (Diagnostic("source_changed", "Source file changed between read and parse", "error"),)
+            return Inspection(suffix.removeprefix("."), "invalid", source, notes)
         fields = tuple(
-            SourceField(item.line, item.field, item.token, source.lines[item.line - 1])
+            SourceField(item.line, item.field, item.raw_token, source.lines[item.line - 1])
             for item in parsed.source_map
         )
         notes = (Diagnostic("execution_unverified", "Parsed syntax is not native or S2 numerical approval", "warning"),)

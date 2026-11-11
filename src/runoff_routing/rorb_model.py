@@ -395,14 +395,14 @@ def _object(raw: object, names: set[str]) -> dict[str, Any]:
 def _items(raw: object) -> list[Any]:
     if not isinstance(raw, list):
         message = "Expected JSON array"
-        raise ValueError(message)
+        raise TypeError(message)
     return cast("list[Any]", raw)
 
 
 def _decimal(raw: object) -> Decimal:
     if not isinstance(raw, str):
         message = "JSON numeric values must be decimal strings"
-        raise ValueError(message)
+        raise TypeError(message)
     if re.fullmatch(r"[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eEdD][+-]?[0-9]+)?", raw) is None:
         message = "Invalid decimal string in JSON"
         raise ValueError(message)
@@ -495,5 +495,5 @@ def from_json(text: str) -> RorbModel:
     decoded: object = json.loads(text, parse_constant=reject_constant)
     if not isinstance(decoded, dict):
         message = "RORB JSON root must be an object"
-        raise ValueError(message)
+        raise TypeError(message)
     return from_dict(cast("dict[str, Any]", decoded))

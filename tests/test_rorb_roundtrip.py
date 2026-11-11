@@ -32,11 +32,8 @@ from runoff_routing.rorb_model import (
     ControlStep,
     LossValue,
     ParameterSet,
-    PrintLocation,
-    Reach,
     RoutingValue,
     RunModel,
-    StormModel,
     SubArea,
     from_dict,
     from_json,
@@ -84,7 +81,7 @@ def _params() -> ParameterSet:
     return ParameterSet(
         "subfolder\\model.catg", r"C:\storms\design.stm", True, 3, 1, 1, 1,
         (RoutingValue(1, Decimal("12.0"), Decimal("0.8")),),
-        (LossValue(1, 1, Decimal("24"), Decimal("5.0")),),
+        (LossValue(1, 1, Decimal(24), Decimal("5.0")),),
     )
 
 
@@ -103,7 +100,7 @@ def test_catchment_unchanged_source_preserves_crlf_comments_and_sha256() -> None
     assert [item.identifier for item in parsed.model.subareas] == ["area_1", "area_2"]
     assert [item.label for item in parsed.model.subareas] == ["A", "B"]
     assert [item.length_km for item in parsed.model.reaches] == [Decimal(5), Decimal(4), Decimal("2.5")]
-    assert any(span.field == "subarea_area_km2" and span.token == "30.000" for span in parsed.source_map)
+    assert any(span.field == "subarea_area_km2" and span.raw_token == "30.000" for span in parsed.source_map)
     edited = replace(parsed.model, title="Changed title")
     with pytest.raises(ValueError, match="cannot represent edits"):
         original_bytes(parsed, current_model=edited)
@@ -217,7 +214,7 @@ def test_duplicate_json_identifiers_and_impossible_controls_rejected() -> None:
     model = _run().catchment
     with pytest.raises(ValueError, match="Duplicate"):
         replace(model, print_locations=(model.print_locations[0], model.print_locations[0]))
-    with pytest.raises(ValueError, match="Unbalanced|Code 4|Code 3"):
+    with pytest.raises(ValueError, match=r"Unbalanced|Code 4|Code 3"):
         replace(model, controls=(ControlStep(4), *model.controls))
     with pytest.raises(ValueError, match="positive"):
         replace(model, subareas=(SubArea("area_1", Decimal(0)), *model.subareas[1:]))
