@@ -48,6 +48,9 @@ class OfflineComparison:
     dt_hours: float | None = None
     nominal_start_time_hours: float = 0.0
     first_native_time_token: str | None = None
+    last_native_time_token: str | None = None
+    native_peak_time_token: str | None = None
+    predicted_peak_elapsed_hours: float | None = None
     sample_count: int | None = None
     exact_printed_matches: int | None = None
     max_absolute_error_m3_s: float | None = None
@@ -59,6 +62,7 @@ class OfflineComparison:
     predicted_integral_m3: float | None = None
     reference_integral_m3: float | None = None
     average_distance_km: float | None = None
+    nominal_rainfall_excess_volume_m3: float | None = None
     differences: tuple[OrdinateDifference, ...] = ()
 
     def to_csv(self) -> str:
@@ -111,7 +115,7 @@ def _integral(samples: Sequence[float], dt_hours: float) -> float:
 
 def _compare_rows(
     rows: list[list[str]], predicted: tuple[float, ...], *, case_id: str, settings: Mapping[str, Any],
-    column: str, engine: Mapping[str, Any], manifest_sha: str, dav: float,
+    column: str, engine: Mapping[str, Any], manifest_sha: str, dav: float, excess_volume: float,
 ) -> OfflineComparison:
     if len(rows) != len(predicted) or any(len(row) != 3 for row in rows):
         message = "Native row count/width does not match the predicted single print location."
@@ -164,6 +168,9 @@ def _compare_rows(
         printed_column=column,
         dt_hours=dt,
         first_native_time_token=rows[0][1],
+        last_native_time_token=rows[-1][1],
+        native_peak_time_token=rows[expected.index(max(expected))][1],
+        predicted_peak_elapsed_hours=predicted.index(max(predicted)) * dt,
         sample_count=len(rows),
         exact_printed_matches=exact_matches,
         max_absolute_error_m3_s=max(abs(row.signed_difference_m3_s) for row in differences),
@@ -175,6 +182,7 @@ def _compare_rows(
         predicted_integral_m3=_integral(predicted, dt),
         reference_integral_m3=_integral(expected, dt),
         average_distance_km=dav,
+        nominal_rainfall_excess_volume_m3=excess_volume,
         differences=tuple(differences),
     )
 
@@ -247,4 +255,9 @@ def compare_corpus_case(corpus_root: Path, case_id: str) -> OfflineComparison:
         tables[0]["rows"], result.outlets_m3_s[0], case_id=case_id,
         settings=settings, column="Hyd001", engine=engine,
         manifest_sha=hashlib.sha256(manifest_bytes).hexdigest(), dav=result.average_distance_km,
+        excess_volume=math.fsum(
+            math.fsum(excess) * 1000.0 * area for excess, area in zip(
+                result.rainfall_excess_mm, model.areas_km2, strict=True
+            )
+        ),
     )

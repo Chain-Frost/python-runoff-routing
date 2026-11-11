@@ -2,7 +2,7 @@
 
 Private development of an independent Python rainfall-runoff routing engine.
 
-**Status: planning and repository scaffolding only. No parser, solver, ensemble or Monte Carlo implementation is validated.**
+**Status: independent Python S2 single-storm computation is a draft prototype; it is not validated as a RORB-equivalent solver.**
 
 The first usable milestone reads existing RORB inputs and reproduces supported single-storm calculations. RORB_CMD and RORBwin are separate reference engines, not interchangeable ground truth. Production calculations will run in Python, without launching RORB for every event.
 
@@ -25,7 +25,7 @@ py -3.14 repo-scripts/check_local.py
 
 Alternatively double-click `check_local.cmd`. Build validation at package milestones uses `py -3.14 -m build`; install the resulting wheel and test from outside the checkout.
 
-The package currently contains only its namespace. The planned inspect/validate/run/compare commands do not exist yet.
+The draft S2 branch includes a bounded computation API and an offline numerical comparison helper. A full RORB input/model adapter and validated general-purpose run/compare CLI are still outstanding.
 
 ## Private bootstrap
 
