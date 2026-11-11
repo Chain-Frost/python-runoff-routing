@@ -1,6 +1,6 @@
 # Compatibility contract
 
-Source references R1-R6 are defined in [SOURCES.md](SOURCES.md). All runtime capabilities are currently unimplemented. The following is the required investigation and acceptance contract, not a claim that uploaded executables have been run.
+Source references R1-R6 are defined in [SOURCES.md](SOURCES.md). S0 capture and restricted S1 CMD inspection, typed readers/writers and code-7 repair are implemented on main. S2 routing/integration are unmerged drafts; **no RORB numerical stage is accepted**. A limited CMD 6.44 and GUI 6.52 native baseline was captured ([S0 record](work/2026-11-11-s0-native.md)). This is still an investigation and acceptance contract, not proof of full compatibility.
 
 ## Separate reference identities
 
