@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any, Literal, cast
 
 from runoff_routing.legacy_inputs import parse_control_bytes, parse_explicit_design_storm_bytes
+from runoff_routing.rorb_codec import SourceDocument
 from runoff_routing.single_storm import Losses, calculate_storm
 
 Status = Literal["compared", "unsupported", "invalid"]
@@ -103,6 +104,12 @@ class OfflineComparison:
 
 class CorpusError(ValueError):
     """Missing, corrupted or structurally inconsistent offline corpus evidence."""
+
+
+def decode_legacy_source(data: bytes) -> str:
+    """Keep the legacy offline text API; classify source bytes exclusively through S1."""
+    source = SourceDocument.from_bytes(data)
+    return data.decode(source.encoding)
 
 
 def _safe_relative(root: Path, locator: str) -> Path:

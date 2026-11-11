@@ -7,7 +7,8 @@ from typing import Any
 
 import pytest
 
-from runoff_routing.offline_reference import CorpusError, compare_corpus_case
+from runoff_routing.offline_reference import CorpusError, compare_corpus_case, decode_legacy_source
+from runoff_routing.rorb_codec import RorbFormatError, SourceDocument
 
 CAT = """SYNTHETIC CATCHMENT
 C RORB_GE 002
@@ -107,6 +108,30 @@ def _write_case(root: Path) -> None:
         ],
     }
     (root / "catalogue.json").write_text(json.dumps(record), encoding="utf-8")
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected", "encoding"),
+    [
+        (b"\xef\xbb\xbfSource\r\n", "Source\r\n", "utf-8-sig"),
+        ("Süd".encode("utf-8"), "Süd", "utf-8-sig"),
+        (b"Legacy \x96 name\r\n", "Legacy – name\r\n", "cp1252"),
+        (b"", "", "utf-8-sig"),
+    ],
+)
+def test_legacy_text_decoder_uses_s1_source_encoding(raw: bytes, expected: str, encoding: str) -> None:
+    source = SourceDocument.from_bytes(raw)
+    assert source.data == raw
+    assert source.encoding == encoding
+    assert source.sha256 == hashlib.sha256(raw).hexdigest()
+    assert decode_legacy_source(raw) == expected
+
+
+def test_legacy_text_decoder_rejects_invalid_cp1252() -> None:
+    with pytest.raises(RorbFormatError, match="Undecodable RORB source bytes") as error:
+        decode_legacy_source(b"\x81")
+    assert error.value.status == "invalid"
+    assert error.value.code == "source_encoding"
 
 
 def test_exact_synthetic_offline_comparison(tmp_path: Path) -> None:
