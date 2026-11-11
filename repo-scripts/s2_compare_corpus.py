@@ -34,7 +34,7 @@ def select_case_ids(catalogue: dict[str, object]) -> tuple[str, ...]:
     for item in records:
         if not isinstance(item, dict):
             message = "Invalid offline catalogue case record"
-            raise ValueError(message)
+            raise TypeError(message)
         key: object = item.get("case_id")
         if not isinstance(key, str) or not key.strip():
             message = "Offline catalogue contains an invalid case_id"

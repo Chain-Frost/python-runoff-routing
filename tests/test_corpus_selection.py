@@ -55,5 +55,5 @@ def test_corpus_selection_rejects_invalid_inventory(corruption: str) -> None:
         record["cases"] = [{"engine": {"kind": "RORB_CMD"}}]
     else:
         record["cases"] = [{"case_id": ""}]
-    with pytest.raises(ValueError, match="catalogue|case_id|case"):
+    with pytest.raises((TypeError, ValueError), match=r"catalogue|case_id|case"):
         _choose()(record)
