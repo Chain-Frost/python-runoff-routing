@@ -19,6 +19,7 @@ from runoff_routing.arr_data import (
     IFDDataset,
     QueryLocation,
 )
+from runoff_routing.arr_legacy import parse_legacy_sections
 
 BASELINES: dict[str, Baseline] = {
     "Default Current (2030) Baseline": "current_2030",
@@ -317,6 +318,37 @@ def _txt_version(lines: list[str], start_pos: int, legacy_profile: str | None) -
     return version
 
 
+def _decode_txt_lines(raw: bytes, profile: str | None, encoding: str) -> list[str]:
+    if encoding not in {"utf-8-sig", "cp1252"}:
+        _problem(f"Unsupported legacy input encoding {encoding!r}")
+    if encoding != "utf-8-sig" and profile != "arr2016":
+        _problem("CP1252 requires explicit legacy arr2016 profile")
+    if not raw or len(raw) > MAX_SOURCE_BYTES:
+        _problem("ARR input is empty or exceeds the 8 MiB offline intake limit")
+    try:
+        decoded = raw.decode(encoding)
+    except UnicodeDecodeError as exc:
+        _problem(f"ARR input must be decodable as {encoding}", cause=exc)
+    lines = [line.strip() for line in decoded.splitlines()]
+    if not lines or not lines[0].startswith("Results - ARR Data Hub"):
+        _problem("Unrecognised ARR TXT header")
+    return lines
+
+
+def _txt_envelope(lines: list[str], profile: str | None) -> tuple[list[str], str | None, bool]:
+    payload = _marked(lines, "[STARTTXT]", "[ENDTXT]", required=True)
+    if payload is None:
+        _problem("Missing STARTTXT section")
+    start_pos, end_pos = lines.index("[STARTTXT]"), lines.index("[ENDTXT]")
+    trailing = [line for line in lines[end_pos + 1 :] if line]
+    embedded_patterns = bool(trailing and trailing[0] == "[STARTPATTERNS]")
+    if trailing and not (profile == "arr2016" and embedded_patterns):
+        _problem("Trailing content after ENDTXT")
+    if embedded_patterns and (len(trailing) < 2 or trailing.count("[STARTPATTERNS]") != 1):
+        _problem("Malformed embedded legacy temporal patterns; import ZIP/CSV separately")
+    return payload, _txt_version(lines, start_pos, profile), embedded_patterns
+
+
 def parse_arr_txt(
     raw: bytes,
     *,
@@ -326,33 +358,9 @@ def parse_arr_txt(
     legacy_encoding: str = "utf-8-sig",
 ) -> ARRDocument:
     """Read 2026v1 IFD TXT or explicit, separate legacy ARR2016/2019 profiles."""
-    if legacy_encoding not in {"utf-8-sig", "cp1252"}:
-        _problem(f"Unsupported legacy input encoding {legacy_encoding!r}")
-    if legacy_encoding != "utf-8-sig" and legacy_profile != "arr2016":
-        _problem("CP1252 requires explicit legacy arr2016 profile")
-    if not raw or len(raw) > MAX_SOURCE_BYTES:
-        _problem("ARR input is empty or exceeds the 8 MiB offline intake limit")
-    try:
-        decoded = raw.decode(legacy_encoding)
-    except UnicodeDecodeError as exc:
-        _problem(f"ARR input must be decodable as {legacy_encoding}", cause=exc)
-    lines = [line.strip() for line in decoded.splitlines()]
-    if not lines or not lines[0].startswith("Results - ARR Data Hub"):
-        _problem("Unrecognised ARR TXT header")
-    payload = _marked(lines, "[STARTTXT]", "[ENDTXT]", required=True)
-    if payload is None:
-        _problem("Missing STARTTXT section")
-    start_pos, end_pos = lines.index("[STARTTXT]"), lines.index("[ENDTXT]")
-    trailing = [line for line in lines[end_pos + 1 :] if line]
-    embedded_patterns = bool(trailing and trailing[0] == "[STARTPATTERNS]")
-    if trailing and not (legacy_profile == "arr2016" and embedded_patterns):
-        _problem("Trailing content after ENDTXT")
-    if embedded_patterns and (len(trailing) < 2 or trailing.count("[STARTPATTERNS]") != 1):
-        _problem("Malformed embedded legacy temporal patterns; import ZIP/CSV separately")
-    version = _txt_version(lines, start_pos, legacy_profile)
+    lines = _decode_txt_lines(raw, legacy_profile, legacy_encoding)
+    payload, version, embedded_patterns = _txt_envelope(lines, legacy_profile)
     if legacy_profile == "arr2016":
-        from runoff_routing.arr_legacy import parse_legacy_sections
-
         return parse_legacy_sections(
             raw,
             payload,

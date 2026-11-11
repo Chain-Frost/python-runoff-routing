@@ -4,7 +4,7 @@ import csv
 import hashlib
 import io
 import json
-from dataclasses import FrozenInstanceError
+from dataclasses import FrozenInstanceError, replace
 from decimal import Decimal
 from pathlib import Path
 
@@ -37,15 +37,17 @@ def test_legacy_requires_opt_in_and_retains_bytes() -> None:
     assert doc.absent_layers == ("RecIFD",)
     assert doc.unprocessed_layers == ("RIVREG", "BOMIFD", "CCF", "BASEFLOW")
     assert doc.legacy_losses is not None
+    field_name = "initial_loss_mm"
     with pytest.raises(FrozenInstanceError):
-        setattr(doc.legacy_losses, "initial_loss_mm", Decimal(1))
+        setattr(doc.legacy_losses, field_name, Decimal(1))
 
 
 def test_legacy_losses_and_arf_are_typed_but_not_applied() -> None:
     doc = parse_arr_txt(_sample(), legacy_profile="arr2016")
     loss = doc.legacy_losses
     arf = doc.legacy_arf
-    assert loss is not None and arf is not None
+    assert loss is not None
+    assert arf is not None
     assert loss.initial_loss_mm == Decimal("21.0")
     assert loss.continuing_loss_mm_per_hour == Decimal("2.00")
     assert loss.raw_id == "31415.0"
@@ -72,7 +74,7 @@ def test_legacy_preburst_stores_depths_ratios_and_source_precision() -> None:
     assert [table.percentile for table in doc.legacy_preburst] == [50, 10, 25, 75, 90]
     median = doc.legacy_preburst[0]
     assert median.durations_min == (60, 120)
-    assert median.aep_percent == (Decimal("50"), Decimal("1"))
+    assert median.aep_percent == (Decimal(50), Decimal(1))
     assert median.depths_mm[0] == (Decimal("2.0"), Decimal("7.00"))
     assert median.ratios[0] == (Decimal("0.010"), Decimal("1.020"))
     assert median.metadata[-1] == ("Note", "Synthetic only, not design data")
@@ -181,14 +183,12 @@ def test_cp1252_legacy_requires_explicit_encoding() -> None:
 
 
 def test_legacy_preburst_typed_model_rejects_invalid_direct_construction() -> None:
-    from dataclasses import replace
-
     doc = parse_arr_txt(_sample(), legacy_profile="arr2016")
     table = doc.legacy_preburst[0]
     with pytest.raises(ARRFormatError, match="row count"):
         replace(table, depths_mm=())
     with pytest.raises(ARRFormatError, match="ratio must be finite"):
-        replace(table, ratios=((Decimal("NaN"), Decimal("0")), *table.ratios[1:]))
+        replace(table, ratios=((Decimal("NaN"), Decimal(0)), *table.ratios[1:]))
     with pytest.raises(ARRFormatError, match="duplicated"):
         replace(table, durations_min=(60, 60))
 
