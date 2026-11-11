@@ -12,6 +12,7 @@ import math
 from collections import deque
 from dataclasses import dataclass
 from decimal import Decimal
+from itertools import pairwise
 from typing import Literal
 
 from .rorb_codec import parse_catg, serialize_catg
@@ -76,7 +77,7 @@ class GeReach:
                 raise ValueError(message)
             _finite(vertex[0], f"Reach {self.identifier!r} vertex {i} x")
             _finite(vertex[1], f"Reach {self.identifier!r} vertex {i} y")
-        if not any(start != end for start, end in zip(self.vertices_m, self.vertices_m[1:])):
+        if not any(start != end for start, end in pairwise(self.vertices_m)):
             message = f"Reach {self.identifier!r} has zero geometric length"
             raise ValueError(message)
 
@@ -125,7 +126,7 @@ def _endpoint_index(point: Point, nodes: tuple[GeNode, ...], tolerance: float, r
     return matches[0]
 
 
-def _network(drawing: GeDrawing) -> _DirectedNetwork:
+def _network(drawing: GeDrawing) -> _DirectedNetwork:  # noqa: C901 -- validate complete tree preflight
     """Validate exact endpoint identity and one connected outlet-rooted tree."""
     nodes = drawing.nodes
     reaches = drawing.reaches
@@ -181,11 +182,11 @@ def _network(drawing: GeDrawing) -> _DirectedNetwork:
 def _length_km(vertices: tuple[Point, ...]) -> float:
     return math.fsum(
         math.hypot(end[0] - start[0], end[1] - start[1])
-        for start, end in zip(vertices, vertices[1:])
+        for start, end in pairwise(vertices)
     ) / 1000
 
 
-def _matches_model(model: CatchmentModel, drawing: GeDrawing, network: _DirectedNetwork) -> str:
+def _matches_model(model: CatchmentModel, drawing: GeDrawing, network: _DirectedNetwork) -> str:  # noqa: C901 -- explicit stack/geometry consistency checks
     """Prove the exact computational vector is compatible with authored geometry."""
     expected_reaches = {reach.identifier: reach for reach in model.reaches}
     if set(network.edge_nodes) != set(expected_reaches):

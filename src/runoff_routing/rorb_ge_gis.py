@@ -33,25 +33,25 @@ class VectorLayer(Protocol):
 
 
 class _OgrGeometry(Protocol):
-    def AddPoint_2D(self, x: float, y: float) -> None: ...
+    def AddPoint_2D(self, x: float, y: float) -> None: ...  # noqa: N802 -- exact external OGR naming convention
 
-    def AddGeometry(self, geometry: _OgrGeometry) -> None: ...
+    def AddGeometry(self, geometry: _OgrGeometry) -> None: ...  # noqa: N802 -- exact external OGR naming convention
 
-    def IsEmpty(self) -> bool: ...
+    def IsEmpty(self) -> bool: ...  # noqa: N802 -- exact external OGR naming convention
 
-    def IsValid(self) -> bool: ...
+    def IsValid(self) -> bool: ...  # noqa: N802 -- exact external OGR naming convention
 
-    def GetArea(self) -> float: ...
+    def GetArea(self) -> float: ...  # noqa: N802 -- exact external OGR naming convention
 
-    def Contains(self, geometry: _OgrGeometry) -> bool: ...
+    def Contains(self, geometry: _OgrGeometry) -> bool: ...  # noqa: N802 -- exact external OGR naming convention
 
 
 class _OgrModule(Protocol):
-    wkbLinearRing: int
-    wkbPolygon: int
-    wkbPoint: int
+    wkbLinearRing: int  # noqa: N815 -- exact GDAL constant
+    wkbPolygon: int  # noqa: N815 -- exact GDAL constant
+    wkbPoint: int  # noqa: N815 -- exact GDAL constant
 
-    def Geometry(self, kind: int) -> _OgrGeometry: ...
+    def Geometry(self, kind: int) -> _OgrGeometry: ...  # noqa: N802 -- exact external OGR naming convention
 
 
 def _ogr() -> _OgrModule:
@@ -100,8 +100,11 @@ def _number(value: object, kind: str, index: int, field: str) -> float:
 
 
 def _identifier(value: object, kind: str, index: int) -> str:
-    if not isinstance(value, str) or not value.strip() or value != value.strip():
-        message = f"{kind} feature {index}: id must be a nonempty string without surrounding whitespace"
+    if not isinstance(value, str):
+        message = f"{kind} feature {index}: id must be a string"
+        raise TypeError(message)
+    if not value.strip() or value != value.strip():
+        message = f"{kind} feature {index}: id must be nonempty without surrounding whitespace"
         raise ValueError(message)
     return value
 

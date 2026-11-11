@@ -73,7 +73,8 @@ def test_graphical_catg_preserves_computational_bytes_and_roundtrips() -> None:
     assert b"C #REACHES\nC      3\n" in data
     assert b"7\nOutlet\n0\n" in data
     assert [step.code for step in parsed.model.controls] == [1, 3, 1, 4, 5, 7]
-    assert b"RORB_GE 002" in data and b"RORB_GE 6.45" not in data
+    assert b"RORB_GE 002" in data
+    assert b"RORB_GE 6.45" not in data
 
 
 def test_flat_extent_and_multi_vertex_reaches() -> None:
@@ -103,15 +104,19 @@ def test_flat_extent_and_multi_vertex_reaches() -> None:
 )
 def test_invalid_outlet_node_fail_closed(replacement: dict[str, Any], message: str) -> None:
     original = _drawing()
-    with pytest.raises(ValueError, match=message):
+    if "x_m" in replacement or "display_label" in replacement:
+        with pytest.raises(ValueError, match=message):
+            replace(original.nodes[-1], **replacement)
+    else:
         changed = replace(original.nodes[-1], **replacement)
-        serialize_catg_with_drawing(_model(), replace(original, nodes=(*original.nodes[:-1], changed)))
+        with pytest.raises(ValueError, match=message):
+            serialize_catg_with_drawing(_model(), replace(original, nodes=(*original.nodes[:-1], changed)))
 
 
 def test_wrong_topology_is_not_silently_reordered() -> None:
     original = _drawing()
     links = (*original.reaches[:2], GeReach("reach_3", ((0, 0), (2500, 0))))
-    with pytest.raises(ValueError, match="tree|Parallel|matches|not downstream|source|length"):
+    with pytest.raises(ValueError, match=r"tree|Parallel|matches|not downstream|source|length"):
         serialize_catg_with_drawing(_model(), replace(original, reaches=links))
     swapped = (
         original.reaches[1],
@@ -127,12 +132,12 @@ def test_geometry_and_source_identity_rejection() -> None:
         serialize_catg_with_drawing(_model(), replace(original, nodes=(
             replace(original.nodes[0], identifier="JOIN"), *original.nodes[1:]
         )))
+    short_reach = replace(original.reaches[0], vertices_m=((0, 0), (4990, 0)))
     with pytest.raises(ValueError, match="length differs"):
-        changed = replace(original.reaches[0], vertices_m=((0, 0), (4990, 0)))
-        serialize_catg_with_drawing(_model(), replace(original, reaches=(changed, *original.reaches[1:])))
+        serialize_catg_with_drawing(_model(), replace(original, reaches=(short_reach, *original.reaches[1:])))
+    shifted_reach = replace(original.reaches[0], vertices_m=((0.1, 0), (5000, 0)))
     with pytest.raises(ValueError, match="matches 0 nodes"):
-        changed = replace(original.reaches[0], vertices_m=((0.1, 0), (5000, 0)))
-        serialize_catg_with_drawing(_model(), replace(original, reaches=(changed, *original.reaches[1:])))
+        serialize_catg_with_drawing(_model(), replace(original, reaches=(shifted_reach, *original.reaches[1:])))
     with pytest.raises(ValueError, match="source IDs"):
         serialize_catg_with_drawing(
             _model(), replace(original, nodes=(replace(original.nodes[0], subarea_id=None), *original.nodes[1:]))
@@ -147,13 +152,13 @@ def test_malformed_and_unsupported_drawing_rejected() -> None:
         replace(drawing, endpoint_tolerance_m=float("inf"))
     with pytest.raises(ValueError, match="zero geometric"):
         GeReach("reach_X", ((0, 0), (0, 0)))
+    extra = PrintLocation("print_2", "Another")
+    augmented = replace(
+        _model(),
+        print_locations=(*_model().print_locations, extra),
+        controls=(*_model().controls, ControlStep(7, print_id="print_2", label="Another")),
+    )
     with pytest.raises(ValueError, match="single final"):
-        extra = PrintLocation("print_2", "Another")
-        augmented = replace(
-            _model(),
-            print_locations=(*_model().print_locations, extra),
-            controls=(*_model().controls, ControlStep(7, print_id="print_2", label="Another")),
-        )
         serialize_catg_with_drawing(augmented, drawing)
 
 
@@ -193,24 +198,24 @@ class _Shape:
         self.kind = shape_kind
         self.coords: list[Point] = []
 
-    def AddPoint_2D(self, x: float, y: float) -> None:
+    def AddPoint_2D(self, x: float, y: float) -> None:  # noqa: N802 -- exact external OGR naming convention
         self.coords.append((x, y))
 
-    def AddGeometry(self, other: _Shape) -> None:
+    def AddGeometry(self, other: _Shape) -> None:  # noqa: N802 -- exact external OGR naming convention
         self.coords = other.coords
 
-    def IsEmpty(self) -> bool:
+    def IsEmpty(self) -> bool:  # noqa: N802 -- exact external OGR naming convention
         return not self.coords
 
-    def IsValid(self) -> bool:
+    def IsValid(self) -> bool:  # noqa: N802 -- exact external OGR naming convention
         return bool(self.coords)
 
-    def GetArea(self) -> float:
+    def GetArea(self) -> float:  # noqa: N802 -- exact external OGR naming convention
         return (max(x for x, _y in self.coords) - min(x for x, _y in self.coords)) * (
             max(y for _x, y in self.coords) - min(y for _x, y in self.coords)
         )
 
-    def Contains(self, other: _Shape) -> bool:
+    def Contains(self, other: _Shape) -> bool:  # noqa: N802 -- exact external OGR naming convention
         x, y = other.coords[0]
         return (
             min(point[0] for point in self.coords) < x < max(point[0] for point in self.coords)
@@ -219,11 +224,11 @@ class _Shape:
 
 
 class _FakeOgr:
-    wkbLinearRing = 1
-    wkbPolygon = 2
-    wkbPoint = 3
+    wkbLinearRing = 1  # noqa: N815 -- faithful OGR test double
+    wkbPolygon = 2  # noqa: N815 -- faithful OGR test double
+    wkbPoint = 3  # noqa: N815 -- faithful OGR test double
 
-    def Geometry(self, kind: int) -> _Shape:
+    def Geometry(self, kind: int) -> _Shape:  # noqa: N802 -- exact external OGR naming convention
         return _Shape(kind)
 
 
@@ -264,7 +269,7 @@ def test_optional_ogr_rejects_bad_basins(monkeypatch: pytest.MonkeyPatch) -> Non
     with pytest.raises(ValueError, match="strictly inside"):
         drawing_from_layers(_model(), misplaced, basins, confluences, reaches, projected_crs="EPSG:28350")
     repeated = _Layer([basins.data[0], basins.data[0]])
-    with pytest.raises(ValueError, match="already assigned|Unassigned|strictly inside"):
+    with pytest.raises(ValueError, match=r"already assigned|Unassigned|strictly inside"):
         drawing_from_layers(_model(), centroids, repeated, confluences, reaches, projected_crs="EPSG:28350")
     ring_with_hole = _Layer([
         (basins.data[0][0] + [(10, 10), (20, 10), (10, 10)], {}),
@@ -288,13 +293,13 @@ def test_gis_attribute_checks(monkeypatch: pytest.MonkeyPatch, bad: str) -> None
         centroids.data[0][1]["fi"] = 0.1
     else:
         centroids.data[0][1]["fi"] = None
-    with pytest.raises(ValueError):
+    with pytest.raises((TypeError, ValueError), match="feature"):
         drawing_from_layers(_model(), centroids, basins, confluences, reaches, projected_crs="EPSG:28350")
 
 
 def test_qgis_null_variant_rejected(monkeypatch: pytest.MonkeyPatch) -> None:
     class _QgisNull:
-        def isNull(self) -> bool:
+        def isNull(self) -> bool:  # noqa: N802 -- QGIS 3 QVariant protocol
             return True
 
     monkeypatch.setattr(rorb_ge_gis, "_ogr", _FakeOgr)
