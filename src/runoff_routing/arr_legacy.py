@@ -21,8 +21,19 @@ from runoff_routing.arr_data import (
 # These describe historical TXT section markers, not a current ARR/IFD method.
 _LEGACY_SECTION_TAGS = frozenset(
     {
-        "RIVREG", "LONGARF", "LOSSES", "TP", "ATP", "BOMIFD", "PREBURST",
-        "PREBURST10", "PREBURST25", "PREBURST75", "PREBURST90", "CCF", "BASEFLOW",
+        "RIVREG",
+        "LONGARF",
+        "LOSSES",
+        "TP",
+        "ATP",
+        "BOMIFD",
+        "PREBURST",
+        "PREBURST10",
+        "PREBURST25",
+        "PREBURST75",
+        "PREBURST90",
+        "CCF",
+        "BASEFLOW",
     }
 )
 _PREBURST_PERCENTILES: dict[str, Literal[10, 25, 50, 75, 90]] = {

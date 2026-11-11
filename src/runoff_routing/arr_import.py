@@ -137,7 +137,13 @@ def _make_source(
     encoding: str = "utf-8-sig",
 ) -> DataHubSource:
     return DataHubSource(
-        fmt, version, hashlib.sha256(raw).hexdigest(), len(raw), locator, captured_at, compatibility_profile,
+        fmt,
+        version,
+        hashlib.sha256(raw).hexdigest(),
+        len(raw),
+        locator,
+        captured_at,
+        compatibility_profile,
         encoding=encoding,
     )
 

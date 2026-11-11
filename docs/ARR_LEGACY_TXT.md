@@ -34,7 +34,7 @@ from runoff_routing.arr_report import inventory_json, legacy_preburst_csv, write
 source = Path(r"C:\data\ARR_Web_Data_catchment.txt")
 result = read_arr_file(source, legacy_profile="arr2016")
 assert result.source.datahub_version is None  # Genuine historical exports may omit it.
-assert result.ifd_datasets == ()                # BOM IFDs are a separate source.
+assert result.ifd_datasets == ()  # BOM IFDs are a separate source.
 write_new(source.with_name("arr_legacy_inventory.json"), inventory_json(result))
 write_new(source.with_name("arr_legacy_preburst.csv"), legacy_preburst_csv(result))
 ```

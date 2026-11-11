@@ -184,7 +184,15 @@ def legacy_preburst_csv(document: ARRDocument) -> str:
         for duration, depths, ratios in zip(table.durations_min, table.depths_mm, table.ratios, strict=True):
             for aep, depth, ratio in zip(table.aep_percent, depths, ratios, strict=True):
                 writer.writerow(
-                    (document.source.sha256, table.source_tag, table.percentile, duration, str(aep), str(depth), str(ratio))
+                    (
+                        document.source.sha256,
+                        table.source_tag,
+                        table.percentile,
+                        duration,
+                        str(aep),
+                        str(depth),
+                        str(ratio),
+                    )
                 )
     return output.getvalue()
 
