@@ -11,7 +11,7 @@
 - `rorb_model.RunModel` holds three independently parsed or authored models; it rejects depth/area-order and ISA/burst count mismatches. `rorb_model.to_dict/from_dict` and `to_json/from_json` retain typed domain contents using **schema_version=1**, exact explicit units and Decimal **strings**; input RORB files are no longer required after model construction.
 - `rorb_codec.to_s2_payload(run)` is a **narrow reviewed float boundary** for the currently understood one-ISA lumped IL/CL, all-pervious S2 subset. It does not import the separate S2 branch, calculate flow or claim numerical parity. S2 should adapt this boundary when its source branch is integrated; do not fork another authoritative parser.
 
-All model classes are frozen and slot-based. Values at file and JSON boundaries are `Decimal`; conversion to finite `float` is explicit only at the provisional S2 adapter. Identifiers `area_1`, `reach_1` and `print_1` are deterministic **computational ordinal IDs**. Human text labels and the original graphical drawing are separate metadata. The catchment vector and storm depths stay in source order.
+All model classes are frozen and slot-based. Values at file and JSON boundaries are `Decimal`; conversion to finite `float` is explicit only at the provisional S2 adapter. A nonzero Decimal that underflows to float zero is rejected instead of silently changing a small numerical parameter to zero. Identifiers `area_1`, `reach_1` and `print_1` are deterministic **computational ordinal IDs**. Human text labels and the original graphical drawing are separate metadata. The catchment vector and storm depths stay in source order.
 
 ## Example: RORB files → Python → JSON → Python → RORB files
 
