@@ -114,7 +114,7 @@ def test_legacy_cp1252_bytes_preserved_through_offline_comparison(tmp_path: Path
     root = tmp_path / "corpus"
     _write_case(root)
     model_path = root / "model.catg"
-    annotated = model_path.read_bytes().replace(b"C END RORB_GE", b"C \\x96 legacy label\\r\\nC END RORB_GE")
+    annotated = model_path.read_bytes().replace(b"C END RORB_GE", b"C \x96 legacy label\r\nC END RORB_GE")
     model_path.write_bytes(annotated)
     catalogue_path = root / "catalogue.json"
     catalogue = json.loads(catalogue_path.read_text(encoding="utf-8"))
