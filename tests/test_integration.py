@@ -118,7 +118,6 @@ def test_original_files_json_canonical_files_read_then_calculate_roundtrip() -> 
     assert run_model(restored) == run_model(parsed.model)
 
 
-
 def test_canonical_rejects_unrepresentable_authored_labels() -> None:
     run = _run()
     altered = replace(
