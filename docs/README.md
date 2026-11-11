@@ -31,4 +31,5 @@
 
 Future repository-owned Markdown must be linked here. Policies describe required behaviour; the roadmap describes future implementation. No source document establishes that this package has passed a numerical acceptance gate.
 
-- [Optional PyROMB-based RORB_GE GIS authoring](RORB_GE_AUTHORING.md): checks basin assignment and topology, then adds nonempty legacy graphical nodes/reaches to the existing typed computational writer.
+- [Optional PyROMB-based RORB_GE GIS authoring](RORB_GE_AUTHORING.md): bounded CMD and OGR acceptance, GUI/editor deferred.
+- [PR #29 bounded native/real-GIS acceptance](work/2026-11-11-pr29-native-acceptance.md): sanitised report and unresolved profile boundaries.

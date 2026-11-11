@@ -1,7 +1,9 @@
 # Optional GIS authoring of RORB_GE catchments (S1)
 
-**Status:** new, limited RORB_GE 002 *source-authoring* contract. Generated files are not yet
-accepted by a native RORB_CMD or RORBwin executable. The existing source-aware
+**Status:** limited RORB_GE 002 *source-authoring* contract; a two-file, 21-ordinate
+RORB_CMD 6.44 profile passed bounded native replay (see [acceptance report](work/2026-11-11-pr29-native-acceptance.md)).
+RORB_GE graphical-editor opening/display and general RORBwin compatibility are **not** validated.
+The existing source-aware
 [bidirectional parser](RORB_BIDIRECTIONAL.md) and its computational ordering remain authoritative.
 
 ## Provenance and code reuse
@@ -119,7 +121,12 @@ not a coordinate transformation or source CRS inspection.
   those models simply cannot be authored through this optional adapter yet.
 - No RORB native executable or private fixtures are bundled or launched.
   Synthetic parser round-tripping does not establish native acceptability.
-- Next: stage a permission-cleared native CMD 6.44/GUI reference from an
-  actual source geometry, preserve raw input hashes, and verify echoed inputs,
-  print identities, source ordering and output diagnostics before accepting
-  a named profile. Keep S1 issue #3 open until the larger stage gates pass.
+- The bounded [CMD 6.44 acceptance report](work/2026-11-11-pr29-native-acceptance.md)
+  documents two diagnostic-free executions, byte-identical computational records,
+  exact 21-ordinate/printed-time agreement and verified physical code-7 identity.
+  A genuine Python 3.14 OGR source/wheel adapter check also passed; separate QGIS
+  provider checks used its Python 3.12 runtime (below this package's >=3.14 requirement).
+- **Not established:** GUI/editor load/save and graphical field/display fidelity,
+  supported Python 3.14 QGIS package operation, broader catchment/format support or
+  hydrological numerical equivalence. These are deferred; no further GUI/GIS work
+  is required for the present computational priority. S1 issue #3 stays open.
