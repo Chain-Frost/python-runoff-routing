@@ -6,6 +6,7 @@ and it does not copy private reference data into the source repository.
 
 import json
 from pathlib import Path
+from typing import cast
 
 from runoff_routing.legacy_inputs import LegacyInputError
 from runoff_routing.offline_reference import CorpusError, compare_corpus_case
@@ -31,11 +32,11 @@ def select_case_ids(catalogue: dict[str, object]) -> tuple[str, ...]:
         message = "Offline corpus catalogue has no case list"
         raise ValueError(message)
     ids: list[str] = []
-    for item in records:
+    for item in cast("list[object]", records):
         if not isinstance(item, dict):
             message = "Invalid offline catalogue case record"
             raise TypeError(message)
-        key: object = item.get("case_id")
+        key: object = cast("dict[str, object]", item).get("case_id")
         if not isinstance(key, str) or not key.strip():
             message = "Offline catalogue contains an invalid case_id"
             raise ValueError(message)
