@@ -2,10 +2,12 @@
 
 | Work front | Status | Owner | Updated | Next review | Next action |
 | --- | --- | --- | --- | --- | --- |
-| [Private bootstrap](2026-11-09-bootstrap.md) | Merged planning scaffold; S0 remains open | Unassigned | 2026-11-09 | With S0 review | Retain local quality and package gates, including exact-head Windows/Python 3.14 evidence. |
-| [S0 evidence capture](2026-11-10-s0-capture.md) | Source checks passed in stacked Windows CI; native acceptance open | Unassigned | 2026-11-10 | Next native session | Verify staged output placement and engine identities on one permission-cleared Windows RORB_CMD run. |
-| [S1 parameter/output inspection](2026-11-10-s1-inspection.md) | Windows CI passed on stacked source; broader grammar/native acceptance open | Unassigned | 2026-11-10 | Next grammar session | Obtain approved catchment/storm fixtures for issue #3. |
+| [Computational reference guidance](2026-11-11-computational-reference-guidance.md) | Owner wording applied | Local agent | 2026-11-11 | Next procedure investigation | Implement Python procedures and verify against pinned RORB computations. |
+| [S0 native validation](2026-11-11-s0-native.md) | Partial native evidence; stage open | Unassigned | 2026-11-11 | On acceptance review | Confirm time conventions and remaining profile/provenance gaps under [#2](https://github.com/Chain-Frost/python-runoff-routing/issues/2). |
+| [S0 evidence capture](2026-11-10-s0-capture.md) | Implemented; acceptance open | Unassigned | 2026-11-11 | On acceptance review | Validate retained CMD/GUI evidence and capture completeness before closing S0. |
+| [S1 CMD parameter/output inspection](2026-11-10-s1-inspection.md) | Implemented subset; Windows checks previously passed, acceptance open | Unassigned | 2026-11-11 | On parser review | Verify .catg/.stm source identities and native print-site/time mapping under [#3](https://github.com/Chain-Frost/python-runoff-routing/issues/3). |
+| [S1 typed parser / canonical files](2026-11-11-s1-bidirectional.md) | Implemented subset; native canonical acceptance open | Unassigned | 2026-11-11 | On parser review | Apply native-observed code-7 physical print-label fix from [#25](https://github.com/Chain-Frost/python-runoff-routing/pull/25) and re-run native CMD canonical acceptance. |
+| [RORB GUI/CMD behavior audit](2026-11-11-rorb-forensics.md) | Planned | Unassigned | 2026-11-11 | On evidence capture | Start isolated Windows GUI/CMD observations under [#16](https://github.com/Chain-Frost/python-runoff-routing/issues/16). |
+| [Private bootstrap](2026-11-09-bootstrap.md) | Scaffold merged (#11); stage gates open | Unassigned | 2026-11-11 | On stage validation | Validate S0 native capture and retain the separate numerical gates; no release is implied. |
 
-| [S1 bidirectional input model](2026-11-11-s1-bidirectional.md) | Initial subset staged for Windows/fixture verification; stage open | Unassigned | 2026-11-11 | PR-head checks | Run source quality and private read-only corpus hashes/parse; expand evidenced grammar. |
-
-[Implementation plan](../IMPLEMENTATION_PLAN.md) links all stage issues. S0-S7 remain unaccepted; S8 is deferred. Issue status and this register do not mean an agent is currently running.
+[Implementation plan](../IMPLEMENTATION_PLAN.md) links all stage issues. S0-S7 remain unaccepted; S8 is deferred. Issue status and this register do not mean an agent is currently running. Review dates do not schedule background work.
