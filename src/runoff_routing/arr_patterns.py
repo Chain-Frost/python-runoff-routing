@@ -150,7 +150,6 @@ def _csv_patterns(raw: bytes, *, kind: PatternKind, encoding: str) -> tuple[Patt
     if len(header) < len(expected) or header[: len(expected)] != expected or any(header[len(expected) :]):
         _invalid("Unrecognised ARR temporal-pattern CSV column order / area-bin layout")
     increments_index = len(expected) - 1
-    seen = 0
     patterns: list[Pattern] = []
     for index, row in enumerate(rows[1:], start=2):
         if not any(cell.strip() for cell in row):
@@ -182,9 +181,6 @@ def _csv_patterns(raw: bytes, *, kind: PatternKind, encoding: str) -> tuple[Patt
                 area_bin=row[4].strip() if kind == "areal" else None,
             )
         )
-        seen += 1
-        if seen > MAX_PATTERN_ROWS:
-            _invalid("Too many ARR temporal-pattern events")
     return tuple(patterns)
 
 

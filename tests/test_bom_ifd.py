@@ -34,7 +34,7 @@ def _csv(*, all_design: bool = False, unit: str = "mm") -> bytes:
         f"1 min,1,{first}\r\n"
         f"1.5 hour,90.0,{second}\r\n"
         f"24 hour,1440,{third}\r\n"
-    ).encode("utf-8")
+    ).encode()
 
 
 def test_standard_ifd_exact_durations_labels_and_bytes() -> None:

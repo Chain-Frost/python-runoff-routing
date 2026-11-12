@@ -115,37 +115,8 @@ class BoMIFD:
     source_system: str = "BoM Design Rainfall System (2016 methodology)"
 
     def __post_init__(self) -> None:
-        if hashlib.sha256(self.raw_bytes).hexdigest() != self.sha256:
-            _invalid("BoM source hash does not match original bytes")
-        if not self.raw_bytes or len(self.raw_bytes) > MAX_BOM_CSV_BYTES:
-            _invalid("BoM CSV source is empty or unbounded")
-        if not self.probabilities or len(self.probabilities) > MAX_BOM_PROBABILITIES:
-            _invalid("BoM probability axis is empty or unbounded")
-        if not self.durations_min or len(self.durations_min) > MAX_BOM_ROWS:
-            _invalid("BoM duration axis is empty or unbounded")
-        if len({(item.kind, item.value) for item in self.probabilities}) != len(self.probabilities):
-            _invalid("Duplicate BoM probability in export")
-        if len(set(self.durations_min)) != len(self.durations_min) or any(t <= 0 for t in self.durations_min):
-            _invalid("Duplicate or invalid BoM duration")
-        if tuple(sorted(self.durations_min)) != self.durations_min:
-            _invalid("BoM duration axis must be in ascending source order")
-        if len(self.duration_labels) != len(self.durations_min):
-            _invalid("BoM duration label and numeric axis mismatch")
-        if len(self.values) != len(self.durations_min) or any(
-            len(row) != len(self.probabilities) for row in self.values
-        ):
-            _invalid("BoM rainfall matrix dimensions do not match axes")
-        if any(not value.is_finite() or value < 0 for row in self.values for value in row):
-            _invalid("BoM IFD values must be finite and nonnegative")
-        geographic_bounds = (
-            (self.latitude, 90),
-            (self.longitude, 180),
-            (self.nearest_latitude, 90),
-            (self.nearest_longitude, 180),
-        )
-        for coord, limit in geographic_bounds:
-            if coord is not None and (not coord.is_finite() or abs(coord) > limit):
-                _invalid("BoM geographic coordinate outside valid bounds")
+        _validate_bom_axes(self)
+        _validate_bom_matrix(self)
 
     def probability(self, label: str) -> BoMProbability:
         """Select by the original label, not an inferred index or probability conversion."""
@@ -176,6 +147,45 @@ class BoMIFD:
             _invalid("BoM source is intensity (mm/h); pass convert_intensity=True explicitly")
         return value * Decimal(duration_min) / Decimal(60)
 
+
+
+def _validate_bom_axes(source: BoMIFD) -> None:
+    """Verify source identity and both row and probability axes."""
+    if hashlib.sha256(source.raw_bytes).hexdigest() != source.sha256:
+        _invalid("BoM source hash does not match original bytes")
+    if not source.raw_bytes or len(source.raw_bytes) > MAX_BOM_CSV_BYTES:
+        _invalid("BoM CSV source is empty or unbounded")
+    if not source.probabilities or len(source.probabilities) > MAX_BOM_PROBABILITIES:
+        _invalid("BoM probability axis is empty or unbounded")
+    if not source.durations_min or len(source.durations_min) > MAX_BOM_ROWS:
+        _invalid("BoM duration axis is empty or unbounded")
+    if len({(item.kind, item.value) for item in source.probabilities}) != len(source.probabilities):
+        _invalid("Duplicate BoM probability in export")
+    if len(set(source.durations_min)) != len(source.durations_min) or any(t <= 0 for t in source.durations_min):
+        _invalid("Duplicate or invalid BoM duration")
+    if tuple(sorted(source.durations_min)) != source.durations_min:
+        _invalid("BoM duration axis must be in ascending source order")
+
+
+def _validate_bom_matrix(source: BoMIFD) -> None:
+    """Validate depth matrix, labelled durations and WGS84 grid/point coordinates."""
+    if len(source.duration_labels) != len(source.durations_min):
+        _invalid("BoM duration label and numeric axis mismatch")
+    if len(source.values) != len(source.durations_min) or any(
+        len(row) != len(source.probabilities) for row in source.values
+    ):
+        _invalid("BoM rainfall matrix dimensions do not match axes")
+    if any(not value.is_finite() or value < 0 for row in source.values for value in row):
+        _invalid("BoM IFD values must be finite and nonnegative")
+    geographic_bounds = (
+        (source.latitude, 90),
+        (source.longitude, 180),
+        (source.nearest_latitude, 90),
+        (source.nearest_longitude, 180),
+    )
+    for coord, limit in geographic_bounds:
+        if coord is not None and (not coord.is_finite() or abs(coord) > limit):
+            _invalid("BoM geographic coordinate outside valid bounds")
 
 def _duration(label: str) -> int:
     matched = _DURATION.fullmatch(label.strip())

@@ -23,28 +23,28 @@ def _point_csv(*, event_id: str = "0004", duration: int = 1440, timestep: int = 
     return (
         "EventID,Duration,TimeStep,Region,AEP,Increments\r\n"
         f"{event_id},{duration},{timestep},SYNTHETIC_REGION,intermediate,10,20,30,40\r\n"
-    ).encode("utf-8")
+    ).encode()
 
 
 def _areal_csv() -> bytes:
     return (
-        "EventID,Duration,TimeStep,Region,Area,AEP,Increments\r\n"
-        "7,60,15,SYNTHETIC_REGION,100-200,frequent,25,25,25,25\r\n"
-    ).encode()
+        b"EventID,Duration,TimeStep,Region,Area,AEP,Increments\r\n"
+        b"7,60,15,SYNTHETIC_REGION,100-200,frequent,25,25,25,25\r\n"
+    )
 
 
 def _bom() -> bytes:
     return (
-        "Synthetic BoM example, NOT a real BoM export\n"
-        "IFD Design Rainfall Depth (mm)\n"
-        "Issued:,12 November 2026\n"
-        "Location Label:,SYNTHETIC EXAMPLE ONLY\n"
-        "Requested coordinate:,Latitude,-33.5,Longitude,115.25\n"
-        "Nearest grid cell:,Latitude,33.5125 (S),Longitude,115.2375 (E)\n"
-        ",,Annual Exceedance Probability (AEP)\n"
-        "Duration,Duration in min,50%,1%\n"
-        "24 hour,1440,30.0,45.5\n"
-    ).encode()
+        b"Synthetic BoM example, NOT a real BoM export\n"
+        b"IFD Design Rainfall Depth (mm)\n"
+        b"Issued:,12 November 2026\n"
+        b"Location Label:,SYNTHETIC EXAMPLE ONLY\n"
+        b"Requested coordinate:,Latitude,-33.5,Longitude,115.25\n"
+        b"Nearest grid cell:,Latitude,33.5125 (S),Longitude,115.2375 (E)\n"
+        b",,Annual Exceedance Probability (AEP)\n"
+        b"Duration,Duration in min,50%,1%\n"
+        b"24 hour,1440,30.0,45.5\n"
+    )
 
 
 def _archive(members: list[tuple[str, bytes]]) -> bytes:
@@ -70,7 +70,7 @@ def test_point_pattern_exact_identity_and_percentages() -> None:
     assert pattern.timestep_min == 360
     assert pattern.increments_percent == tuple(Decimal(x) for x in (10, 20, 30, 40))
     with pytest.raises(FrozenInstanceError):
-        setattr(pattern, "event_id", "replacement")
+        pattern.event_id = "replacement"  # pyright: ignore[reportAttributeAccessIssue] -- frozen runtime test
 
 
 def test_areal_bin_is_explicit_and_not_converted_to_area() -> None:
