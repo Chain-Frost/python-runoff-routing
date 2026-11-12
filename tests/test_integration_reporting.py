@@ -9,13 +9,13 @@ from pathlib import Path
 
 import pytest
 
-from runoff_routing.integration import RunInputError, read_run_json, run_model
-from runoff_routing.integration_reporting import review_recorded_print
+from runoff_routing.integration import RunInputError, RunResult, read_run_json, run_model
+from runoff_routing.integration_reporting import RecordedPrintReview, review_recorded_print
 
 ROOT = Path(__file__).absolute().parents[1]
 
 
-def _model_result():
+def _model_result() -> RunResult:
     run = read_run_json((ROOT / "examples" / "synthetic-run.json").read_text(encoding="utf-8"))
     return run_model(run)
 
@@ -27,7 +27,7 @@ def _tokens_and_times() -> tuple[tuple[str, ...], tuple[str, ...]]:
     return flows, times
 
 
-def _review():
+def _review() -> RecordedPrintReview:
     result = _model_result()
     flows, times = _tokens_and_times()
     return review_recorded_print(
@@ -98,33 +98,38 @@ def test_machine_readable_report_preserves_original_native_tokens() -> None:
 def test_missing_or_ambiguous_provenance_is_rejected(changed: str) -> None:
     result = _model_result()
     flows, times = _tokens_and_times()
-    kwargs = {
-        "model_print_id": "print_1",
-        "native_column_id": "Hyd001",
-        "engine_profile": "RORB_CMD 6.44 - synthetic identity only",
-        "raw_native_time_tokens": times,
-    }
+    model_print_id = "print_1"
+    native_column_id = "Hyd001"
+    engine_profile = "RORB_CMD 6.44 - synthetic identity only"
+    native_times = times
     if changed == "model":
-        kwargs["model_print_id"] = "unmapped"
+        model_print_id = "unmapped"
     elif changed == "column":
-        kwargs["native_column_id"] = ""
+        native_column_id = ""
     elif changed == "profile":
-        kwargs["engine_profile"] = ""
+        engine_profile = ""
     elif changed == "counts":
         flows = flows[:-1]
     elif changed == "times":
-        kwargs["raw_native_time_tokens"] = times[:-1]
+        native_times = times[:-1]
     else:
-        kwargs["raw_native_time_tokens"] = ("", *times[1:])
+        native_times = ("", *times[1:])
     with pytest.raises(RunInputError):
-        review_recorded_print(result, flows, **kwargs)
+        review_recorded_print(
+            result,
+            flows,
+            model_print_id=model_print_id,
+            native_column_id=native_column_id,
+            engine_profile=engine_profile,
+            raw_native_time_tokens=native_times,
+        )
 
 
 def test_native_printed_flow_token_validation_fails_closed() -> None:
     result = _model_result()
     flows, times = _tokens_and_times()
     bad = (flows[0], "NaN", *flows[2:])
-    with pytest.raises(ValueError, match="finite"):
+    with pytest.raises(ValueError, match="Invalid printed discharge"):
         review_recorded_print(
             result,
             bad,
