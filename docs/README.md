@@ -18,6 +18,7 @@
 - [S6-P0 legacy ARR2016 TXT input](ARR_LEGACY_TXT.md)
 - [S6-P1 BoM IFD, ARR temporal patterns and gross rainfall](ARR_BOM_TP_GROSS.md)
 - [S6-P2 ARR2019 temporal-pattern ensemble selection and ARF equations](ARR_S6_P2_SELECTION_ARF.md)
+- [S6-P3 ARR2019 preburst and IL/CL source methods](ARR_S6_P3_PREBURST_LOSSES.md)
 - [Pull-request template](../.github/pull_request_template.md)
 
 ## Rainfall intake
@@ -39,6 +40,7 @@
 - [S6-P0 implementation record](work/2026-11-11-s6-p0-implementation.md)
 - [S6-P1 BoM/TP implementation record](work/2026-11-12-s6-bom-tp-gross.md)
 - [S6-P2 selection/ARF implementation record](work/2026-11-12-s6-p2-selection-arf.md)
+- [S6-P3 legacy preburst/loss work record](work/2026-11-12-s6-p3-preburst-loss.md)
 - [Native code-7 serialization work record](work/2026-11-11-s1-code7-serialization.md)
 - [S1/S2 integration readiness and dependency register](work/2026-11-11-s1-s2-integration-readiness.md)
 
