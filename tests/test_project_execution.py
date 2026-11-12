@@ -239,7 +239,6 @@ def test_native_execution_is_never_called(monkeypatch: pytest.MonkeyPatch, tmp_p
     assert result.calculation.prints
 
 
-
 def test_same_reference_asset_hash_after_relocation_keeps_python_run_comparable(tmp_path: Path) -> None:
     a = tmp_path / "old"
     b = tmp_path / "new"

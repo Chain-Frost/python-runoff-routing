@@ -442,7 +442,6 @@ def test_compare_and_export_fail_closed_on_bad_input_hash(tmp_path: Path) -> Non
     assert not (tmp_path / "should_not_exist.json").exists()
 
 
-
 @pytest.mark.parametrize(
     "path",
     ["CON", "nul.txt", "AUX.ifd", "com1.csv", "LPT9", "COM³.dat", "folder/data.", "folder/data "],

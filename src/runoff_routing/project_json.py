@@ -222,10 +222,7 @@ def _model_source(raw: object) -> EmbeddedRun | LegacyRunFiles:
 
 def asset_signatures(assets: tuple[ExternalAsset, ...]) -> tuple[tuple[str, str, str, str], ...]:
     """Ordered asset provenance, excluding transport-specific relative paths."""
-    return tuple(
-        (asset.identifier, asset.role, asset.data_profile, asset.source.sha256)
-        for asset in assets
-    )
+    return tuple((asset.identifier, asset.role, asset.data_profile, asset.source.sha256) for asset in assets)
 
 
 def _file_dict(source: SourceFile) -> dict[str, str]:
