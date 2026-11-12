@@ -35,8 +35,8 @@ def test_exact_prescribed_inflow_half_print_unit_boundary_is_valid(nonlinear: bo
 @pytest.mark.parametrize("nonlinear", [False, True])
 def test_prescribed_inflow_just_outside_half_print_unit_is_rejected(nonlinear: bool) -> None:
     """The Decimal boundary fix must not widen the printing budget."""
-    with pytest.raises(ValueError, match="Prescribed inflow"):
-        if nonlinear:
+    if nonlinear:
+        with pytest.raises(ValueError, match="Prescribed inflow"):
             audit_printed_nonlinear_balance(
                 (0.0, 1.2344500001),
                 ("0.0000", "1.2344"),
@@ -45,7 +45,8 @@ def test_prescribed_inflow_just_outside_half_print_unit_is_rejected(nonlinear: b
                 exponent_m=0.8,
                 dt_hours=0.5,
             )
-        else:
+    else:
+        with pytest.raises(ValueError, match="Prescribed inflow"):
             audit_printed_linear_balance(
                 (0.0, 1.2344500001),
                 ("0.0000", "1.2344"),
