@@ -25,7 +25,7 @@ py -3.14 -m build
 
 The first command runs repository hygiene, Ruff lint/format checks, strict Pyright, then non-native/non-benchmark tests. It stops on failure and does not install dependencies or launch reference programs. `check_local.cmd` is the double-click, pause-at-end equivalent. The source-only hygiene check can also run independently: `python repo-scripts/check_repository.py`.
 
-The build command is a separate package milestone check. Install the wheel outside the repository, verify import location and exercise the selected public API there. Record source and wheel outcomes separately. Main has S0 capture and S1 restricted parser APIs but no accepted numerical solver; a build or parser check does not establish numerical validity.
+The build command is a separate package milestone check. Install the wheel outside the repository, verify import location and exercise the selected public API there. Record source and wheel outcomes separately. Main has S0 capture, S1 restricted parser APIs and the S2 Python-only routing/integration prototype, but **no accepted RORB-compatible numerical solver**. A green build, parser test or installed-wheel replay does not establish native numerical validity.
 
 Documentation changes require relative-link and factual-claim review. Numerical/parser changes require focused tests plus affected prior-stage regressions and native evidence where the contract changes. Linux checks are useful but never replace Windows/Python 3.14 acceptance. Report every missing tool, failed check and unexpected skip; do not downgrade the target interpreter to manufacture a pass.
 
