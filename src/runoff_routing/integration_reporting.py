@@ -59,25 +59,31 @@ def review_recorded_print(
     """
     if not engine_profile.strip():
         message = "An explicit, version-qualified engine profile must be supplied"
-        raise RunInputError("invalid", "engine_profile", message)
+        error = RunInputError("invalid", "engine_profile", message)
+        raise error
     if not native_column_id.strip():
         message = "An explicit native hydrograph column identity must be supplied"
-        raise RunInputError("invalid", "native_column_id", message)
+        error = RunInputError("invalid", "native_column_id", message)
+        raise error
     matching = tuple(item for item in result.prints if item.print_id == model_print_id)
     if len(matching) != 1:
         message = f"The model print ID {model_print_id!r} does not identify exactly one calculated site"
-        raise RunInputError("invalid", "print_identity", message)
+        error = RunInputError("invalid", "print_identity", message)
+        raise error
     native_tokens = tuple(native_discharge_tokens)
     native_times = tuple(raw_native_time_tokens)
     if len(native_tokens) != len(matching[0].discharge_m3_s):
         message = "Native and model printed discharge sample counts differ"
-        raise RunInputError("invalid", "print_count", message)
+        error = RunInputError("invalid", "print_count", message)
+        raise error
     if len(native_times) != len(native_tokens):
         message = "Native time labels and discharge sample counts differ"
-        raise RunInputError("invalid", "native_time_count", message)
+        error = RunInputError("invalid", "native_time_count", message)
+        raise error
     if any(not time for time in native_times):
         message = "Raw native time labels cannot be empty"
-        raise RunInputError("invalid", "native_time_label", message)
+        error = RunInputError("invalid", "native_time_label", message)
+        raise error
 
     parity = assess_recorded_print(result, native_tokens, print_id=model_print_id)
     reporting = audit_volume_conventions(
