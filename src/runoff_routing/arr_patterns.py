@@ -24,6 +24,7 @@ MAX_PATTERN_INCREMENTS = 512
 PatternKind = Literal["point", "areal"]
 _HEADER_POINT = ("eventid", "duration", "timestep", "region", "aep", "increments")
 _HEADER_AREAL = ("eventid", "duration", "timestep", "region", "area", "aep", "increments")
+_HEADER_AREAL_NO_AEP = ("eventid", "duration", "timestep", "region", "area", "increments")
 _BANDS = {"frequent", "intermediate", "rare", "very rare"}
 
 
@@ -57,14 +58,14 @@ class Pattern:
     duration_min: int
     timestep_min: int
     region: str
-    aep_band: str
+    aep_band: str | None
     increments_percent: tuple[Decimal, ...]
     area_bin: str | None = None
 
     def __post_init__(self) -> None:
         if not self.event_id or not self.region:
             _invalid("ARR temporal pattern event/region identity is empty")
-        if self.aep_band not in _BANDS:
+        if self.aep_band is not None and self.aep_band not in _BANDS:
             _invalid("Unknown ARR temporal-pattern AEP bin")
         if self.duration_min <= 0 or self.timestep_min <= 0:
             _invalid("Temporal-pattern durations and timestep must be positive")
@@ -116,8 +117,8 @@ class PatternSet:
         if len(ids) != len(set(ids)):
             _invalid("Duplicate temporal-pattern event ID in the same bin, duration and region")
         for event in self.patterns:
-            if self.kind == "point" and event.area_bin is not None:
-                _invalid("Point temporal patterns must not have an areal bin")
+            if self.kind == "point" and (event.area_bin is not None or event.aep_band is None):
+                _invalid("Point temporal patterns require an AEP bin and must not have an areal bin")
             if self.kind == "areal" and event.area_bin is None:
                 _invalid("Areal temporal patterns require the source area bin")
             if abs(sum(event.increments_percent) - Decimal(100)) > self.rounding_budget_percent:
@@ -145,9 +146,13 @@ def _csv_patterns(raw: bytes, *, kind: PatternKind, encoding: str) -> tuple[Patt
     rows = _decode_csv(raw, encoding)
     if not rows or len(rows) > MAX_PATTERN_ROWS + 1:
         _invalid("Missing/oversized ARR temporal-pattern CSV")
-    expected = _HEADER_AREAL if kind == "areal" else _HEADER_POINT
     header = tuple(part.strip().lower().replace(" ", "") for part in rows[0])
-    if len(header) < len(expected) or header[: len(expected)] != expected or any(header[len(expected) :]):
+    supported = (_HEADER_AREAL, _HEADER_AREAL_NO_AEP) if kind == "areal" else (_HEADER_POINT,)
+    expected = next(
+        (candidate for candidate in supported if header[: len(candidate)] == candidate and not any(header[len(candidate) :])),
+        None,
+    )
+    if expected is None:
         _invalid("Unrecognised ARR temporal-pattern CSV column order / area-bin layout")
     increments_index = len(expected) - 1
     patterns: list[Pattern] = []
@@ -158,9 +163,8 @@ def _csv_patterns(raw: bytes, *, kind: PatternKind, encoding: str) -> tuple[Patt
             _invalid(f"Missing temporal-pattern metadata at line {index}")
         duration_min = _positive_int(row[1], field="Duration")
         timestep_min = _positive_int(row[2], field="TimeStep")
-        aep_index = 5 if kind == "areal" else 4
-        band = row[aep_index].strip().lower()
-        if band not in _BANDS:
+        band: str | None = None if expected == _HEADER_AREAL_NO_AEP else row[increments_index - 1].strip().lower()
+        if band is not None and band not in _BANDS:
             _invalid(f"Unknown ARR AEP bin at line {index}: {band!r}")
         increment_cells = row[increments_index:]
         if not increment_cells or not increment_cells[0].strip():

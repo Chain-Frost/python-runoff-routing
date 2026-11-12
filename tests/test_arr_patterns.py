@@ -82,6 +82,44 @@ def test_areal_bin_is_explicit_and_not_converted_to_area() -> None:
         parse_pattern_csv(_point_csv(), kind="areal")
 
 
+def test_areal_csv_without_aep_preserves_absent_frequency_and_numeric_source_bin() -> None:
+    raw = (
+        b"EventID,Duration,TimeStep,Region,Area,Increments\r\n"
+        b"08911,60,15,SYNTHETIC_REGION,100,25,25,25,25\r\n"
+        b"08912,60,15,SYNTHETIC_REGION,5000,25,25,25,25\r\n"
+    )
+    document = parse_pattern_csv(raw, kind="areal")
+    assert document.raw_bytes == raw
+    assert [pattern.event_id for pattern in document.patterns] == ["08911", "08912"]
+    assert [pattern.area_bin for pattern in document.patterns] == ["100", "5000"]
+    assert all(pattern.aep_band is None for pattern in document.patterns)
+    assert document.patterns[0].increments_percent == (Decimal(25),) * 4
+    with pytest.raises(ARRFormatError, match="column order"):
+        parse_pattern_csv(raw, kind="point")
+    malformed = raw.replace(b",100,25,25,25,25", b",100,25,25,25")
+    with pytest.raises(ARRFormatError, match="increment count"):
+        parse_pattern_csv(malformed, kind="areal")
+
+
+def test_areal_zip_without_aep_retains_missing_field_and_supports_raw_hyetograph() -> None:
+    raw = (
+        b"EventID,Duration,TimeStep,Region,Area,Increments\n"
+        b"08911,60,15,SYNTHETIC_REGION,100,25,25,25,25\n"
+    )
+    zipped = _archive([("Areal_SYNTHETIC_AllStats.csv", b"arbitrary non-ingested metadata"), ("Areal_SYNTHETIC_Increments.csv", raw)])
+    patterns = parse_pattern_zip(zipped, kind="areal")
+    assert patterns.source_sha256 == hashlib.sha256(zipped).hexdigest()
+    assert [m.locator for m in patterns.members] == ["Areal_SYNTHETIC_Increments.csv"]
+    assert patterns.patterns[0].aep_band is None
+    bom = parse_bom_ifd_csv(
+        _bom().replace(b"24 hour,1440,30.0,45.5", b"1 hour,60,30.0,45.5").replace(b"24 hour,1440", b"1 hour,60")
+    )
+    storm = storm_from_bom(bom, bom.probability("1%"), patterns, patterns.patterns[0])
+    assert storm.pattern_aep_band is None
+    assert storm.pattern_area_bin == "100"
+    assert storm.total_mm == Decimal("45.5")
+
+
 def test_point_zip_preserves_order_and_member_hashes() -> None:
     first = _point_csv(event_id="0004")
     second = _point_csv(event_id="0230")

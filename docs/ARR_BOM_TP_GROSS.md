@@ -30,10 +30,10 @@ Two owner-supplied BoM point CSVs were reviewed locally (not committed). **Both 
 
 ## Temporal-pattern intake
 
-- Separate `point` and `areal` readers accept the characterised `EventID,Duration,TimeStep,Region,AEP,Increments` and `EventID,Duration,TimeStep,Region,Area,AEP,Increments` CSV schemas. Preserve source pattern IDs including leading zeros, source order, original region, AEP bin, area bin, percentages and byte hash. AEP bins are not converted to percentage probability (that belongs to an explicit later policy).
+- Separate `point` and `areal` readers accept the characterised `EventID,Duration,TimeStep,Region,AEP,Increments` point schema, and **both** observed areal schemas: `EventID,Duration,TimeStep,Region,Area,Increments` (genuine FLTwest archive) and `EventID,Duration,TimeStep,Region,Area,AEP,Increments` (synthetic/variant). Preserve original pattern IDs including leading zeros, source order, region, area-bin labels, percentages and source bytes/hashes. An areal file **without** an AEP column produces `Pattern.aep_band is None`; it must not inherit a made-up probability band. Where the source has an AEP band, preserve it without converting it to a percentage.
 - Check `duration_min % timestep_min == 0`, vector length equals duration/timestep, percentages are finite and nonnegative, event IDs are unambiguous within their bin, and increments sum to 100% within an **explicit** rounding budget (default exactly 100%; budget capped at 0.5 percentage points).
 - ZIP import validates all archive names (no absolute paths, `..`, backslashes or duplicates ignoring case), prohibits symlinks/encryption, imposes per-file/total byte, member-count and compression-ratio limits, and reads into memory without extracting. Individual CSV member SHA-256 and order are retained.
-- Synthetically characterised CSVs do not constitute acceptance of **every** legacy/2026 temporal-pattern archive dialect. Real ARR TP ZIP replay remains an opt-in local acceptance requirement.
+- **Actual legacy FLTwest replay (2026-11-12):** the owner supplied both original ZIPs for a Margaret River regional example. `FLTwest.zip` parsed **720 point patterns**, 24 durations, 240 patterns each of `frequent`, `intermediate`, `rare`; SHA-256 `0cd57da5e7dffd8f235b72d3e59c83ac1ab9f2e54f03e94201340e307ed83adb`. `Areal_FLTwest.zip` parsed **891 areal patterns**, 10 durations, 9 source area labels (`100` through `40000`), with **no AEP column**; SHA-256 `61c60366f953669a9879c5e2c6619b3c420c3a3dceeb296fa41e91606b3c213f`. All 1,611 parsed events have exactly 100% increment totals and consistent interval counts. For `10080` minutes and area `40000`, only one event is present (81 areal records at that duration rather than 90); the parser preserves the source as supplied, not silently padding it. The two archives' `AllStats.csv` members remain uninterpreted metadata, protected only by the original whole-ZIP hash. This confirms **these two actual historical ARR archive dialects**, not all 2026v1 TP variants or any area/band selection method. Original source ZIPs are not committed. See the [S6 replay record](work/2026-11-12-s6-bom-tp-gross.md).
 
 ## Explicit unadjusted hyetograph API
 
@@ -57,7 +57,7 @@ assert sum(storm.increments_mm) == storm.total_mm
 
 ## Next review gates
 
-1. Obtain permission-reviewed real legacy and 2026v1 point/areal TP ZIP exports; compare raw IDs, region/area/bin semantics and malformed archive response. Separate input shape verification from method interpretation.
+1. **Complete for these legacy examples only:** real FLTwest point/areal ZIPs parsed and independently inventoried; real 2026v1 TP variants, `AllStats` semantics, area-bin selection, frequency-band selection and upstream omissions still need method/source review.
 2. Design **explicit policy** for IFD dataset selection (BoM vs Data Hub envelope), spatial/ARF, 2016 preburst methods vs 2026 ratio/derived-depth methods, loss layers, climate baseline/SSP/year and TP selection/embedded-burst filters. Prevent double adjustments by construction.
 3. Design an S6-to-S2/RORBwin adapter that writes independent explicit storms, verifies effective inputs and compares engine-specific routed results. None of these acceptance gates are closed by import tests.
 

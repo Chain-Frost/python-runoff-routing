@@ -19,6 +19,11 @@
 - [S6-P1 BoM IFD, ARR temporal patterns and gross rainfall](ARR_BOM_TP_GROSS.md)
 - [Pull-request template](../.github/pull_request_template.md)
 
+## Rainfall intake
+
+- [BoM IFD, ARR temporal pattern and gross-rainfall data contract](ARR_BOM_TP_GROSS.md)
+- [S6 real FLTwest archive replay and implementation record](work/2026-11-12-s6-bom-tp-gross.md)
+
 ## Work and handoff
 
 - [Work register](work/README.md)

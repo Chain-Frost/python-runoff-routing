@@ -23,7 +23,7 @@ class RawHyetograph:
     timestep_min: int
     pattern_event_id: str
     pattern_region: str
-    pattern_aep_band: str
+    pattern_aep_band: str | None
     pattern_area_bin: str | None
     source_label: str
     source_sha256: str
