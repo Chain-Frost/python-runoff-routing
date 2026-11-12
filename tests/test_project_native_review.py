@@ -45,9 +45,7 @@ def _synthetic_case(tmp_path: Path) -> tuple[Path, Path, str]:
     calculated = run_model(model)
     depths = calculated.prints[0].discharge_m3_s
     native_times = [f"{(index + 1) * calculated.numerical.dt_hours:.2f}" for index in range(len(depths))]
-    rows = "\n".join(
-        f"{index + 1} {native_times[index]} {flow:.4f}" for index, flow in enumerate(depths)
-    )
+    rows = "\n".join(f"{index + 1} {native_times[index]} {flow:.4f}" for index, flow in enumerate(depths))
     text = (
         "RORBWin Output File\n"
         "Program version 6.44 synthetic\n"
@@ -201,9 +199,7 @@ def test_native_review_is_read_only_and_no_clobber(tmp_path: Path) -> None:
         ("gaps", "provenance gaps"),
     ],
 )
-def test_native_manifest_inconsistency_rejected(
-    tmp_path: Path, changed: str, message: str
-) -> None:
+def test_native_manifest_inconsistency_rejected(tmp_path: Path, changed: str, message: str) -> None:
     project, manifest, _ = _synthetic_case(tmp_path)
     new_sha = _mutate_manifest(manifest, changed)
     with pytest.raises(ProjectError, match=message):
@@ -282,7 +278,6 @@ def test_native_review_does_not_launch_reference_binary(tmp_path: Path, monkeypa
         native_column_id="Hyd001",
     )
     assert report.review_status == "source_verified_diagnostic"
-
 
 
 def test_project_native_cli_is_no_clobber_and_reports_explicit_unassessed_status(

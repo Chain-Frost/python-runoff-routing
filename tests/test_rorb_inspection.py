@@ -186,7 +186,6 @@ def test_read_only_inspector_cannot_launch_native_process(tmp_path: Path, monkey
     assert inspect_file(_write(tmp_path, _out(), "ref.out")).status == "partial"
 
 
-
 def test_cmd_one_based_print_increment_is_not_shifted(tmp_path: Path) -> None:
     text = _out(rows="1 0.333 0 0\n2 0.666 12 10\n3 0.999 0 0\n")
     doc = inspect_file(_write(tmp_path, text, "one-based-cmd.out"))
