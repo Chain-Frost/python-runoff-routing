@@ -54,8 +54,7 @@ def _raw_labels(labels: Sequence[str] | None, count: int, name: str) -> tuple[st
         return None
     result = tuple(labels)
     if len(result) != count or any(
-        not token or any(char in token for char in ("\x00", "\r", "\n"))
-        for token in result
+        not token or any(char in token for char in ("\x00", "\r", "\n")) for token in result
     ):
         message = f"{name} tokens must be nonempty original strings matching the sample grid"
         raise ValueError(message)
