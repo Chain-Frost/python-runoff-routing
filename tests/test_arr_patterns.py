@@ -102,15 +102,9 @@ def test_areal_csv_without_aep_preserves_absent_frequency_and_numeric_source_bin
 
 
 def test_areal_zip_without_aep_retains_missing_field_and_supports_raw_hyetograph() -> None:
-    raw = (
-        b"EventID,Duration,TimeStep,Region,Area,Increments\n"
-        b"08911,60,15,SYNTHETIC_REGION,100,25,25,25,25\n"
-    )
+    raw = b"EventID,Duration,TimeStep,Region,Area,Increments\n08911,60,15,SYNTHETIC_REGION,100,25,25,25,25\n"
     zipped = _archive(
-        [
-            ("Areal_SYNTHETIC_AllStats.csv", b"arbitrary non-ingested metadata"),
-            ("Areal_SYNTHETIC_Increments.csv", raw),
-        ]
+        [("Areal_SYNTHETIC_AllStats.csv", b"arbitrary non-ingested metadata"), ("Areal_SYNTHETIC_Increments.csv", raw)]
     )
     patterns = parse_pattern_zip(zipped, kind="areal")
     assert patterns.source_sha256 == hashlib.sha256(zipped).hexdigest()
