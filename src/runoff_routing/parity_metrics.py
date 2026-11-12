@@ -102,6 +102,11 @@ def _read_tokens(tokens: Sequence[str]) -> tuple[tuple[float, ...], tuple[float,
     return tuple(values), tuple(half_units)
 
 
+def _within_print_half_unit(value: float, native_token: str, half_unit: float) -> bool:
+    """Preserve exact half-unit ties without binary-float subtraction drift."""
+    return abs(Decimal(str(value)) - Decimal(native_token)) <= Decimal(str(half_unit))
+
+
 def _integral(samples: Sequence[float], dt_hours: float) -> float:
     return 3600.0 * dt_hours * math.fsum((left + right) * 0.5 for left, right in pairwise(samples))
 
@@ -138,7 +143,7 @@ def assess_printed_parity(
             raise ValueError(msg)
         error = abs(predicted - reference)
         errors.append(error)
-        if abs(Decimal(str(predicted)) - Decimal(native_tokens[index])) <= Decimal(str(half_unit)):
+        if _within_print_half_unit(predicted, native_tokens[index], half_unit):
             within += 1
         elif first is None:
             first = index
@@ -191,10 +196,14 @@ def audit_printed_linear_balance(
     if len(prescribed_inflow_m3_s) != len(upstream) or len(upstream) != len(downstream):
         msg = "The prescribed and printed sample grids must match."
         raise ValueError(msg)
-    for index, (prescribed, printed, unit) in enumerate(
+    for index, (prescribed, _printed, unit) in enumerate(
         zip(prescribed_inflow_m3_s, upstream, upstream_eps, strict=True)
     ):
-        if not math.isfinite(prescribed) or prescribed < 0 or abs(prescribed - printed) > unit:
+        if (
+            not math.isfinite(prescribed)
+            or prescribed < 0
+            or not _within_print_half_unit(prescribed, printed_inflow_tokens[index], unit)
+        ):
             msg = f"Prescribed inflow is not reproduced by the native upstream print at sample {index}."
             raise ValueError(msg)
     audit = audit_reach_balance(
@@ -301,10 +310,14 @@ def audit_printed_nonlinear_balance(
     if len(prescribed_inflow_m3_s) != len(upstream) or len(upstream) != len(downstream):
         msg = "The prescribed and printed sample grids must match."
         raise ValueError(msg)
-    for index, (prescribed, printed, unit) in enumerate(
+    for index, (prescribed, _printed, unit) in enumerate(
         zip(prescribed_inflow_m3_s, upstream, upstream_eps, strict=True)
     ):
-        if not math.isfinite(prescribed) or prescribed < 0 or abs(prescribed - printed) > unit:
+        if (
+            not math.isfinite(prescribed)
+            or prescribed < 0
+            or not _within_print_half_unit(prescribed, printed_inflow_tokens[index], unit)
+        ):
             msg = f"Prescribed inflow is not reproduced by the native upstream print at sample {index}."
             raise ValueError(msg)
     audit = audit_reach_balance(

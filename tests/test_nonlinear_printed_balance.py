@@ -4,8 +4,55 @@ import math
 
 import pytest
 
-from runoff_routing.parity_metrics import audit_printed_nonlinear_balance
+from runoff_routing.parity_metrics import audit_printed_linear_balance, audit_printed_nonlinear_balance
 from runoff_routing.reach_routing import RoutingDomainError, route_reach
+
+
+@pytest.mark.parametrize("nonlinear", [False, True])
+def test_exact_prescribed_inflow_half_print_unit_boundary_is_valid(nonlinear: bool) -> None:
+    """Binary subtraction can spuriously reject the exact 0.00005 tie."""
+    if nonlinear:
+        report = audit_printed_nonlinear_balance(
+            (0.0, 1.23445),
+            ("0.0000", "1.2344"),
+            ("0.0000", "0.0000"),
+            coefficient_k=1.0,
+            exponent_m=0.8,
+            dt_hours=0.5,
+        )
+    else:
+        report = audit_printed_linear_balance(
+            (0.0, 1.23445),
+            ("0.0000", "1.2344"),
+            ("0.0000", "0.0000"),
+            coefficient_k=1.0,
+            dt_hours=0.5,
+        )
+    assert len(report.steps) == 1
+    assert report.steps[0].end_index == 1
+
+
+@pytest.mark.parametrize("nonlinear", [False, True])
+def test_prescribed_inflow_just_outside_half_print_unit_is_rejected(nonlinear: bool) -> None:
+    """The Decimal boundary fix must not widen the printing budget."""
+    with pytest.raises(ValueError, match="Prescribed inflow"):
+        if nonlinear:
+            audit_printed_nonlinear_balance(
+                (0.0, 1.2344500001),
+                ("0.0000", "1.2344"),
+                ("0.0000", "0.0000"),
+                coefficient_k=1.0,
+                exponent_m=0.8,
+                dt_hours=0.5,
+            )
+        else:
+            audit_printed_linear_balance(
+                (0.0, 1.2344500001),
+                ("0.0000", "1.2344"),
+                ("0.0000", "0.0000"),
+                coefficient_k=1.0,
+                dt_hours=0.5,
+            )
 
 
 @pytest.mark.parametrize("dt", [0.5, 0.25, 0.125])
