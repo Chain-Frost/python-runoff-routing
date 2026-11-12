@@ -531,8 +531,8 @@ def main(argv: list[str] | None = None) -> int:
             )
             return 0
         if len(args) == 3 and args[0] == "compare-runs":
-            from .project_execution import (
-                compare_routed_projects,  # noqa: PLC0415 -- CLI-only import avoids project_json execution cycle
+            from .project_execution import (  # noqa: PLC0415 -- CLI-only import avoids project_json execution cycle
+                compare_routed_projects,
             )
 
             comparison = compare_routed_projects(Path(args[1]), Path(args[2]))
