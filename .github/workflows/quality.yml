@@ -42,6 +42,7 @@ jobs:
           try {
             $env:PYTHONPATH = $target
             python -c "import pathlib, runoff_routing; p=pathlib.Path(runoff_routing.__file__).resolve(); root=pathlib.Path(r'$target').resolve(); assert p.is_relative_to(root), p; assert (p.parent / 'py.typed').is_file(); print(p)"
+            python -c "from runoff_routing.bom_ifd import parse_bom_ifd_csv; from runoff_routing.arr_patterns import parse_pattern_zip; from runoff_routing.arr_storm import storm_from_bom; print('S6 source wheel imports OK')"
           } finally {
             Pop-Location
           }

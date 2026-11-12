@@ -2,6 +2,7 @@
 
 | Work front | Status | Owner | Updated | Next review | Next action |
 | --- | --- | --- | --- | --- | --- |
+| [S6-P1 BoM IFD + TP intake](2026-11-12-s6-bom-tp-gross.md) | Draft, dependent on S6-P0 PR #38 | Independent rainfall agent | 2026-11-12 | Windows quality review | Verify offline BoM and TP input, gross rainfall, no hydrological parity claim. |
 | [S6-P0 ARR Data Hub intake](2026-11-11-s6-p0-implementation.md) | Draft source-only implementation | Independent rainfall agent | 2026-11-11 | After implementation CI review | Validate 2026v1 IFD JSON/TXT and provenance; do not infer ARR method acceptance [#33](https://github.com/Chain-Frost/python-runoff-routing/issues/33). |
 | [Computational reference guidance](2026-11-11-computational-reference-guidance.md) | Owner wording applied | Local agent | 2026-11-11 | Next procedure investigation | Implement Python procedures and verify against pinned RORB computations. |
 | [S0 native validation](2026-11-11-s0-native.md) | Partial native evidence; stage open | Unassigned | 2026-11-11 | On acceptance review | Confirm time conventions and remaining profile/provenance gaps under [#2](https://github.com/Chain-Frost/python-runoff-routing/issues/2). |
