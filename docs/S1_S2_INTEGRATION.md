@@ -1,6 +1,6 @@
 # S1–S2 Python-only integration
 
-**Status: draft integration prototype, NOT an accepted RORB implementation.** This document covers the code behind [S1 #19](https://github.com/Chain-Frost/python-runoff-routing/pull/19) and [S2 #14](https://github.com/Chain-Frost/python-runoff-routing/pull/14)/[#18](https://github.com/Chain-Frost/python-runoff-routing/pull/18). Keep [issue #3](https://github.com/Chain-Frost/python-runoff-routing/issues/3) and [issue #4](https://github.com/Chain-Frost/python-runoff-routing/issues/4) open.
+**Status: implementation merged to `main` in [PR #23](https://github.com/Chain-Frost/python-runoff-routing/pull/23), NOT an accepted RORB-compatible numerical implementation.** This document covers the code behind [S1 #19](https://github.com/Chain-Frost/python-runoff-routing/pull/19) and [S2 #14](https://github.com/Chain-Frost/python-runoff-routing/pull/14)/[#18](https://github.com/Chain-Frost/python-runoff-routing/pull/18). Keep [issue #3](https://github.com/Chain-Frost/python-runoff-routing/issues/3) and [issue #4](https://github.com/Chain-Frost/python-runoff-routing/issues/4) open.
 
 ## Supported API, source provenance and no-clobber outputs
 
