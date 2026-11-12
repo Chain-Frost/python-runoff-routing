@@ -120,7 +120,9 @@ def audit_onset(
         first_any_nonzero_index=first_any,
         first_outside_budget_index=mismatch,
         samples_from_onset=offset,
-        first_mismatch_native_increment=increments[mismatch] if increments is not None and mismatch is not None else None,
+        first_mismatch_native_increment=increments[mismatch]
+        if increments is not None and mismatch is not None
+        else None,
         first_mismatch_native_time=times[mismatch] if times is not None and mismatch is not None else None,
         first_mismatch_native_discharge=tokens[mismatch] if mismatch is not None else None,
         first_mismatch_predicted_m3_s=predicted[mismatch] if mismatch is not None else None,

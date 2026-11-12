@@ -51,12 +51,16 @@ def test_later_mismatch_and_equal_native_gui_axes_remain_distinct() -> None:
     prediction = (0.0, 0.5, 1.0, 1.0, 1.1)
     printed = ("0.0000", "0.5000", "1.0000", "1.0000", "1.0000")
     cmd = audit_onset(
-        prediction, printed, dt_hours=0.5,
+        prediction,
+        printed,
+        dt_hours=0.5,
         native_increment_tokens=("1", "2", "3", "4", "5"),
         native_time_tokens=("0.50", "1.00", "1.50", "2.00", "2.50"),
     )
     gui = audit_onset(
-        prediction, printed, dt_hours=0.5,
+        prediction,
+        printed,
+        dt_hours=0.5,
         native_increment_tokens=("0", "1", "2", "3", "4"),
         native_time_tokens=("0.00", "0.50", "1.00", "1.50", "2.00"),
     )
@@ -95,7 +99,9 @@ def test_offline_adapter_checks_identity_and_preserves_original_native_tokens() 
         OrdinateDifference(0, "1", "0.50", "0.0000", 0.0, 0.0),
         OrdinateDifference(1, "2", "1.00", "2.0000", 2.02, 0.02),
     )
-    comparison = OfflineComparison("synthetic", "compared", "test fixture", dt_hours=0.5, sample_count=2, differences=rows)
+    comparison = OfflineComparison(
+        "synthetic", "compared", "test fixture", dt_hours=0.5, sample_count=2, differences=rows
+    )
     result = audit_offline_comparison(comparison)
     assert result.case_id == "synthetic"
     assert result.first_mismatch_native_time == "1.00"
@@ -144,10 +150,14 @@ def test_native_clock_and_identifiers_do_not_accept_partial_or_malformed_provena
     with pytest.raises(ValueError, match="supplied together"):
         audit_onset((0.0,), ("0.000",), dt_hours=0.5, native_time_tokens=("0.50",))
     with pytest.raises(ValueError, match="matching the sample grid"):
-        audit_onset((0.0, 0.0), ("0.000", "0.000"), dt_hours=0.5,
-                    native_increment_tokens=("1",), native_time_tokens=("0.50", "1.00"))
+        audit_onset(
+            (0.0, 0.0),
+            ("0.000", "0.000"),
+            dt_hours=0.5,
+            native_increment_tokens=("1",),
+            native_time_tokens=("0.50", "1.00"),
+        )
     with pytest.raises(ValueError, match="nonempty original strings"):
-        audit_onset((0.0,), ("0.000",), dt_hours=0.5,
-                    native_increment_tokens=("\n",), native_time_tokens=("0.50",))
+        audit_onset((0.0,), ("0.000",), dt_hours=0.5, native_increment_tokens=("\n",), native_time_tokens=("0.50",))
     with pytest.raises(ValueError, match="Case identifier"):
         audit_onset((0.0,), ("0.000",), dt_hours=0.5, case_id=" unsafe ")
