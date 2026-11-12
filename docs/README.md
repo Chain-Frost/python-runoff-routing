@@ -35,6 +35,7 @@
 - [S2 offline development record](work/2026-11-11-s2-offline-development.md)
 - [S2 printed-ordinate audit record](work/2026-11-11-s2-parity-audit.md)
 - [S1/S2 integration implementation record](work/2026-11-11-s1-s2-integration.md)
+- [S1/S2 implementation merge and acceptance boundary](work/2026-11-12-s1-s2-implementation-merge.md)
 - [PR #29 bounded native/real-GIS acceptance](work/2026-11-11-pr29-native-acceptance.md)
 
 Future repository-owned Markdown must be linked here. Policies describe required behaviour; the roadmap describes future implementation. No source document establishes that this package has passed a numerical acceptance gate.

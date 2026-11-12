@@ -1,5 +1,7 @@
 # Handoff C — S1 typed model / S2 numerical prototype integration
 
+**Current status (2026-11-12):** The Python-only implementation was merged into public `main` via [PR #23](https://github.com/Chain-Frost/python-runoff-routing/pull/23) as `a558c0ce9679949cf15ef5be024d8f4b0a7637f6`. Previous draft-state wording below records historical development. **Native numerical S2 parity remains unaccepted:** four linear supplemental profiles pass, while all 36 computed CMD whole-catchment cases fail frozen printed precision. [Current merge and validation record](2026-11-12-s1-s2-implementation-merge.md). Stage issues #3/#4 remain open.
+
 **State:** implementation in draft; S1 code-7 changes reconciled; all scientific acceptance gates open. **Date:** 2026-11-11. **Owner branch:** `feat/s1-s2-integration-owner-20261111`.
 
 ## Upstream dependency map
@@ -47,3 +49,9 @@ S0 #12, S1 inspection #13, S1 typed API #19 and corrected native code-7 writer #
 ## S1-backed offline source transport
 
 The retained offline S2 comparator passes SHA-256-verified original `.catg` and `.stm` bytes through the S1 grammar via the compatibility adapter. This preserves legacy CP1252 input support, avoids a duplicate parser, and retains original evidence hashes. Public synthetic regressions include CP1252 catchment/storm text and an annotated all-pervious sentinel. These are input-transport checks, not a private-corpus replay or numerical acceptance; overlapping S2 #21 must be reconciled independently before merging.
+
+## Implementation merge outcome (2026-11-12)
+
+The reviewed head `55aac4f51db1f994239b3c052598a1cc09787599` passed Windows/Python 3.14.10 Ruff 0.16.6, strict Pyright and 247 synthetic tests, with successful out-of-tree wheel import. The final private installed-wheel campaign verified 1,026 indexed files and classified 65 originals (36 computed CMD failures against fixed print precision, 25 unreviewed, three expected failures, one incomplete reference); the four limited linear profiles passed. All 16,836 integrated Python predicted ordinates matched the retained Python comparator and the prior numerical CSVs were unchanged. The only historical report difference was three S1 failure-message strings. These are software regression findings, **not** acceptance of native RORB equivalence.
+
+The repository allows squash merges only; the implementation was merged as `a558c0ce9679949cf15ef5be024d8f4b0a7637f6`, without a release, native run, private fixture transfer, tolerance change or golden replacement. The dependent pure nonlinear diagnostic remains a separate unaccepted draft [PR #41](https://github.com/Chain-Frost/python-runoff-routing/pull/41). S1 issue #3, S2 issue #4 and annotated code-7 native execution acceptance are outstanding.
