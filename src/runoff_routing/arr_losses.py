@@ -131,7 +131,7 @@ def select_legacy_preburst_loss(
         msg = "Only an explicit legacy ARR2016 TXT profile supports this loss selection"
         raise ARRFormatError(msg)
     _validate_loss_method(method, excess_policy)
-    if isinstance(duration_min, bool) or not isinstance(duration_min, int) or duration_min <= 0:
+    if isinstance(duration_min, bool) or duration_min <= 0:
         msg = "Loss event duration must be whole positive minutes"
         raise ARRFormatError(msg)
     if not aep_percent.is_finite() or not 0 < aep_percent <= 100:
@@ -199,6 +199,14 @@ def select_legacy_preburst_loss(
     )
 
 
+def _require_areal_event(value: object) -> AreaAdjustedHyetograph:
+    """Validate a dynamic API boundary without weakening typed call signatures."""
+    if not isinstance(value, AreaAdjustedHyetograph):
+        msg = "Ratio-to-rainfall mode requires a once-ARF-adjusted BoM event"
+        raise ARRFormatError(msg)
+    return value
+
+
 def derive_preburst_from_areal_rainfall(
     selection: PreburstLossSelection,
     event: AreaAdjustedHyetograph,
@@ -209,9 +217,7 @@ def derive_preburst_from_areal_rainfall(
     to the computed preburst depth. The exact RORBwin 6.52 event arithmetic
     remains an independently testable hypothesis, not established parity.
     """
-    if not isinstance(event, AreaAdjustedHyetograph):
-        msg = "Ratio-to-rainfall mode requires a once-ARF-adjusted BoM event"
-        raise ARRFormatError(msg)
+    event = _require_areal_event(event)
     if selection.depth_basis != "as_exported_depth":
         msg = "Preburst rainfall ratio was already applied; double application prohibited"
         raise ARRFormatError(msg)
