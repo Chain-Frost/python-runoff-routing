@@ -14,6 +14,7 @@
 - [S1 CMD inspection](S1-INSPECTION.md)
 - [S1 bidirectional typed RORB model](RORB_BIDIRECTIONAL.md)
 - [S1/S2 Python integration API and capability matrix](S1_S2_INTEGRATION.md)
+- [S2 onset-relative printed-precision diagnostic](S2_ONSET_AUDIT.md)
 - [Optional PyROMB-based RORB_GE GIS authoring](RORB_GE_AUTHORING.md)
 - [RORB behavioral audit and warning policy](BEHAVIOUR_AND_WARNINGS.md)
 - [Pull-request template](../.github/pull_request_template.md)
@@ -36,6 +37,7 @@
 - [S2 printed-ordinate audit record](work/2026-11-11-s2-parity-audit.md)
 - [S1/S2 integration implementation record](work/2026-11-11-s1-s2-integration.md)
 - [S1/S2 implementation merge and acceptance boundary](work/2026-11-12-s1-s2-implementation-merge.md)
+- [S2 onset-relative discrepancy work record](work/2026-11-12-s2-onset-audit.md)
 - [PR #29 bounded native/real-GIS acceptance](work/2026-11-11-pr29-native-acceptance.md)
 
 Future repository-owned Markdown must be linked here. Policies describe required behaviour; the roadmap describes future implementation. No source document establishes that this package has passed a numerical acceptance gate.
