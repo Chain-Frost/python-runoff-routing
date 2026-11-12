@@ -149,9 +149,8 @@ def compare_routed_projects(left: Path, right: Path) -> ComputedProjectCompariso
     left_run = execute_loaded_project(original)
     right_run = execute_loaded_project(alternative)
     first_difference = _first_output_difference(left_run.calculation, right_run.calculation)
-    locations_equal = (
-        tuple((item.print_id, item.label) for item in left_run.calculation.prints)
-        == tuple((item.print_id, item.label) for item in right_run.calculation.prints)
+    locations_equal = tuple((item.print_id, item.label) for item in left_run.calculation.prints) == tuple(
+        (item.print_id, item.label) for item in right_run.calculation.prints
     )
     return ComputedProjectComparison(
         original.project.identifier,

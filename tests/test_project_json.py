@@ -302,7 +302,6 @@ def test_cli_import_rorb_writes_fingerprinted_project(tmp_path: Path, capsys: py
     assert main(args) == 2
 
 
-
 def test_original_rorb_files_and_embedded_json_have_exact_typed_model_identity(tmp_path: Path) -> None:
     par, catg, stm = _legacy_sources(tmp_path)
     legacy_path = tmp_path / "historic project.json"

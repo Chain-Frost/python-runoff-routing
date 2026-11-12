@@ -423,9 +423,7 @@ def _first_differences(left: object, right: object, path: str, differences: list
         differences.append(path)
 
 
-def _difference_mapping(
-    first: dict[str, object], second: dict[str, object], path: str, differences: list[str]
-) -> None:
+def _difference_mapping(first: dict[str, object], second: dict[str, object], path: str, differences: list[str]) -> None:
     for key in sorted(first.keys() | second.keys()):
         if len(differences) >= MAX_DIFFERENCE_PATHS:
             break
@@ -436,9 +434,7 @@ def _difference_mapping(
             _first_differences(first[key], second[key], label, differences)
 
 
-def _difference_sequence(
-    first: list[object], second: list[object], path: str, differences: list[str]
-) -> None:
+def _difference_sequence(first: list[object], second: list[object], path: str, differences: list[str]) -> None:
     if len(first) != len(second):
         differences.append(f"{path}.length")
     for index, (a, b) in enumerate(zip(first, second, strict=False)):
