@@ -38,9 +38,7 @@ def _document() -> bytes:
 
 def _selection(*, method: LossMethod = "burst_only_reduced_il") -> PreburstLossSelection:
     document = parse_arr_txt(_document(), legacy_profile="arr2016")
-    return select_legacy_preburst_loss(
-        document, duration_min=60, aep_percent=Decimal(1), percentile=50, method=method
-    )
+    return select_legacy_preburst_loss(document, duration_min=60, aep_percent=Decimal(1), percentile=50, method=method)
 
 
 def _event(
@@ -269,9 +267,7 @@ def test_complete_storm_preburst_can_produce_excess_and_cannot_reuse_burst_il() 
         _document().replace(b"Storm Initial Losses (mm),21.0", b"Storm Initial Losses (mm),2.0"),
         legacy_profile="arr2016",
     )
-    selection = select_legacy_preburst_loss(
-        doc, duration_min=60, aep_percent=Decimal(1), method="explicit_preburst"
-    )
+    selection = select_legacy_preburst_loss(doc, duration_min=60, aep_percent=Decimal(1), method="explicit_preburst")
     event = _event()
     full = prepend_explicit_preburst(
         event, selection, percentages=(Decimal(50), Decimal(50)), declared_profile_id="synthetic-two-step"
@@ -311,7 +307,9 @@ def test_ratio_preburst_rejects_nonadjusted_rainfall_and_unreviewed_excess() -> 
     with pytest.raises(ARRFormatError, match="once-ARF-adjusted"):
         derive_preburst_from_areal_rainfall(selection, cast(AreaAdjustedHyetograph, gross))
     calc = calculate_arr2019_arf(
-        catchment_area_km2=Decimal(100), duration_min=60, aep_percent=Decimal(1),
+        catchment_area_km2=Decimal(100),
+        duration_min=60,
+        aep_percent=Decimal(1),
         coefficients=published_coefficients("South-West Western Australia"),
     )
     areal = apply_arr2019_arf_to_bom_storm(gross, calc)
