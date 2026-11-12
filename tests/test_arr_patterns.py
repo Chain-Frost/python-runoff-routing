@@ -152,8 +152,16 @@ def test_declared_rounding_budget_and_strict_storm_balance() -> None:
     ],
 )
 def test_zip_rejects_unsafe_member_paths(name: str) -> None:
+    # ZipInfo normalises backslash separators on Windows before writing. Patch the
+    # same-length stored names in both ZIP headers so the parser sees hostile bytes.
+    safe_name = name.replace("\\", "_")
+    raw = _archive([(safe_name, _point_csv())])
+    if safe_name != name:
+        stored_name = safe_name.encode()
+        assert raw.count(stored_name) == 2
+        raw = raw.replace(stored_name, name.encode())
     with pytest.raises(ARRFormatError, match="Unsafe"):
-        parse_pattern_zip(_archive([(name, _point_csv())]), kind="point")
+        parse_pattern_zip(raw, kind="point")
 
 
 def test_zip_rejects_duplicate_casefolded_names() -> None:
