@@ -110,9 +110,7 @@ def test_areal_zip_without_aep_retains_missing_field_and_supports_raw_hyetograph
     assert patterns.source_sha256 == hashlib.sha256(zipped).hexdigest()
     assert [m.locator for m in patterns.members] == ["Areal_SYNTHETIC_Increments.csv"]
     assert patterns.patterns[0].aep_band is None
-    bom = parse_bom_ifd_csv(
-        _bom().replace(b"24 hour,1440,30.0,45.5", b"1 hour,60,30.0,45.5")
-    )
+    bom = parse_bom_ifd_csv(_bom().replace(b"24 hour,1440,30.0,45.5", b"1 hour,60,30.0,45.5"))
     storm = storm_from_bom(bom, bom.probability("1%"), patterns, patterns.patterns[0])
     assert storm.pattern_aep_band is None
     assert storm.pattern_area_bin == "100"
