@@ -78,7 +78,7 @@ def _make_storm(
         source_rainfall_depth_mm=depth,
         increments_mm=depths,
         end_times_min=tuple(range(pattern.timestep_min, pattern.duration_min + 1, pattern.timestep_min)),
-        total_mm=sum(depths),
+        total_mm=sum(depths, Decimal(0)),
         operations=operations,
     )
 

@@ -205,7 +205,13 @@ def _parse_probability(token: str) -> BoMProbability:
     match = _PROBABILITY.fullmatch(label)
     if match is None:
         _invalid(f"Unknown BoM probability label {token!r}; EY, AEP and ARI are not interchangeable")
-    for group, kind in (("ey", "EY"), ("aep", "AEP_PERCENT"), ("one_in", "AEP_ONE_IN"), ("ari", "ARI_YEARS")):
+    kinds: tuple[tuple[str, ProbabilityKind], ...] = (
+        ("ey", "EY"),
+        ("aep", "AEP_PERCENT"),
+        ("one_in", "AEP_ONE_IN"),
+        ("ari", "ARI_YEARS"),
+    )
+    for group, kind in kinds:
         value = match.group(group)
         if value is not None:
             return BoMProbability(label=label, kind=kind, value=_decimal(value, "probability", positive=True))
