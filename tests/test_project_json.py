@@ -378,7 +378,8 @@ def test_external_asset_provenance_can_disagree_even_with_identical_run_model(tm
     write_project(left, replace(_inline(), assets=(asset_a,)))
     write_project(right, replace(_inline(), assets=(asset_b,)))
     result = compare_project_files(left, right)
-    assert result.model_equal and result.rainfall_profile_equal
+    assert result.model_equal
+    assert result.rainfall_profile_equal
     assert not result.external_assets_equal
     assert not result.configuration_equal
     assert any(path.startswith("external_assets[0]") for path in result.first_differences)

@@ -511,7 +511,7 @@ def main(argv: list[str] | None = None) -> int:
     args = sys.argv[1:] if argv is None else argv
     try:
         if len(args) == 3 and args[0] == "run":
-            from .project_execution import run_project, write_execution_json
+            from .project_execution import run_project, write_execution_json  # noqa: PLC0415 -- CLI-only import avoids project_json execution cycle
 
             calculation = run_project(Path(args[1]))
             write_execution_json(Path(args[2]), calculation)
@@ -528,7 +528,7 @@ def main(argv: list[str] | None = None) -> int:
             )
             return 0
         if len(args) == 3 and args[0] == "compare-runs":
-            from .project_execution import compare_routed_projects
+            from .project_execution import compare_routed_projects  # noqa: PLC0415 -- CLI-only import avoids project_json execution cycle
 
             comparison = compare_routed_projects(Path(args[1]), Path(args[2]))
             print(comparison.to_json(), end="")

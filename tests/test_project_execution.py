@@ -93,7 +93,8 @@ def test_file_backed_rorb_and_embedded_json_produce_identical_python_ordinates(t
     a, b = run_project(source), run_project(embedded)
     assert a.source_kind == "rorb-files"
     assert b.source_kind == "embedded-run"
-    assert a.source_file_hashes and not b.source_file_hashes
+    assert a.source_file_hashes
+    assert not b.source_file_hashes
     assert a.calculation == b.calculation
     assert a.model_sha256 == b.model_sha256
     comparison = compare_routed_projects(source, embedded)
@@ -111,7 +112,7 @@ def test_exact_python_output_differences_are_reported_without_tolerance(tmp_path
     edited = tmp_path / "edited.json"
     model = _model()
     write_project(original, Project("original", "explicit", EmbeddedRun(model)))
-    new_routing = replace(model.parameters.routing[0], kc=Decimal("2"))
+    new_routing = replace(model.parameters.routing[0], kc=Decimal(2))
     new_parameters = replace(model.parameters, routing=(new_routing,))
     write_project(edited, Project("edited", "explicit", EmbeddedRun(replace(model, parameters=new_parameters))))
     result = compare_routed_projects(original, edited)
