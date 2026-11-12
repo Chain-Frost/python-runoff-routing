@@ -156,11 +156,12 @@ def _native_report_entry(manifest: dict[str, object]) -> dict[str, object]:
         message = "S0 manifest lacks retained output records"
         raise ProjectError(message)
     records = cast("list[object]", outputs)
-    selected = tuple(
-        _record(item, "S0 output")
-        for item in records
-        if isinstance(item, dict) and str(item.get("path", "")).lower().endswith(".out")
-    )
+    selected: list[dict[str, object]] = []
+    for item in records:
+        entry = _record(item, "S0 output")
+        name = entry.get("path")
+        if isinstance(name, str) and name.lower().endswith(".out"):
+            selected.append(entry)
     if len(selected) != 1:
         message = "S0 native review requires exactly one retained .out report"
         raise ProjectError(message)
