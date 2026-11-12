@@ -148,7 +148,6 @@ class BoMIFD:
         return value * Decimal(duration_min) / Decimal(60)
 
 
-
 def _validate_bom_axes(source: BoMIFD) -> None:
     """Verify source identity and both row and probability axes."""
     if hashlib.sha256(source.raw_bytes).hexdigest() != source.sha256:
@@ -186,6 +185,7 @@ def _validate_bom_matrix(source: BoMIFD) -> None:
     for coord, limit in geographic_bounds:
         if coord is not None and (not coord.is_finite() or abs(coord) > limit):
             _invalid("BoM geographic coordinate outside valid bounds")
+
 
 def _duration(label: str) -> int:
     matched = _DURATION.fullmatch(label.strip())
@@ -232,9 +232,7 @@ def _csv_rows(raw: bytes, encoding: str) -> list[list[str]]:
     return rows
 
 
-def _table_metadata(
-    preamble: list[list[str]], explicit_unit: RainfallUnit | None
-) -> tuple[BoMTableKind, RainfallUnit]:
+def _table_metadata(preamble: list[list[str]], explicit_unit: RainfallUnit | None) -> tuple[BoMTableKind, RainfallUnit]:
     titles = [match for row in preamble for cell in row if (match := _TABLE_TITLE.fullmatch(cell.strip())) is not None]
     if len(titles) != 1:
         _invalid("BoM CSV requires one recognised IFD/All Design Rainfall depth or intensity title")
@@ -312,7 +310,7 @@ def parse_bom_ifd_csv(
     duration_labels: list[str] = []
     durations: list[int] = []
     values: list[tuple[Decimal, ...]] = []
-    for i, row in enumerate(rows[header_index + 1:], start=header_index + 2):
+    for i, row in enumerate(rows[header_index + 1 :], start=header_index + 2):
         if not any(cell.strip() for cell in row):
             if any(any(cell.strip() for cell in later) for later in rows[i:]):
                 _invalid("Unexpected content after blank row in BoM matrix")
