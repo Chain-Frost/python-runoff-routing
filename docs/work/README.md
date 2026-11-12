@@ -2,6 +2,8 @@
 
 | Work front | Status | Owner | Updated | Next review | Next action |
 | --- | --- | --- | --- | --- | --- |
+| [Integrated native print review](2026-11-12-integrated-print-review.md) | Draft additive integration | Unassigned | 2026-11-12 | Review PR #40 dependency and Windows quality | Native print IDs and reporting statistics stay distinct; no native parity claim. |
+| [Native reporting convention](2026-11-11-s2-reporting-conventions.md) | PR #40 quality accepted, integration open | Unassigned | 2026-11-12 | On reporting review | Preserve native inclusive sum and physical flux as different statistics. |
 | [Computational reference guidance](2026-11-11-computational-reference-guidance.md) | Owner wording applied | Local agent | 2026-11-11 | Next procedure investigation | Implement Python procedures and verify against pinned RORB computations. |
 | [S0 native validation](2026-11-11-s0-native.md) | Partial native evidence; stage open | Unassigned | 2026-11-11 | On acceptance review | Confirm time conventions and remaining profile/provenance gaps under [#2](https://github.com/Chain-Frost/python-runoff-routing/issues/2). |
 | [S0 evidence capture](2026-11-10-s0-capture.md) | Implemented; acceptance open | Unassigned | 2026-11-11 | On acceptance review | Validate retained CMD/GUI evidence and capture completeness before closing S0. |
