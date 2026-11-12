@@ -47,7 +47,8 @@ def _independent_long(area: float, duration: float, aep_percent: float, region: 
     p = 0.3 + math.log10(aep_percent / 100)
     return min(
         1,
-        1 - a * (area**b - c * math.log10(duration)) * duration**-d
+        1
+        - a * (area**b - c * math.log10(duration)) * duration**-d
         + e * area**f * duration**g * p
         + h * 10 ** (i * area * duration / 1440) * p,
     )
@@ -162,11 +163,7 @@ def test_opt_in_extended_range_and_original_source_not_rounded() -> None:
 
 
 def test_gross_bom_rainfall_is_arf_reduced_once() -> None:
-    raw = (
-        b"IFD Design Rainfall Depth (mm)\n"
-        b"Duration,Duration in min,1%\n"
-        b"24 hour,1440,129\n"
-    )
+    raw = b"IFD Design Rainfall Depth (mm)\nDuration,Duration in min,1%\n24 hour,1440,129\n"
     source = parse_bom_ifd_csv(raw)
     csv = b"EventID,Duration,TimeStep,Region,AEP,Increments\n0007,1440,360,TEST,rare,10,20,30,40\n"
     patterns = parse_pattern_csv(csv, kind="point")

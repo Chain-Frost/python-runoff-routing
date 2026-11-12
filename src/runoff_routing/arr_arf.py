@@ -25,7 +25,15 @@ _PUBLISHED_PARAMETERS: dict[str, tuple[str, ...]] = {
     "Semi-arid Inland Queensland": ("0.159", "0.283", "0.25", "0.308", "7.3E-07", "1", "0.039", "0", "0"),
     "Tasmania": ("0.0605", "0.347", "0.2", "0.283", "0.00076", "0.347", "0.0877", "0.012", "-0.00033"),
     "South-West Western Australia": (
-        "0.183", "0.259", "0.271", "0.33", "3.85E-06", "0.41", "0.55", "0.00817", "-0.00045"
+        "0.183",
+        "0.259",
+        "0.271",
+        "0.33",
+        "3.85E-06",
+        "0.41",
+        "0.55",
+        "0.00817",
+        "-0.00045",
     ),
     "Central New South Wales": ("0.265", "0.241", "0.505", "0.321", "0.00056", "0.414", "-0.021", "0.015", "-0.00033"),
     "South-East Coast": ("0.06", "0.361", "0", "0.317", "8.11E-05", "0.651", "0", "0", "0"),
@@ -61,9 +69,15 @@ def published_coefficients(region: str) -> ARFCoefficients:
         msg = f"Unknown ARR2019 ARF region {region!r}; use a published full region name"
         raise ARRFormatError(msg)
     values = (
-        Decimal(raw[0]), Decimal(raw[1]), Decimal(raw[2]),
-        Decimal(raw[3]), Decimal(raw[4]), Decimal(raw[5]),
-        Decimal(raw[6]), Decimal(raw[7]), Decimal(raw[8]),
+        Decimal(raw[0]),
+        Decimal(raw[1]),
+        Decimal(raw[2]),
+        Decimal(raw[3]),
+        Decimal(raw[4]),
+        Decimal(raw[5]),
+        Decimal(raw[6]),
+        Decimal(raw[7]),
+        Decimal(raw[8]),
     )
     return ARFCoefficients(region, values, "arr2019_book2_table_2_4_2")
 
@@ -136,11 +150,14 @@ def _short(area: Decimal, duration: Decimal, aep_frac: Decimal) -> Decimal:
     return min(
         Decimal(1),
         Decimal(1)
-        - Decimal("0.287") * (area ** Decimal("0.265") - Decimal("0.439") * duration.log10())
+        - Decimal("0.287")
+        * (area ** Decimal("0.265") - Decimal("0.439") * duration.log10())
         * duration ** Decimal("-0.36")
         + Decimal("0.00226") * area ** Decimal("0.226") * duration ** Decimal("0.125") * probability_term
-        + Decimal("0.0141") * area ** Decimal("0.213")
-        * Decimal(10) ** (Decimal("-0.021") * (duration - 180) ** 2 / 1440) * probability_term,
+        + Decimal("0.0141")
+        * area ** Decimal("0.213")
+        * Decimal(10) ** (Decimal("-0.021") * (duration - 180) ** 2 / 1440)
+        * probability_term,
     )
 
 
@@ -150,8 +167,8 @@ def _long(area: Decimal, duration: Decimal, aep_frac: Decimal, coeffs: ARFCoeffi
     return min(
         Decimal(1),
         Decimal(1)
-        - a * (area ** b - c * duration.log10()) * duration ** -d
-        + e * area ** f * duration ** g * probability_term
+        - a * (area**b - c * duration.log10()) * duration**-d
+        + e * area**f * duration**g * probability_term
         + h * Decimal(10) ** (i * area * duration / 1440) * probability_term,
     )
 

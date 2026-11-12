@@ -77,8 +77,12 @@ def test_area_band_boundaries_fail_instead_of_using_nearest(area: str, expected_
 @pytest.mark.parametrize(
     ("aep", "band"),
     [
-        ("50", "frequent"), ("20", "frequent"), ("10", "intermediate"),
-        ("5", "intermediate"), ("2", "rare"), ("1", "rare"),
+        ("50", "frequent"),
+        ("20", "frequent"),
+        ("10", "intermediate"),
+        ("5", "intermediate"),
+        ("2", "rare"),
+        ("1", "rare"),
     ],
 )
 def test_exact_aep_band_and_source_order(aep: str, band: str) -> None:
