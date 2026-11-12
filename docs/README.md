@@ -28,6 +28,8 @@
 
 ## Work and handoff
 
+- [S6 RORBwin native rainfall validation — local agent handoff](work/2026-11-12-s6-rorbwin-local-validation-handoff.md)
+
 - [Work register](work/README.md)
 - [Bootstrap record](work/2026-11-09-bootstrap.md)
 - [First implementation handoff](work/S0-S1-HANDOFF.md)

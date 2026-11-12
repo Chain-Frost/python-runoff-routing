@@ -2,6 +2,7 @@
 
 | Work front | Status | Owner | Updated | Next review | Next action |
 | --- | --- | --- | --- | --- | --- |
+| [S6 local RORBwin 6.52 rainfall validation](2026-11-12-s6-rorbwin-local-validation-handoff.md) | Handoff prepared; no native comparison run | Unassigned (local Windows agent) | 2026-11-12 | On native evidence review | Fingerprint RORBwin and compare synthetic 100 km² rainfall, ARF, preburst and IL/CL vectors before routing; private evidence only. |
 | [S6-P3 legacy preburst/loss policy](2026-11-12-s6-p3-preburst-loss.md) | Draft; original storm IL versus burst IL and explicit source ratio | Rainfall agent | 2026-11-12 | Windows quality and native comparison | Verify RORBwin v6.52 GSAM/Jordan defaults, source ratios, time-grid and IL/CL numerics before acceptance. |
 | [S6-P2 temporal-pattern selection + ARF](2026-11-12-s6-p2-selection-arf.md) | Draft; source-only ARR2019 methods; depends on #48 | Rainfall agent | 2026-11-12 | Windows quality and method review | Confirm actual catchment area/ARF zone, validate event selection and RORBwin rainfall inputs; no stage acceptance. |
 | [S6-P1 BoM IFD + TP intake](2026-11-12-s6-bom-tp-gross.md) | Draft, dependent on S6-P0 PR #38 | Independent rainfall agent | 2026-11-12 | Windows quality review | Verify offline BoM and TP input, gross rainfall, no hydrological parity claim. |
