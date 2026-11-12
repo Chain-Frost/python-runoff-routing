@@ -71,10 +71,18 @@ def test_graphical_catg_preserves_computational_bytes_and_roundtrips() -> None:
     assert data.split(marker, maxsplit=1)[1] == serialize_catg(model).split(marker, maxsplit=1)[1]
     assert b"C #NODES\nC      4\n" in data
     assert b"C #REACHES\nC      3\n" in data
-    assert b"7\nOutlet\n0\n" in data
+    assert b"7, Outlet\nOutlet\n0\n" in data
     assert [step.code for step in parsed.model.controls] == [1, 3, 1, 4, 5, 7]
     assert b"RORB_GE 002" in data
     assert b"RORB_GE 6.45" not in data
+
+
+def test_bare_code7_emission_when_graphical_annotation_is_explicitly_blank() -> None:
+    model = _model()
+    unannotated = replace(model, controls=(*model.controls[:-1], replace(model.controls[-1], label="")))
+    data = serialize_catg_with_drawing(unannotated, _drawing())
+    assert b"7\nOutlet\n0\n" in data
+    assert parse_catg(data).model == unannotated
 
 
 def test_flat_extent_and_multi_vertex_reaches() -> None:

@@ -13,6 +13,8 @@
 - [S0 local reference capture](REFERENCE_CAPTURE.md)
 - [S1 CMD inspection](S1-INSPECTION.md)
 - [S1 bidirectional typed RORB model](RORB_BIDIRECTIONAL.md)
+- [S1/S2 Python integration API and capability matrix](S1_S2_INTEGRATION.md)
+- [Optional PyROMB-based RORB_GE GIS authoring](RORB_GE_AUTHORING.md)
 - [RORB behavioral audit and warning policy](BEHAVIOUR_AND_WARNINGS.md)
 - [Pull-request template](../.github/pull_request_template.md)
 
@@ -28,8 +30,11 @@
 - [S1 CMD inspection record](work/2026-11-10-s1-inspection.md)
 - [S1 typed parser work record](work/2026-11-11-s1-bidirectional.md)
 - [Native code-7 serialization work record](work/2026-11-11-s1-code7-serialization.md)
+- [S1/S2 integration readiness and dependency register](work/2026-11-11-s1-s2-integration-readiness.md)
+- [S2 reach-kernel development record](work/2026-11-10-s2-reach-kernel.md)
+- [S2 offline development record](work/2026-11-11-s2-offline-development.md)
+- [S2 printed-ordinate audit record](work/2026-11-11-s2-parity-audit.md)
+- [S1/S2 integration implementation record](work/2026-11-11-s1-s2-integration.md)
+- [PR #29 bounded native/real-GIS acceptance](work/2026-11-11-pr29-native-acceptance.md)
 
 Future repository-owned Markdown must be linked here. Policies describe required behaviour; the roadmap describes future implementation. No source document establishes that this package has passed a numerical acceptance gate.
-
-- [Optional PyROMB-based RORB_GE GIS authoring](RORB_GE_AUTHORING.md): bounded CMD and OGR acceptance, GUI/editor deferred.
-- [PR #29 bounded native/real-GIS acceptance](work/2026-11-11-pr29-native-acceptance.md): sanitised report and unresolved profile boundaries.
