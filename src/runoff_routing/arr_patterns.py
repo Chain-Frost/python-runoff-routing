@@ -224,8 +224,11 @@ def _zip_infos(archive: zipfile.ZipFile) -> tuple[zipfile.ZipInfo, ...]:
     total = 0
     seen: set[str] = set()
     for info in infos:
-        _safe_zip_name(info.filename.rstrip("/") if info.is_dir() else info.filename)
-        key = info.filename.casefold()
+        # ZipInfo.filename normalises backslashes on Windows; orig_filename
+        # retains the unmodified central-directory entry for security checks.
+        raw_name = info.orig_filename
+        _safe_zip_name(raw_name.rstrip("/") if info.is_dir() else raw_name)
+        key = raw_name.casefold()
         if key in seen:
             _invalid(f"Duplicate temporal-pattern archive member {info.filename!r}")
         seen.add(key)
