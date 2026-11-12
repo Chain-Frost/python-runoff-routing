@@ -24,7 +24,9 @@ _PUBLISHED_PARAMETERS: dict[str, tuple[str, ...]] = {
     "East Coast North": ("0.327", "0.241", "0.448", "0.36", "0.00096", "0.48", "-0.21", "0.012", "-0.0013"),
     "Semi-arid Inland Queensland": ("0.159", "0.283", "0.25", "0.308", "7.3E-07", "1", "0.039", "0", "0"),
     "Tasmania": ("0.0605", "0.347", "0.2", "0.283", "0.00076", "0.347", "0.0877", "0.012", "-0.00033"),
-    "South-West Western Australia": ("0.183", "0.259", "0.271", "0.33", "3.85E-06", "0.41", "0.55", "0.00817", "-0.00045"),
+    "South-West Western Australia": (
+        "0.183", "0.259", "0.271", "0.33", "3.85E-06", "0.41", "0.55", "0.00817", "-0.00045"
+    ),
     "Central New South Wales": ("0.265", "0.241", "0.505", "0.321", "0.00056", "0.414", "-0.021", "0.015", "-0.00033"),
     "South-East Coast": ("0.06", "0.361", "0", "0.317", "8.11E-05", "0.651", "0", "0", "0"),
     "Southern Semi-arid": ("0.254", "0.247", "0.403", "0.351", "0.0013", "0.302", "0.058", "0", "0"),
@@ -243,7 +245,7 @@ def calculate_arr2019_arf(
     allow_rare_aep_extension: bool = False,
     negative_policy: NegativePolicy = "reject",
 ) -> ARFResult:
-    """ARR2019 equations 2.4.1–2.4.4, with explicit applicable method boundaries.
+    """ARR2019 equations 2.4.1-2.4.4, with explicit applicable method boundaries.
 
     Durations below 30 minutes and AEP below 1% are outside the derived
     range and require explicit method flags (ARR recommends up to 0.05%).

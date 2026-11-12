@@ -16,13 +16,15 @@ REGION = "SYNTHETIC REGION"
 def _point() -> PatternSet:
     rows = ["EventID,Duration,TimeStep,Region,AEP,Increments"]
     for band in ("frequent", "intermediate", "rare"):
-        for ordinal in range(10):
-            rows.append(f"{band}{ordinal:02d},60,15,{REGION},{band},10,20,30,40")
+        rows.extend(f"{band}{ordinal:02d},60,15,{REGION},{band},10,20,30,40" for ordinal in range(10))
     return parse_pattern_csv(("\n".join(rows) + "\n").encode(), kind="point")
 
 
 def _areal(*, omit_aep: bool = True, count: int = 10, bin_label: str = "100") -> PatternSet:
-    rows = ["EventID,Duration,TimeStep,Region,Area,Increments" if omit_aep else "EventID,Duration,TimeStep,Region,Area,AEP,Increments"]
+    header = "EventID,Duration,TimeStep,Region,Area,Increments"
+    if not omit_aep:
+        header = "EventID,Duration,TimeStep,Region,Area,AEP,Increments"
+    rows = [header]
     for ordinal in range(count):
         parts = [f"T{ordinal:03d}", "720", "180", REGION, bin_label]
         if not omit_aep:
@@ -74,7 +76,10 @@ def test_area_band_boundaries_fail_instead_of_using_nearest(area: str, expected_
 
 @pytest.mark.parametrize(
     ("aep", "band"),
-    [("50", "frequent"), ("20", "frequent"), ("10", "intermediate"), ("5", "intermediate"), ("2", "rare"), ("1", "rare")],
+    [
+        ("50", "frequent"), ("20", "frequent"), ("10", "intermediate"),
+        ("5", "intermediate"), ("2", "rare"), ("1", "rare"),
+    ],
 )
 def test_exact_aep_band_and_source_order(aep: str, band: str) -> None:
     source = _point()
@@ -125,7 +130,7 @@ def test_incomplete_ensemble_is_not_silently_filled() -> None:
 
 @pytest.mark.parametrize("aep", [Decimal("63.2"), Decimal("0.5"), Decimal("0.2"), Decimal("NaN")])
 def test_uncharacterised_aep_conversions_rejected(aep: Decimal) -> None:
-    with pytest.raises(ARRFormatError, match="frequency selection|finite Decimal"):
+    with pytest.raises(ARRFormatError, match=r"frequency selection|finite Decimal"):
         select_arr2019_ensemble(
             _point(), catchment_area_km2=Decimal(50), duration_min=60, aep_percent=aep, region=REGION
         )
@@ -145,10 +150,14 @@ def test_source_region_duration_and_kind_must_match() -> None:
             _areal(), region=REGION, catchment_area_km2=Decimal(50), duration_min=60, aep_percent=Decimal(1)
         )
     with pytest.raises(ARRFormatError, match="requires areal"):
-        select_arr2019_ensemble(_point(), region=REGION, catchment_area_km2=Decimal(75), duration_min=60, aep_percent=Decimal(1))
+        select_arr2019_ensemble(
+            _point(), region=REGION, catchment_area_km2=Decimal(75), duration_min=60, aep_percent=Decimal(1)
+        )
     with pytest.raises(ARRFormatError, match="got 0"):
         select_arr2019_ensemble(
             _point(), region="OTHER REGION", catchment_area_km2=Decimal(50), duration_min=60, aep_percent=Decimal(1)
         )
     with pytest.raises(ARRFormatError, match="got 0"):
-        select_arr2019_ensemble(_point(), region=REGION, catchment_area_km2=Decimal(50), duration_min=180, aep_percent=Decimal(1))
+        select_arr2019_ensemble(
+            _point(), region=REGION, catchment_area_km2=Decimal(50), duration_min=180, aep_percent=Decimal(1)
+        )

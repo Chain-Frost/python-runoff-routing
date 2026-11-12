@@ -28,12 +28,12 @@ _AREAL_BINS: tuple[tuple[int, str], ...] = (
 )
 # Exact design probabilities backed by standard regional ARR2019 ensemble practice.
 _AEP_BINS: dict[Decimal, str] = {
-    Decimal("50"): "frequent",
-    Decimal("20"): "frequent",
-    Decimal("10"): "intermediate",
-    Decimal("5"): "intermediate",
-    Decimal("2"): "rare",
-    Decimal("1"): "rare",
+    Decimal(50): "frequent",
+    Decimal(20): "frequent",
+    Decimal(10): "intermediate",
+    Decimal(5): "intermediate",
+    Decimal(2): "rare",
+    Decimal(1): "rare",
 }
 
 

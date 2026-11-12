@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 from decimal import Decimal
+from pathlib import Path
 
 import pytest
 
@@ -11,9 +12,11 @@ from runoff_routing.arr_arf import (
     ARF_POLICY_VERSION,
     apply_arr2019_arf_to_bom_storm,
     calculate_arr2019_arf,
+    legacy_datahub_coefficients,
     published_coefficients,
 )
 from runoff_routing.arr_data import ARRFormatError
+from runoff_routing.arr_import import parse_arr_txt
 from runoff_routing.arr_patterns import parse_pattern_csv
 from runoff_routing.arr_storm import storm_from_bom
 from runoff_routing.bom_ifd import parse_bom_ifd_csv
@@ -42,7 +45,12 @@ def _independent_short(area: float, duration: float, aep_percent: float) -> floa
 def _independent_long(area: float, duration: float, aep_percent: float, region: str) -> float:
     a, b, c, d, e, f, g, h, i = (float(x) for x in published_coefficients(region).values)
     p = 0.3 + math.log10(aep_percent / 100)
-    return min(1, 1 - a * (area**b - c * math.log10(duration)) * duration**-d + e * area**f * duration**g * p + h * 10 ** (i * area * duration / 1440) * p)
+    return min(
+        1,
+        1 - a * (area**b - c * math.log10(duration)) * duration**-d
+        + e * area**f * duration**g * p
+        + h * 10 ** (i * area * duration / 1440) * p,
+    )
 
 
 def test_published_coefficients_resolve_old_2019_gist_discrepancy() -> None:
@@ -56,7 +64,7 @@ def test_official_2019_book2_worked_example() -> None:
     result = calculate_arr2019_arf(
         catchment_area_km2=Decimal("245.07"),
         duration_min=1440,
-        aep_percent=Decimal("1"),
+        aep_percent=Decimal(1),
         coefficients=published_coefficients("East Coast North"),
     )
     assert result.policy_version == ARF_POLICY_VERSION
@@ -92,9 +100,7 @@ def test_long_duration_equation_against_independent_float_expression(area: int, 
 @pytest.mark.parametrize("area", [2, 5, 9])
 @pytest.mark.parametrize("duration", [60, 720, 1080, 1440, 2880])
 def test_small_area_interpolation_formula(area: int, duration: int) -> None:
-    if duration <= 720:
-        endpoint = _arf("10", duration)
-    elif duration >= 1440:
+    if duration <= 720 or duration >= 1440:
         endpoint = _arf("10", duration)
     else:
         endpoint = _arf("10", 720) + (_arf("10", 1440) - _arf("10", 720)) * Decimal("0.5")
@@ -182,21 +188,22 @@ def test_gross_bom_rainfall_is_arf_reduced_once() -> None:
 def test_wrong_probability_and_duration_do_not_apply_arf() -> None:
     raw = b"IFD Design Rainfall Depth (mm)\nDuration,Duration in min,1%\n24 hour,1440,129\n"
     source = parse_bom_ifd_csv(raw)
-    patterns = parse_pattern_csv(b"EventID,Duration,TimeStep,Region,AEP,Increments\n1,1440,720,X,rare,50,50\n", kind="point")
+    patterns = parse_pattern_csv(
+        b"EventID,Duration,TimeStep,Region,AEP,Increments\n1,1440,720,X,rare,50,50\n", kind="point"
+    )
     gross = storm_from_bom(source, source.probability("1%"), patterns, patterns.patterns[0])
     with pytest.raises(ARRFormatError, match="AEP percentages differ"):
-        apply_arr2019_arf_to_bom_storm(gross, calculate_arr2019_arf(catchment_area_km2=Decimal(1), duration_min=1440, aep_percent=Decimal(2)))
+        apply_arr2019_arf_to_bom_storm(
+            gross, calculate_arr2019_arf(catchment_area_km2=Decimal(1), duration_min=1440, aep_percent=Decimal(2))
+        )
     with pytest.raises(ARRFormatError, match="duration differ"):
-        apply_arr2019_arf_to_bom_storm(gross, calculate_arr2019_arf(catchment_area_km2=Decimal(1), duration_min=720, aep_percent=Decimal(1)))
+        apply_arr2019_arf_to_bom_storm(
+            gross, calculate_arr2019_arf(catchment_area_km2=Decimal(1), duration_min=720, aep_percent=Decimal(1))
+        )
 
 
 def test_legacy_datahub_arfs_keep_original_coefficient_precision_and_source_hash() -> None:
     """2016-era Data Hub coefficients are not automatically replaced by 2019 table values."""
-    from pathlib import Path
-
-    from runoff_routing.arr_arf import legacy_datahub_coefficients
-    from runoff_routing.arr_import import parse_arr_txt
-
     source = Path(__file__).absolute().parent / "fixtures" / "arr" / "2016-era-synthetic.txt"
     doc = parse_arr_txt(source.read_bytes(), legacy_profile="arr2016")
     params = legacy_datahub_coefficients(doc)
