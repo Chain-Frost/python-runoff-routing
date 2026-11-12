@@ -12,15 +12,15 @@ import re
 from dataclasses import asdict, dataclass
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
-from typing import Any, Literal, cast
+from typing import Literal, cast
 
 from .integration_reporting import RecordedPrintReview, review_recorded_print
 from .project_execution import execute_loaded_project
 from .project_json import LegacyRunFiles, ProjectError, load_project
 from .reference import verify_manifest
 from .rorb_documents import RorbSource
-from .rorb_out import inspect_output
 from .rorb_model import RunModel
+from .rorb_out import inspect_output
 
 _HASH = re.compile(r"[a-f0-9]{64}\Z")
 _MAX_MANIFEST_BYTES = 2 * 1024 * 1024
@@ -150,10 +150,7 @@ def _check_capture_settings(manifest: dict[str, object], loaded_run: LegacyRunFi
             raise ProjectError(message)
 
 
-def _checked_report(
-    manifest: dict[str, object], manifest_path: Path, native_column_id: str, expected_rows: int
-) -> tuple[RorbSource, tuple[str, ...], tuple[str, ...]]:
-    """Reuse S1's single-table inspector, then recover the exact source tokens."""
+def _native_report_entry(manifest: dict[str, object]) -> dict[str, object]:
     outputs = manifest.get("outputs")
     if not isinstance(outputs, list):
         message = "S0 manifest lacks retained output records"
@@ -167,7 +164,15 @@ def _checked_report(
     if len(selected) != 1:
         message = "S0 native review requires exactly one retained .out report"
         raise ProjectError(message)
-    name = _string(selected[0].get("path"), "Native output path")
+    return selected[0]
+
+
+def _checked_report(
+    manifest: dict[str, object], manifest_path: Path, native_column_id: str, expected_rows: int
+) -> tuple[RorbSource, tuple[str, ...], tuple[str, ...]]:
+    """Reuse S1's single-table inspector, then recover the exact source tokens."""
+    selected = _native_report_entry(manifest)
+    name = _string(selected.get("path"), "Native output path")
     relative = Path(name)
     if relative.is_absolute() or ".." in relative.parts or relative.name != name:
         message = "Native report path must be a direct contained evidence file"
@@ -177,7 +182,7 @@ def _checked_report(
         message = "Native report exceeds the bounded 64 MiB offline review limit"
         raise ProjectError(message)
     source = RorbSource.read(path)
-    if source.sha256 != selected[0].get("sha256"):
+    if source.sha256 != selected.get("sha256"):
         message = "Native output changed after manifest verification"
         raise ProjectError(message)
     inspection = inspect_output(source)
@@ -204,6 +209,39 @@ def _checked_report(
     return source, raw_tokens, increments
 
 
+def _validated_capture_profile(manifest: dict[str, object], executable_sha256: str) -> str:
+    if manifest.get("outcome") not in ("success", "zero_runoff"):
+        message = "Native S0 capture is not a completed successful result"
+        raise ProjectError(message)
+    if manifest.get("provenance_gaps") != []:
+        message = "Native capture contains unresolved provenance gaps"
+        raise ProjectError(message)
+    diagnostics = _record(manifest.get("diagnostics"), "S0 diagnostics")
+    if diagnostics.get("errors") != [] or diagnostics.get("warnings") != []:
+        message = "Native S0 capture has errors or warnings"
+        raise ProjectError(message)
+    engine = _record(manifest.get("engine"), "S0 engine")
+    binary = _record(engine.get("executable"), "S0 executable")
+    if engine.get("kind") != "RORB_CMD":
+        message = "This S5 reference review supports pinned RORB_CMD profiles only, not RORBwin"
+        raise ProjectError(message)
+    if _HASH.fullmatch(executable_sha256) is None or binary.get("sha256") != executable_sha256:
+        message = "Native executable SHA-256 was not pinned or does not match the capture"
+        raise ProjectError(message)
+    version = _string(engine.get("observed_version"), "Native executable version")
+    return f"RORB_CMD {version} sha256={executable_sha256}"
+
+
+def _check_capture_identity(manifest: dict[str, object], column_id: str, expected_rows: int) -> None:
+    if type(manifest.get("expected_steps")) is not int or manifest["expected_steps"] != expected_rows:
+        message = "Native S0 expected steps do not match the S1 storm horizon"
+        raise ProjectError(message)
+    requested = _record(manifest.get("requested_print_locations"), "S0 requested print locations")
+    if column_id not in requested or not isinstance(requested[column_id], str):
+        message = "No explicit native column identity in S0 capture manifest"
+        raise ProjectError(message)
+
+
 def review_project_native_capture(
     project_path: Path,
     manifest_path: Path,
@@ -223,35 +261,10 @@ def review_project_native_capture(
         message = "Native S0 review requires a legacy-rorb project backed by original RORB source files"
         raise ProjectError(message)
     manifest, manifest_hash = _verified_manifest(manifest_path, manifest_sha256)
-    if manifest.get("outcome") not in ("success", "zero_runoff"):
-        message = "Native S0 capture is not a completed successful result"
-        raise ProjectError(message)
-    if manifest.get("provenance_gaps") != []:
-        message = "Native capture contains unresolved provenance gaps"
-        raise ProjectError(message)
-    diagnostics = _record(manifest.get("diagnostics"), "S0 diagnostics")
-    if diagnostics.get("errors") != [] or diagnostics.get("warnings") != []:
-        message = "Native S0 capture has errors or warnings"
-        raise ProjectError(message)
-    engine = _record(manifest.get("engine"), "S0 engine")
-    executable = _record(engine.get("executable"), "S0 executable")
-    if engine.get("kind") != "RORB_CMD":
-        message = "This S5 reference review supports pinned RORB_CMD profiles only, not RORBwin"
-        raise ProjectError(message)
-    if _HASH.fullmatch(engine_executable_sha256) is None or executable.get("sha256") != engine_executable_sha256:
-        message = "Native executable SHA-256 was not pinned or does not match the capture"
-        raise ProjectError(message)
-    version = _string(engine.get("observed_version"), "Native executable version")
-    profile = f"RORB_CMD {version} sha256={engine_executable_sha256}"
+    profile = _validated_capture_profile(manifest, engine_executable_sha256)
     _check_capture_settings(manifest, loaded.project.model_source, loaded.run)
     count = loaded.run.storm.calculation_increments + 1
-    if type(manifest.get("expected_steps")) is not int or manifest["expected_steps"] != count:
-        message = "Native S0 expected steps do not match the S1 storm horizon"
-        raise ProjectError(message)
-    requested = _record(manifest.get("requested_print_locations"), "S0 requested print locations")
-    if native_column_id not in requested or not isinstance(requested[native_column_id], str):
-        message = "No explicit native column identity in S0 capture manifest"
-        raise ProjectError(message)
+    _check_capture_identity(manifest, native_column_id, count)
     source, tokens, increments = _checked_report(manifest, manifest_path, native_column_id, count)
     report = inspect_output(source).hydrographs
     if report is None:
