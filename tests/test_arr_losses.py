@@ -43,7 +43,9 @@ def _selection(*, method: LossMethod = "burst_only_reduced_il") -> PreburstLossS
     )
 
 
-def _event(*, aep: str = "1%", duration_min: int = 60, label: str = "BoM 2016 IFD (raw gross rainfall)") -> RawHyetograph:
+def _event(
+    *, aep: str = "1%", duration_min: int = 60, label: str = "BoM 2016 IFD (raw gross rainfall)"
+) -> RawHyetograph:
     return RawHyetograph(
         duration_min=duration_min,
         timestep_min=30,
@@ -79,8 +81,8 @@ def test_median_preburst_selected_by_exact_duration_and_aep() -> None:
     assert result.source_sha256
     assert ("Version", "2018_v1") in result.source_preburst_metadata
     assert ("Version", "2016_v1") in result.source_loss_metadata
+    attribute = "burst_initial_loss_mm"
     with pytest.raises(FrozenInstanceError):
-        attribute = "burst_initial_loss_mm"
         setattr(result, attribute, Decimal(0))
 
 
