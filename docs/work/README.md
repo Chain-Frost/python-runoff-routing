@@ -2,6 +2,7 @@
 
 | Work front | Status | Owner | Updated | Next review | Next action |
 | --- | --- | --- | --- | --- | --- |
+| [S6-P2 temporal-pattern selection + ARF](2026-11-12-s6-p2-selection-arf.md) | Draft; source-only ARR2019 methods; depends on #48 | Rainfall agent | 2026-11-12 | Windows quality and method review | Confirm actual catchment area/ARF zone, validate event selection and RORBwin rainfall inputs; no stage acceptance. |
 | [S6-P1 BoM IFD + TP intake](2026-11-12-s6-bom-tp-gross.md) | Draft, dependent on S6-P0 PR #38 | Independent rainfall agent | 2026-11-12 | Windows quality review | Verify offline BoM and TP input, gross rainfall, no hydrological parity claim. |
 | [S6-P1 BoM IFD and ARR TP intake](2026-11-12-s6-bom-tp-gross.md) | Draft; real FLTwest ZIP replay passed structural validation | Rainfall agent | 2026-11-12 | After final-head CI and method review | Preserve missing areal AEP; verify 2026 variants and design-event selection before hydraulic acceptance (PR #48). |
 | [S6-P0 ARR Data Hub intake](2026-11-11-s6-p0-implementation.md) | Draft source-only implementation | Independent rainfall agent | 2026-11-11 | After implementation CI review | Validate 2026v1 IFD JSON/TXT and provenance; do not infer ARR method acceptance [#33](https://github.com/Chain-Frost/python-runoff-routing/issues/33). |
