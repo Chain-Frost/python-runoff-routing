@@ -90,7 +90,10 @@ def test_machine_readable_report_preserves_original_native_tokens() -> None:
     assert payload["numerical_acceptance"] == "unassessed"
     assert payload["native_reporting"]["raw_native_time_tokens"][0] == "0.50"
     assert payload["native_reporting"]["sample_index_elapsed_hours"][0] == "0.0"
-    assert Decimal(payload["native_reporting"]["inclusive_sample_sum_m3"]) == audit.native_reporting.inclusive_sample_sum_m3
+    assert (
+        Decimal(payload["native_reporting"]["inclusive_sample_sum_m3"])
+        == audit.native_reporting.inclusive_sample_sum_m3
+    )
     assert "reported_native_volume_m3" in payload["native_reporting"]
 
 
