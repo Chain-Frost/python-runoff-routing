@@ -76,17 +76,7 @@ class PreburstLossSelection:
         if not self.source_sha256 or not self.source_profile or not self.operations:
             msg = "ARR loss selection requires source and method provenance"
             raise ARRFormatError(msg)
-        if self.depth_basis not in {"as_exported_depth", "ratio_x_areal_reduced_design_depth"}:
-            msg = "Unsupported preburst depth basis"
-            raise ARRFormatError(msg)
-        if (self.depth_basis == "as_exported_depth") != (self.rainfall_basis_total_mm is None):
-            msg = "Ratio-derived preburst must retain its rainfall depth basis"
-            raise ARRFormatError(msg)
-        if self.rainfall_basis_total_mm is not None and (
-            not self.rainfall_basis_total_mm.is_finite() or self.rainfall_basis_total_mm < 0
-        ):
-            msg = "Invalid preburst rainfall depth basis"
-            raise ARRFormatError(msg)
+        _validate_preburst_depth_basis(self)
         if self.burst_initial_loss_mm is not None and (
             not self.burst_initial_loss_mm.is_finite() or self.burst_initial_loss_mm < 0
         ):
@@ -95,6 +85,31 @@ class PreburstLossSelection:
         if (self.method == "explicit_preburst") != (self.burst_initial_loss_mm is None):
             msg = "Explicit preburst retains storm IL; burst-only requires burst IL"
             raise ARRFormatError(msg)
+
+
+def _validate_preburst_depth_basis(selection: PreburstLossSelection) -> None:
+    """Keep original and ratio-derived event depth provenance distinct."""
+    if selection.depth_basis not in {"as_exported_depth", "ratio_x_areal_reduced_design_depth"}:
+        msg = "Unsupported preburst depth basis"
+        raise ARRFormatError(msg)
+    if (selection.depth_basis == "as_exported_depth") != (selection.rainfall_basis_total_mm is None):
+        msg = "Ratio-derived preburst must retain its rainfall depth basis"
+        raise ARRFormatError(msg)
+    if selection.rainfall_basis_total_mm is not None and (
+        not selection.rainfall_basis_total_mm.is_finite() or selection.rainfall_basis_total_mm < 0
+    ):
+        msg = "Invalid preburst rainfall depth basis"
+        raise ARRFormatError(msg)
+
+
+def _validate_loss_method(method: LossMethod, excess_policy: ExcessPreburstPolicy) -> None:
+    """Explicitly distinguish method policy from the original Data Hub source."""
+    if method not in {"burst_only_reduced_il", "explicit_preburst"}:
+        msg = "Unrecognised preburst loss method"
+        raise ARRFormatError(msg)
+    if excess_policy not in {"reject", "clamp_burst_il_to_zero"}:
+        msg = "Unrecognised excess-preburst policy"
+        raise ARRFormatError(msg)
 
 
 def select_legacy_preburst_loss(
@@ -115,12 +130,7 @@ def select_legacy_preburst_loss(
     if document.source.compatibility_profile != "arr2016_txt":
         msg = "Only an explicit legacy ARR2016 TXT profile supports this loss selection"
         raise ARRFormatError(msg)
-    if method not in {"burst_only_reduced_il", "explicit_preburst"}:
-        msg = "Unrecognised preburst loss method"
-        raise ARRFormatError(msg)
-    if excess_policy not in {"reject", "clamp_burst_il_to_zero"}:
-        msg = "Unrecognised excess-preburst policy"
-        raise ARRFormatError(msg)
+    _validate_loss_method(method, excess_policy)
     if isinstance(duration_min, bool) or not isinstance(duration_min, int) or duration_min <= 0:
         msg = "Loss event duration must be whole positive minutes"
         raise ARRFormatError(msg)
@@ -140,7 +150,8 @@ def select_legacy_preburst_loss(
         row = table.durations_min.index(duration_min)
         col = table.aep_percent.index(aep_percent)
     except ValueError as exc:
-        raise ARRFormatError("Requested legacy preburst duration/AEP missing; no interpolation") from exc
+        msg = "Requested legacy preburst duration/AEP missing; no interpolation"
+        raise ARRFormatError(msg) from exc
     depth = table.depths_mm[row][col]
     ratio = table.ratios[row][col]
     exceeded = max(Decimal(0), depth - losses.initial_loss_mm)
@@ -303,7 +314,8 @@ def _event_inputs(
             raise ARRFormatError(msg)
         aep = Decimal(aep_label[:-1])
     except InvalidOperation as exc:
-        raise ARRFormatError("Unparseable rainfall AEP for loss selection") from exc
+        msg = "Unparseable rainfall AEP for loss selection"
+        raise ARRFormatError(msg) from exc
     if not aep.is_finite() or aep != selection.aep_percent:
         msg = "Loss/preburst AEP does not match rainfall AEP"
         raise ARRFormatError(msg)

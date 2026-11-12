@@ -1,12 +1,18 @@
 """Synthetic-only preburst/loss policies; no RORB executable or hydrological parity."""
 
 from dataclasses import FrozenInstanceError, replace
-from typing import Literal
 from decimal import Decimal
 from pathlib import Path
+from typing import Literal, cast
 
 import pytest
 
+from runoff_routing.arr_arf import (
+    AreaAdjustedHyetograph,
+    apply_arr2019_arf_to_bom_storm,
+    calculate_arr2019_arf,
+    published_coefficients,
+)
 from runoff_routing.arr_data import ARRFormatError
 from runoff_routing.arr_import import parse_arr_txt
 from runoff_routing.arr_losses import (
@@ -14,10 +20,14 @@ from runoff_routing.arr_losses import (
     LossMethod,
     PreburstLossSelection,
     calculate_burst_only_excess,
+    calculate_complete_storm_excess,
+    derive_preburst_from_areal_rainfall,
     prepend_explicit_preburst,
     select_legacy_preburst_loss,
+    verify_legacy_bom_source_point,
 )
 from runoff_routing.arr_storm import RawHyetograph
+from runoff_routing.bom_ifd import parse_bom_ifd_csv
 
 FIXTURES = Path(__file__).absolute().parent / "fixtures" / "arr"
 
@@ -70,7 +80,8 @@ def test_median_preburst_selected_by_exact_duration_and_aep() -> None:
     assert ("Version", "2018_v1") in result.source_preburst_metadata
     assert ("Version", "2016_v1") in result.source_loss_metadata
     with pytest.raises(FrozenInstanceError):
-        setattr(result, "burst_initial_loss_mm", Decimal(0))
+        attribute = "burst_initial_loss_mm"
+        setattr(result, attribute, Decimal(0))
 
 
 @pytest.mark.parametrize("percentile", [10, 25, 50, 75, 90])
@@ -89,7 +100,7 @@ def test_all_preburst_percentiles_have_distinct_source_identity(
 )
 def test_missing_or_invalid_exact_axis_fails_closed(duration: int, aep: Decimal) -> None:
     doc = parse_arr_txt(_document(), legacy_profile="arr2016")
-    with pytest.raises(ARRFormatError, match="missing|duration|AEP"):
+    with pytest.raises(ARRFormatError, match=r"missing|duration|AEP"):
         select_legacy_preburst_loss(doc, duration_min=duration, aep_percent=aep)
 
 
@@ -171,7 +182,7 @@ def test_explicit_preburst_never_silently_uses_burst_only_losses() -> None:
     [(), (Decimal(50),), (Decimal(-1), Decimal(101)), (Decimal("NaN"), Decimal(100)), (Decimal(0), Decimal(101))],
 )
 def test_missing_malformed_preburst_profile_rejected(percentages: tuple[Decimal, ...]) -> None:
-    with pytest.raises(ARRFormatError, match="empty|total|Invalid"):
+    with pytest.raises(ARRFormatError, match=r"empty|total|Invalid"):
         prepend_explicit_preburst(
             _event(), _selection(method="explicit_preburst"), percentages=percentages, declared_profile_id="test"
         )
@@ -179,7 +190,7 @@ def test_missing_malformed_preburst_profile_rejected(percentages: tuple[Decimal,
 
 @pytest.mark.parametrize("aep", ["2%", "2EY", "1 in 100", "NaN%", "garbled"])
 def test_ensemble_probability_mismatch_rejected(aep: str) -> None:
-    with pytest.raises(ARRFormatError, match="AEP|percentage|Unparseable"):
+    with pytest.raises(ARRFormatError, match=r"AEP|percentage|Unparseable"):
         calculate_burst_only_excess(_event(aep=aep), _selection())
 
 
@@ -199,9 +210,6 @@ def test_no_implicit_preburst_pattern_or_hidden_source_identity() -> None:
 
 
 def test_exact_bom_arr_requested_coordinates_and_raw_hash_are_verified() -> None:
-    from runoff_routing.arr_losses import verify_legacy_bom_source_point
-    from runoff_routing.bom_ifd import parse_bom_ifd_csv
-
     raw = (
         b"Copyright Commonwealth of Australia 2016\n"
         b"IFD Design Rainfall Depth (mm)\n"
@@ -232,8 +240,6 @@ def test_source_increments_and_total_must_agree() -> None:
 
 
 def test_complete_storm_separates_preburst_and_burst_without_double_reduction() -> None:
-    from runoff_routing.arr_losses import calculate_complete_storm_excess
-
     selection = _selection(method="explicit_preburst")
     event = _event()
     full = prepend_explicit_preburst(
@@ -257,8 +263,6 @@ def test_complete_storm_separates_preburst_and_burst_without_double_reduction() 
 
 
 def test_complete_storm_preburst_can_produce_excess_and_cannot_reuse_burst_il() -> None:
-    from runoff_routing.arr_losses import calculate_complete_storm_excess
-
     doc = parse_arr_txt(
         _document().replace(b"Storm Initial Losses (mm),21.0", b"Storm Initial Losses (mm),2.0"),
         legacy_profile="arr2016",
@@ -278,9 +282,6 @@ def test_complete_storm_preburst_can_produce_excess_and_cannot_reuse_burst_il() 
 
 
 def test_ratio_preburst_on_arf_adjusted_rainfall_preserves_original_depth() -> None:
-    from runoff_routing.arr_arf import calculate_arr2019_arf, published_coefficients, apply_arr2019_arf_to_bom_storm
-    from runoff_routing.arr_losses import derive_preburst_from_areal_rainfall
-
     gross = _event()
     calculation = calculate_arr2019_arf(
         catchment_area_km2=Decimal(100),
@@ -303,13 +304,8 @@ def test_ratio_preburst_on_arf_adjusted_rainfall_preserves_original_depth() -> N
 
 
 def test_ratio_preburst_rejects_nonadjusted_rainfall_and_unreviewed_excess() -> None:
-    from runoff_routing.arr_arf import calculate_arr2019_arf, published_coefficients, apply_arr2019_arf_to_bom_storm
-    from runoff_routing.arr_losses import derive_preburst_from_areal_rainfall
-
     gross = _event()
     selection = _selection()
-    from typing import cast
-    from runoff_routing.arr_arf import AreaAdjustedHyetograph
     with pytest.raises(ARRFormatError, match="once-ARF-adjusted"):
         derive_preburst_from_areal_rainfall(selection, cast(AreaAdjustedHyetograph, gross))
     calc = calculate_arr2019_arf(
