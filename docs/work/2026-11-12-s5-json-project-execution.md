@@ -18,3 +18,5 @@
 - Neither historic ARR nor ARR2026 data are generated here. Separate rainfall agent [PR #38](https://github.com/Chain-Frost/python-runoff-routing/pull/38) owns actual ARR Data Hub ingestion and eventual generation.
 - TOML is entirely deferred per owner direction. No merge, release, licence, visibility or automation changes.
 - Require exact final-head Windows Python 3.14 / Ruff 0.16.6 / strict Pyright / full public tests / out-of-tree installed-wheel validation before claiming this slice's software checks passed.
+
+- Further S5 review: compare verified external asset content separately from portable relative path spelling; reject Windows reserved device names and trailing-dot/space components, with synthetic relocation and rejection tests. No numerical kernel, rainfall generator, reference evidence or tolerance modification.

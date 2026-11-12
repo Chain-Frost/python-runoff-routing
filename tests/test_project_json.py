@@ -440,3 +440,37 @@ def test_compare_and_export_fail_closed_on_bad_input_hash(tmp_path: Path) -> Non
     with pytest.raises(ProjectError, match="SHA-256"):
         export_run_json(source, tmp_path / "should_not_exist.json")
     assert not (tmp_path / "should_not_exist.json").exists()
+
+
+
+@pytest.mark.parametrize(
+    "path",
+    ["CON", "nul.txt", "AUX.ifd", "com1.csv", "LPT9", "COM³.dat", "folder/data.", "folder/data "],
+)
+def test_unportable_windows_device_and_trailing_dot_names_rejected(path: str) -> None:
+    with pytest.raises(ProjectError, match="Unsafe"):
+        SourceFile(path, "0" * 64)
+
+
+def test_identical_external_content_relocated_within_project_is_semantically_equal(tmp_path: Path) -> None:
+    origin = tmp_path / "before"
+    moved = tmp_path / "after"
+    origin.mkdir()
+    moved.mkdir()
+    source = b"same synthetic rainfall metadata"
+    for folder, name in ((origin, "2016-source.txt"), (moved, "historic file.txt")):
+        (folder / name).write_bytes(source)
+    digest = hashlib.sha256(source).hexdigest()
+    left_asset = ExternalAsset("ifd", "rainfall", "legacy_arr2016", SourceFile("2016-source.txt", digest))
+    right_asset = ExternalAsset("ifd", "rainfall", "legacy_arr2016", SourceFile("historic file.txt", digest))
+    left = origin / "project.json"
+    right = moved / "project.json"
+    write_project(left, replace(_inline(), assets=(left_asset,)))
+    write_project(right, replace(_inline(), assets=(right_asset,)))
+    result = compare_project_files(left, right)
+    assert result.model_equal
+    assert result.external_assets_equal
+    assert not result.external_asset_paths_equal
+    assert result.configuration_equal
+    assert result.first_differences == ()
+    assert result.numerical_parity == "not_assessed"

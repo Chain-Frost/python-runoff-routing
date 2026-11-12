@@ -237,3 +237,29 @@ def test_native_execution_is_never_called(monkeypatch: pytest.MonkeyPatch, tmp_p
     monkeypatch.setattr(subprocess, "run", prohibited)
     result = run_project(_embedded(tmp_path))
     assert result.calculation.prints
+
+
+
+def test_same_reference_asset_hash_after_relocation_keeps_python_run_comparable(tmp_path: Path) -> None:
+    a = tmp_path / "old"
+    b = tmp_path / "new"
+    a.mkdir()
+    b.mkdir()
+    evidence = b"same original reference bytes"
+    (a / "capture.out").write_bytes(evidence)
+    (b / "renamed capture.out").write_bytes(evidence)
+    digest = hashlib.sha256(evidence).hexdigest()
+    left_asset = ExternalAsset("native", "reference", "synthetic", SourceFile("capture.out", digest))
+    right_asset = ExternalAsset("native", "reference", "synthetic", SourceFile("renamed capture.out", digest))
+    left = a / "project.json"
+    right = b / "project.json"
+    write_project(left, Project("left", "explicit", EmbeddedRun(_model()), (left_asset,)))
+    write_project(right, Project("right", "explicit", EmbeddedRun(_model()), (right_asset,)))
+    comparison = compare_routed_projects(left, right)
+    assert comparison.same_typed_model
+    assert comparison.same_external_assets
+    assert not comparison.external_asset_paths_equal
+    assert comparison.same_print_locations
+    assert comparison.same_computed_ordinates
+    assert comparison.identical
+    assert comparison.native_parity_status == "not_assessed"

@@ -126,3 +126,11 @@ py -3.14 -m runoff_routing.project_json compare-runs "C:\models\historic\project
 The run command writes one exclusive-create JSON report and returns 0 only when successful; a missing, unsupported, or existing destination returns 2. compare-runs returns 0 when both verified configurations and outputs match, 1 for valid differences and 2 for invalid/unsupported input. Existing compare is configuration-only and does not invoke the solver. Long-form model-elapsed CSV is available via ExecutedProject.to_csv().
 
 Native CMD/GUI comparison requires separately verified engine hashes, raw reference data, explicit print-site mapping and the frozen S2 tolerance policy; none is automatically inferred from an equal Python result. S6 owns ARR2016/2026 source processing; TOML remains deferred.
+
+## Portable source comparisons and Windows filenames
+
+Project comparison checks source **identity and content** independently of its relative storage path. External assets are compared in declared order by ID, role, data profile and SHA-256. A renamed or relocated asset with identical verified bytes is still the same input; `external_asset_paths_equal` reports whether the storage paths also match. Different bytes, identifiers, roles, profiles or ordering remain configuration differences. Both projects independently verify all recorded source hashes before comparison.
+
+Portable relative filenames are validated against Windows behaviour even when inspected on another operating system. Reserved device names (`CON`, `NUL`, `AUX`, `PRN`, `COM1`–`COM9`, `LPT1`–`LPT9` and their device-name variants) and components ending in a space or dot are rejected rather than being silently normalised. Unicode ordinary filenames remain supported; project roots themselves may be local, mapped or UNC.
+
+This is a source/provenance safeguard, not a native RORB or rainfall-method parity claim.

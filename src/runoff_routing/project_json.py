@@ -22,6 +22,7 @@ PROJECT_FORMAT = "python-runoff-routing-project"
 MAX_SOURCE_BYTES = 64 * 1024 * 1024
 _HASH = re.compile(r"[a-f0-9]{64}\Z")
 _ID = re.compile(r"[A-Za-z][A-Za-z0-9_.-]{0,127}\Z")
+_RESERVED_DEVICES = {"CON", "PRN", "AUX", "NUL", "CONIN$", "CONOUT$"}
 
 RainfallProfile = Literal["explicit", "legacy-rorb", "arr-2026v1"]
 AssetRole = Literal["rainfall", "temporal-pattern", "curve", "reference"]
@@ -37,6 +38,19 @@ def _identifier(value: str, label: str) -> None:
         raise ProjectError(message)
 
 
+def _has_windows_reserved_component(path: str) -> bool:
+    """Reject Windows device aliases and names normalised by Windows APIs."""
+    for part in path.split("/"):
+        if part.endswith((".", " ")):
+            return True
+        stem = part.split(".", maxsplit=1)[0].upper()
+        if stem in _RESERVED_DEVICES:
+            return True
+        if len(stem) == 4 and stem[:3] in {"COM", "LPT"} and stem[-1] in "123456789¹²³":
+            return True
+    return False
+
+
 def _safe_relative(path: str) -> None:
     """Portable slash paths only; absolute/drive/UNC/traversal paths fail closed."""
     if (
@@ -45,6 +59,7 @@ def _safe_relative(path: str) -> None:
         or "\\" in path
         or ":" in path
         or PureWindowsPath(path).anchor
+        or _has_windows_reserved_component(path)
         or path.startswith("/")
         or any(part in {"", ".", ".."} for part in path.split("/"))
         or any(ord(char) < 32 or char in '<>"|?*' for char in path)
@@ -203,6 +218,14 @@ def _model_source(raw: object) -> EmbeddedRun | LegacyRunFiles:
         )
     message = f"Unsupported model source kind: {kind}"
     raise ProjectError(message)
+
+
+def asset_signatures(assets: tuple[ExternalAsset, ...]) -> tuple[tuple[str, str, str, str], ...]:
+    """Ordered asset provenance, excluding transport-specific relative paths."""
+    return tuple(
+        (asset.identifier, asset.role, asset.data_profile, asset.source.sha256)
+        for asset in assets
+    )
 
 
 def _file_dict(source: SourceFile) -> dict[str, str]:
@@ -402,6 +425,7 @@ class ProjectComparison:
     model_equal: bool
     rainfall_profile_equal: bool
     external_assets_equal: bool
+    external_asset_paths_equal: bool
     configuration_equal: bool
     first_differences: tuple[str, ...]
     numerical_parity: Literal["not_assessed"] = "not_assessed"
@@ -456,7 +480,10 @@ def compare_project_files(left: Path, right: Path) -> ProjectComparison:
     b = load_project(right)
     model_equal = a.run == b.run
     profile_equal = a.project.rainfall_profile == b.project.rainfall_profile
-    assets_equal = a.project.assets == b.project.assets
+    assets_equal = asset_signatures(a.project.assets) == asset_signatures(b.project.assets)
+    asset_paths_equal = tuple(item.source.path for item in a.project.assets) == tuple(
+        item.source.path for item in b.project.assets
+    )
     differences: list[str] = []
     if not model_equal:
         _first_differences(to_dict(a.run), to_dict(b.run), "run", differences)
@@ -464,8 +491,8 @@ def compare_project_files(left: Path, right: Path) -> ProjectComparison:
         differences.append("rainfall_profile")
     if not assets_equal:
         _first_differences(
-            project_to_dict(a.project)["external_assets"],
-            project_to_dict(b.project)["external_assets"],
+            list(asset_signatures(a.project.assets)),
+            list(asset_signatures(b.project.assets)),
             "external_assets",
             differences,
         )
@@ -477,6 +504,7 @@ def compare_project_files(left: Path, right: Path) -> ProjectComparison:
         model_equal,
         profile_equal,
         assets_equal,
+        asset_paths_equal,
         model_equal and profile_equal and assets_equal,
         tuple(differences[:MAX_DIFFERENCE_PATHS]),
     )

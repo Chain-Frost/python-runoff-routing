@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Literal
 
 from .integration import RunInputError, RunResult, run_model
-from .project_json import EmbeddedRun, LoadedProject, ProjectError, load_project
+from .project_json import EmbeddedRun, LoadedProject, ProjectError, asset_signatures, load_project
 from .rorb_model import to_json
 
 CalculationStatus = Literal["computed_unvalidated"]
@@ -51,6 +51,7 @@ class ComputedProjectComparison:
     right_project_id: str
     same_typed_model: bool
     same_external_assets: bool
+    external_asset_paths_equal: bool
     same_print_locations: bool
     same_computed_ordinates: bool
     first_difference: str | None
@@ -156,7 +157,9 @@ def compare_routed_projects(left: Path, right: Path) -> ComputedProjectCompariso
         original.project.identifier,
         alternative.project.identifier,
         original.run == alternative.run,
-        original.project.assets == alternative.project.assets,
+        asset_signatures(original.project.assets) == asset_signatures(alternative.project.assets),
+        tuple(item.source.path for item in original.project.assets)
+        == tuple(item.source.path for item in alternative.project.assets),
         locations_equal,
         first_difference is None,
         first_difference,
