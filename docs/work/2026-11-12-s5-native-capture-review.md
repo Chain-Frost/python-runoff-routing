@@ -22,3 +22,10 @@
 - Full native RORB numerical equivalence and private 65-case replay on this exact head are NOT RUN / NOT ACCEPTED.
 - No RORBwin assumptions, new rainfall generation, new numerical kernel or post-hoc precision tolerance.
 - TOML entirely deferred; no merge, release, hosted-automation modification or issue closure.
+
+## Verified source-quality result
+
+- **PASS on implementation head `9c36efe620470032baed33b08293e95851f4a24c`**: [Windows quality #43148310990](https://github.com/Chain-Frost/python-runoff-routing/actions/runs/43148310990), Python 3.14.10.
+- Repository hygiene 104 files, zero errors; Ruff 0.16.6 lint/formatter clean; strict Pyright zero errors/warnings; **370 public synthetic tests passed**; wheel built and installed/imported outside the checkout.
+- Tests include synthetic zero-based and CMD one-based output row conventions, SHA-verified input/output/manifest mismatch rejection, profile/effective-parameter mismatches, original time tokens and write-no-clobber.
+- **NOT RUN:** the original private CMD five-subarea capture using this adapter; the 65-case campaign; RORBwin native acceptance or any new RORB_CMD launch. Native numerical stage remains unassessed.

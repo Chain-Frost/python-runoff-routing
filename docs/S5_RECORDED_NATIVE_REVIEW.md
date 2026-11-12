@@ -44,3 +44,7 @@ All reports remain `source_verified_diagnostic`, `mapping_evidence=caller_assert
 **Scope:** RORB_CMD only; initial captured one-ISA/burst pervious DESIGN subset. RORBwin, ambiguous or incomplete reports, mismatched source bytes/settings, and unprocessed ARR rainfall fail closed. S6 owns ARR2016/2026 event preparation; TOML is deferred.
 
 Tests use synthetic S0-shaped files only. Private benchmark output is not copied into the public repository or executed by CI.
+
+## Software-quality verification
+
+The first S5-P2 implementation head `9c36efe` passed [Windows/Python 3.14 quality run #43148310990](https://github.com/Chain-Frost/python-runoff-routing/actions/runs/43148310990), including strict Ruff/Pyright, 370 public synthetic tests, and an installed-wheel import. This is a **source-quality check only**: no private original CMD/GUI hydrographs or native executables ran on the hosted workflow.
