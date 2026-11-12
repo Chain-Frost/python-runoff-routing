@@ -134,3 +134,6 @@ Project comparison checks source **identity and content** independently of its r
 Portable relative filenames are validated against Windows behaviour even when inspected on another operating system. Reserved device names (`CON`, `NUL`, `AUX`, `PRN`, `COM1`–`COM9`, `LPT1`–`LPT9` and their device-name variants) and components ending in a space or dot are rejected rather than being silently normalised. Unicode ordinary filenames remain supported; project roots themselves may be local, mapped or UNC.
 
 This is a source/provenance safeguard, not a native RORB or rainfall-method parity claim.
+## S5-P2 SHA-pinned native CMD evidence
+
+The [S5 native evidence review contract](S5_RECORDED_NATIVE_REVIEW.md) adds an optional `review-native` CLI that connects the existing S0 manifest verifier and S1/S2 printed-output/volume audits to a file-backed JSON project. It requires an explicit engine SHA, unchanged native input hashes and a caller-supplied print-column mapping. The report is **diagnostic only**, with no claim of native numerical acceptance.

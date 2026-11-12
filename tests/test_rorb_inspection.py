@@ -184,3 +184,21 @@ def test_read_only_inspector_cannot_launch_native_process(tmp_path: Path, monkey
     monkeypatch.setattr(subprocess, "run", prohibited)
     assert inspect_file(_write(tmp_path, _cmd())).status == "parsed"
     assert inspect_file(_write(tmp_path, _out(), "ref.out")).status == "partial"
+
+
+
+def test_cmd_one_based_print_increment_is_not_shifted(tmp_path: Path) -> None:
+    text = _out(rows="1 0.333 0 0\n2 0.666 12 10\n3 0.999 0 0\n")
+    doc = inspect_file(_write(tmp_path, text, "one-based-cmd.out"))
+    assert doc.status == "partial"
+    assert doc.hydrographs is not None
+    assert tuple(item.increment for item in doc.hydrographs.rows) == (1, 2, 3)
+    assert tuple(item.raw_time for item in doc.hydrographs.rows) == ("0.333", "0.666", "0.999")
+    assert doc.hydrographs.reported_duration_increments == 2
+
+
+def test_cmd_one_based_report_rejects_truncated_end(tmp_path: Path) -> None:
+    text = _out(rows="1 0.333 0 0\n2 0.666 12 10\n")
+    doc = inspect_file(_write(tmp_path, text, "truncated-cmd.out"))
+    assert doc.status == "invalid"
+    assert doc.hydrographs is None

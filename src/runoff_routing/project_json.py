@@ -531,6 +531,35 @@ def main(argv: list[str] | None = None) -> int:
     """Small Windows-friendly CLI without argparse, native calls or side effects."""
     args = sys.argv[1:] if argv is None else argv
     try:
+        if len(args) == 8 and args[0] == "review-native":
+            from .project_native_review import (  # noqa: PLC0415 -- CLI-only, depends on S5 source validation
+                review_project_native_capture,
+                write_native_review_json,
+            )
+
+            _, project_path, manifest_path, manifest_hash, executable_hash, print_id, column_id, output_path = args
+            review = review_project_native_capture(
+                Path(project_path),
+                Path(manifest_path),
+                manifest_sha256=manifest_hash,
+                engine_executable_sha256=executable_hash,
+                model_print_id=print_id,
+                native_column_id=column_id,
+            )
+            write_native_review_json(Path(output_path), review)
+            print(
+                json.dumps(
+                    {
+                        "review_status": review.review_status,
+                        "numerical_acceptance": review.numerical_acceptance,
+                        "manifest_sha256": review.manifest_sha256,
+                        "native_output_sha256": review.native_output_sha256,
+                        "printed_within_budget": review.printed.printed_discharge_parity.within_print_budget,
+                    },
+                    sort_keys=True,
+                )
+            )
+            return 0
         if len(args) == 3 and args[0] == "run":
             from .project_execution import (  # noqa: PLC0415 -- CLI-only import avoids project_json execution cycle
                 run_project,
@@ -612,7 +641,9 @@ def main(argv: list[str] | None = None) -> int:
         "Usage: python -m runoff_routing.project_json (validate|inspect) <project.json> "
         "| import-rorb <id> <rainfall-profile> <par> <catg> <stm> <project.json> "
         "| export-run <project.json> <run.json> | compare <left.json> <right.json> "
-        "| run <project.json> <result.json> | compare-runs <left.json> <right.json>",
+        "| run <project.json> <result.json> | compare-runs <left.json> <right.json> "
+        "| review-native <project.json> <manifest.json> <manifest-sha256> "
+        "<engine-sha256> <print-id> <native-column> <review.json>",
         file=sys.stderr,
     )
     return 2
