@@ -149,7 +149,11 @@ def _csv_patterns(raw: bytes, *, kind: PatternKind, encoding: str) -> tuple[Patt
     header = tuple(part.strip().lower().replace(" ", "") for part in rows[0])
     supported = (_HEADER_AREAL, _HEADER_AREAL_NO_AEP) if kind == "areal" else (_HEADER_POINT,)
     expected = next(
-        (candidate for candidate in supported if header[: len(candidate)] == candidate and not any(header[len(candidate) :])),
+        (
+            candidate
+            for candidate in supported
+            if header[: len(candidate)] == candidate and not any(header[len(candidate) :])
+        ),
         None,
     )
     if expected is None:
