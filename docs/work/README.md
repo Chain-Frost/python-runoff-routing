@@ -1,7 +1,7 @@
 # Work register
 
-- [S6 RORBwin local preflight](2026-11-13-s6-rorbwin-local-preflight.md): source hashes verified,
-  Windows checks and Python vectors prepared; native R0–R7 **NOT RUN**, interactive capture required.
+- [S6 RORBwin local preflight](2026-11-13-s6-rorbwin-local-preflight.md): R0 native rainfall matched
+  using an editor-saved 6.52 model; zero-loss excess ordinates matched, CSV timing open; R1–R7 **NOT RUN**.
 
 | Work front | Status | Owner | Updated | Next review | Next action |
 | --- | --- | --- | --- | --- | --- |
