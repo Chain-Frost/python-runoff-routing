@@ -2,6 +2,7 @@
 
 | Work front | Status | Owner | Updated | Next review | Next action |
 | --- | --- | --- | --- | --- | --- |
+| [S5-P2 private replay](2026-11-12-s5-native-capture-review.md) | Installed-wheel workflow PASS; numerical comparison FAIL | Local agent | 2026-11-13 | Dependency review | Review #47, reconcile #40, then #45 and #52; defer further S5 functionality. |
 | [Computational reference guidance](2026-11-11-computational-reference-guidance.md) | Owner wording applied | Local agent | 2026-11-11 | Next procedure investigation | Implement Python procedures and verify against pinned RORB computations. |
 | [S0 native validation](2026-11-11-s0-native.md) | Partial native evidence; stage open | Unassigned | 2026-11-11 | On acceptance review | Confirm time conventions and remaining profile/provenance gaps under [#2](https://github.com/Chain-Frost/python-runoff-routing/issues/2). |
 | [S0 evidence capture](2026-11-10-s0-capture.md) | Implemented; acceptance open | Unassigned | 2026-11-11 | On acceptance review | Validate retained CMD/GUI evidence and capture completeness before closing S0. |
