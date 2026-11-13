@@ -68,6 +68,16 @@ def _area_bin(area_km2: Decimal) -> str | None:
     return next(bin_label for lower, bin_label in reversed(_AREAL_BINS) if area_km2 >= lower)
 
 
+def _is_design_duration(value: object) -> bool:
+    """Validate runtime integer minutes without a bool/float coercion."""
+    return isinstance(value, int) and not isinstance(value, bool) and 1 <= value <= 10080
+
+
+def _has_ten_members(value: object) -> bool:
+    """The ten-member published ensemble count is not caller-selectable."""
+    return isinstance(value, int) and not isinstance(value, bool) and value == 10
+
+
 def select_arr2019_ensemble(
     source: PatternSet,
     *,
@@ -87,7 +97,7 @@ def select_arr2019_ensemble(
     if not region or not region.strip():
         msg = "Temporal-pattern region must be explicitly supplied"
         raise ARRFormatError(msg)
-    if isinstance(duration_min, bool) or not isinstance(duration_min, int) or not 1 <= duration_min <= 10080:
+    if not _is_design_duration(duration_min):
         msg = "Design duration must be a positive integer in 1..10080 minutes"
         raise ARRFormatError(msg)
     if not aep_percent.is_finite():
@@ -97,7 +107,7 @@ def select_arr2019_ensemble(
     if aep_band is None:
         msg = f"ARR2019 temporal-pattern frequency selection is not characterised for {aep_percent}% AEP"
         raise ARRFormatError(msg)
-    if isinstance(expected_count, bool) or not isinstance(expected_count, int) or expected_count != 10:
+    if not _has_ten_members(expected_count):
         msg = "ARR2019 selection requires exactly ten members; expected_count cannot relax that requirement"
         raise ARRFormatError(msg)
     kind: Literal["point", "areal"] = "point" if area_bin is None else "areal"
