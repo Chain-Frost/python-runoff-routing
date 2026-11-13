@@ -17,6 +17,7 @@
 - [S2 native versus physical-volume reporting conventions](S2_REPORTING_CONVENTIONS.md): exact Decimal print-unit audit; not numerical parity.
 - [S2 reporting-convention work record](work/2026-11-11-s2-reporting-conventions.md)
 - [S1/S2 Python integration API and capability matrix](S1_S2_INTEGRATION.md)
+- [S5 JSON projects: import, compare and Python-reference run](PROJECT_JSON.md)
 - [Optional PyROMB-based RORB_GE GIS authoring](RORB_GE_AUTHORING.md)
 - [RORB behavioral audit and warning policy](BEHAVIOUR_AND_WARNINGS.md)
 - [Pull-request template](../.github/pull_request_template.md)
