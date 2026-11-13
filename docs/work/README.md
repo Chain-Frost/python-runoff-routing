@@ -1,5 +1,7 @@
 # Work register
 
+- [S6 R0/R1 precision and time-label audit](2026-11-14-s6-r0-r1-precision-audit.md): reconciles earlier and later native evidence, records strict R1 failures and freezes prospective coefficient-pair controls; no new native run or private rehash.
+
 - [S6 controlled loss kernel](2026-11-14-s6-controlled-loss-kernel.md): seven crossing/timestep controls,
   separate opt-in candidate implemented; strict native precision failures retained; default unchanged.
 
