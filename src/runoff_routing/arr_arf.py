@@ -17,6 +17,7 @@ ARF_POLICY_VERSION = "ARR2019_BOOK2_V4_1_2_4_1_TO_2_4_4"
 CoefficientOrigin = Literal["arr2019_book2_table_2_4_2", "legacy_datahub"]
 NegativePolicy = Literal["reject", "floor_zero"]
 
+
 def _valid_integer_duration(value: object) -> bool:
     """Guard runtime minute inputs without treating bool/float as an integer."""
     return isinstance(value, int) and not isinstance(value, bool) and 1 <= value <= 10080
