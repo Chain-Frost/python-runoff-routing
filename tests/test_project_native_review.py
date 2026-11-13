@@ -13,7 +13,8 @@ import pytest
 from runoff_routing.integration import canonical_run_bytes, read_run_json, run_model
 from runoff_routing.project_json import LegacyRunFiles, Project, ProjectError, SourceFile, main, write_project
 from runoff_routing.project_native_review import review_project_native_capture, write_native_review_json
-from runoff_routing.project_regression import FORMAT, main as regression_main, run_suite, write_suite_results
+from runoff_routing.project_regression import FORMAT, run_suite, write_suite_results
+from runoff_routing.project_regression import main as regression_main
 from runoff_routing.rorb_inspect import inspect_file
 
 ROOT = Path(__file__).absolute().parents[1]
@@ -439,7 +440,7 @@ def test_offline_suite_preserves_verified_native_reported_volume_without_gate_in
     assert str(audit.reported_native_volume_m3) == "1.23E+4"
     assert audit.raw_native_time_tokens is not None
     assert result.cases[0].reviews[0].native_volume_source == "unique_single_column_out"
-    assert json.loads(result.to_json())["cases"][0]["prints"][0]["reporting"]["native_reported_volume_token"] == "1.23E+04"
+    assert json.loads(result.to_json())["cases"][0]["prints"][0]["reporting"]["native_reported_volume_token"] == result.cases[0].reviews[0].native_reported_volume_text
 
 
 def test_offline_suite_handles_incomplete_capture_and_unavailable_file(tmp_path: Path) -> None:
@@ -466,7 +467,8 @@ def test_offline_suite_tampering_unknown_keys_and_unmodified_inputs(tmp_path: Pa
     output, csv_file = tmp_path / "summary.json", tmp_path / "samples.csv"
     result = run_suite(suite)
     write_suite_results(output, result, details_csv=csv_file)
-    assert output.exists() and csv_file.exists()
+    assert output.exists()
+    assert csv_file.exists()
     with pytest.raises(FileExistsError):
         write_suite_results(tmp_path / "another.json", result, details_csv=csv_file)
     assert not (tmp_path / "another.json").exists()

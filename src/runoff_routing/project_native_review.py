@@ -251,6 +251,12 @@ def _check_capture_identity(manifest: dict[str, object], column_id: str, expecte
         raise ProjectError(message)
 
 
+def _check_print_mappings(mappings: tuple[tuple[str, str], ...]) -> None:
+    if not mappings or len({p for p, _ in mappings}) != len(mappings) or len({c for _, c in mappings}) != len(mappings):
+        message = "Native print mappings must be nonempty and one-to-one"
+        raise ProjectError(message)
+
+
 def review_project_native_captures(
     project_path: Path,
     manifest_path: Path,
@@ -261,9 +267,7 @@ def review_project_native_captures(
 ) -> tuple[NativeProjectReview, ...]:
     """Review all selected CMD sites after a single source check and S2 execution."""
     mappings = tuple(print_mappings)
-    if not mappings or len({p for p, _ in mappings}) != len(mappings) or len({c for _, c in mappings}) != len(mappings):
-        message = "Native print mappings must be nonempty and one-to-one"
-        raise ProjectError(message)
+    _check_print_mappings(mappings)
     loaded = load_project(project_path)
     if loaded.project.rainfall_profile != "legacy-rorb" or not isinstance(loaded.project.model_source, LegacyRunFiles):
         message = "Native S0 review requires a legacy-rorb project backed by original RORB source files"
@@ -302,7 +306,7 @@ def review_project_native_captures(
         position = report.columns.index(column) + 2
         tokens = tuple(source.lines[row.line - 1].split()[position] for row in report.rows)
         predicted = next((item.discharge_m3_s for item in result.calculation.prints if item.print_id == print_id), ())
-        volume_text = report.reported_volume_text if len(report.columns) == 1 else None
+        volume_text = report.reported_volume_text
         try:
             printed = review_recorded_print(
                 result.calculation,

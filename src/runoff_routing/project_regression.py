@@ -324,6 +324,18 @@ class _CaseError(Exception):
         super().__init__(message)
         self.classification = classification
 
+    @classmethod
+    def unsupported(cls, message: str) -> _CaseError:
+        return cls("unsupported", message)
+
+    @classmethod
+    def incomplete(cls, message: str) -> _CaseError:
+        return cls("incomplete", message)
+
+    @classmethod
+    def invalid(cls, message: str) -> _CaseError:
+        return cls("invalid", message)
+
 
 def _verified_file(root: Path, reference: SourceFile) -> Path:
     """Use project-relative portable paths, verifying physical containment and exact bytes."""
@@ -332,17 +344,17 @@ def _verified_file(root: Path, reference: SourceFile) -> Path:
         path = candidate.resolve(strict=True)
     except (OSError, RuntimeError) as exc:
         message = f"Missing source {reference.path}: {exc}"
-        raise _CaseError("incomplete", message) from exc
+        raise _CaseError.incomplete(message) from exc
     if not path.is_relative_to(root) or not path.is_file():
         message = f"Unsafe source locator: {reference.path}"
-        raise _CaseError("invalid", message)
+        raise _CaseError.invalid(message)
     if path.stat().st_size > 64 * 1024 * 1024:
         message = f"Source exceeds review limit: {reference.path}"
-        raise _CaseError("invalid", message)
+        raise _CaseError.invalid(message)
     raw = path.read_bytes()
     if hashlib.sha256(raw).hexdigest() != reference.sha256:
         message = f"Source hash mismatch: {reference.path}"
-        raise _CaseError("invalid", message)
+        raise _CaseError.invalid(message)
     return path
 
 
@@ -359,56 +371,56 @@ def _preflight_native(loaded: LoadedProject, manifest_path: Path, native_spec: N
         or not isinstance(loaded.project.model_source, LegacyRunFiles)
     ):
         message = "Offline CMD review requires file-backed legacy-rorb forcing"
-        raise _CaseError("unsupported", message)
+        raise _CaseError.unsupported(message)
     if any(asset.role != "reference" for asset in loaded.project.assets):
         message = "Unprocessed external rainfall/curve input"
-        raise _CaseError("unsupported", message)
+        raise _CaseError.unsupported(message)
     try:
         manifest_raw: object = json.loads(manifest_path.read_text(encoding="utf-8"))
     except (UnicodeError, ValueError) as exc:
         message = f"Malformed native capture manifest: {exc}"
-        raise _CaseError("invalid", message) from exc
+        raise _CaseError.invalid(message) from exc
     if not isinstance(manifest_raw, dict):
         message = "Native capture manifest must be an object"
-        raise _CaseError("invalid", message)
+        raise _CaseError.invalid(message)
     native = cast("dict[str, object]", manifest_raw)
     engine = native.get("engine")
     if not isinstance(engine, dict) or engine.get("kind") not in {"RORB_CMD", "RORBwin"}:
         message = "Unrecognised or missing native engine profile"
-        raise _CaseError("invalid", message)
+        raise _CaseError.invalid(message)
     if engine.get("kind") != "RORB_CMD":
         message = "Only RORB_CMD retained output is characterised"
-        raise _CaseError("unsupported", message)
+        raise _CaseError.unsupported(message)
     outcome = native.get("outcome")
     if isinstance(outcome, str) and outcome in {"incomplete_output", "missing_output", "captured_unverified"}:
         message = f"Native capture outcome is {outcome}"
-        raise _CaseError("incomplete", message)
+        raise _CaseError.incomplete(message)
     if outcome != "success" and outcome != "zero_runoff":
         message = f"Native capture outcome is not a valid calculation: {outcome}"
-        raise _CaseError("invalid", message)
+        raise _CaseError.invalid(message)
     requested = native.get("requested_print_locations")
     actual_columns = {mapping.native_column_id for mapping in native_spec.print_mapping}
     expected_model = {entry.identifier for entry in loaded.run.catchment.print_locations}
     mapped_model = {mapping.model_print_id for mapping in native_spec.print_mapping}
     if not isinstance(requested, dict) or actual_columns != set(requested) or mapped_model != expected_model:
         message = "Ambiguous or incomplete print-location mapping coverage"
-        raise _CaseError("invalid", message)
+        raise _CaseError.invalid(message)
 
 
 def _run_case(spec: CaseSpec, root: Path) -> CaseOutcome:
     if spec.project is None or spec.native is None:
         message = "Project or retained native reference is not supplied"
-        raise _CaseError("incomplete", message)
+        raise _CaseError.incomplete(message)
     if not spec.native.print_mapping:
         message = "Native reference has no print mappings"
-        raise _CaseError("incomplete", message)
+        raise _CaseError.incomplete(message)
     project = _verified_file(root, spec.project)
     manifest_path = _verified_file(root, spec.native.manifest)
     try:
         loaded = load_project(project)
     except (ProjectError, ValueError) as exc:
         message = f"Project cannot be verified: {exc}"
-        raise _CaseError("invalid", message) from exc
+        raise _CaseError.invalid(message) from exc
     _preflight_native(loaded, manifest_path, spec.native)
     try:
         reviews = review_project_native_captures(
@@ -421,13 +433,13 @@ def _run_case(spec: CaseSpec, root: Path) -> CaseOutcome:
     except ProjectError as exc:
         reason = str(exc)
         if "Unsupported" in reason or "only supports" in reason or "not supported" in reason:
-            raise _CaseError("unsupported", reason) from exc
+            raise _CaseError.unsupported(reason) from exc
         if "hydrograph" in reason.lower() or "horizon" in reason.lower() or "report" in reason.lower():
-            raise _CaseError("incomplete", reason) from exc
-        raise _CaseError("invalid", reason) from exc
+            raise _CaseError.incomplete(reason) from exc
+        raise _CaseError.invalid(reason) from exc
     if not reviews:
         message = "Native comparison returned no print locations"
-        raise _CaseError("invalid", message)
+        raise _CaseError.invalid(message)
     first = reviews[0]
     passing = all(r.printed.printed_discharge_parity.within_print_budget for r in reviews)
     return CaseOutcome(
