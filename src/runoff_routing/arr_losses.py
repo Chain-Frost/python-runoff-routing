@@ -76,18 +76,8 @@ class PreburstLossSelection:
         if not self.source_sha256 or not self.source_profile or not self.operations:
             msg = "ARR loss selection requires source and method provenance"
             raise ARRFormatError(msg)
-        if self.preburst_percentile not in {10, 25, 50, 75, 90}:
-            msg = "Unsupported legacy preburst percentile"
-            raise ARRFormatError(msg)
         _validate_preburst_depth_basis(self)
-        if self.preburst_above_storm_il_mm != max(Decimal(0), self.preburst_depth_mm - self.storm_initial_loss_mm):
-            msg = "Selected preburst excess must equal preburst minus storm IL once"
-            raise ARRFormatError(msg)
-        if self.burst_initial_loss_mm is not None and self.burst_initial_loss_mm != max(
-            Decimal(0), self.storm_initial_loss_mm - self.preburst_depth_mm
-        ):
-            msg = "Selected burst initial loss must equal storm IL minus preburst once"
-            raise ARRFormatError(msg)
+        _validate_selected_preburst_arithmetic(self)
         if self.burst_initial_loss_mm is not None and (
             not self.burst_initial_loss_mm.is_finite() or self.burst_initial_loss_mm < 0
         ):
@@ -96,6 +86,22 @@ class PreburstLossSelection:
         if (self.method == "explicit_preburst") != (self.burst_initial_loss_mm is None):
             msg = "Explicit preburst retains storm IL; burst-only requires burst IL"
             raise ARRFormatError(msg)
+
+
+def _validate_selected_preburst_arithmetic(selection: PreburstLossSelection) -> None:
+    """Reject forged/repeated preburst and burst IL arithmetic at construction."""
+    if selection.preburst_percentile not in {10, 25, 50, 75, 90}:
+        msg = "Unsupported legacy preburst percentile"
+        raise ARRFormatError(msg)
+    _validate_preburst_depth_basis(self)
+    if selection.preburst_above_storm_il_mm != max(Decimal(0), selection.preburst_depth_mm - selection.storm_initial_loss_mm):
+        msg = "Selected preburst excess must equal preburst minus storm IL once"
+        raise ARRFormatError(msg)
+    if selection.burst_initial_loss_mm is not None and selection.burst_initial_loss_mm != max(
+        Decimal(0), selection.storm_initial_loss_mm - selection.preburst_depth_mm
+    ):
+        msg = "Selected burst initial loss must equal storm IL minus preburst once"
+        raise ARRFormatError(msg)
 
 
 def _validate_preburst_depth_basis(selection: PreburstLossSelection) -> None:
