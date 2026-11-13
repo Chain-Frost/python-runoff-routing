@@ -1,6 +1,6 @@
 # S5-P1: JSON projects and Python-only routing
 
-**Date:** 2026-11-12. **Scope:** isolated implementation from current main. **Issues:** [S5-P1 #44](https://github.com/Chain-Frost/python-runoff-routing/issues/44), [S5-P0 #35](https://github.com/Chain-Frost/python-runoff-routing/issues/35), [S5 #7](https://github.com/Chain-Frost/python-runoff-routing/issues/7). **Status:** draft implementation, exact-head Windows CI and installed-wheel gate pending.
+**Date:** 2026-11-12. **Scope:** isolated implementation from current main. **Issues:** [S5-P1 #44](https://github.com/Chain-Frost/python-runoff-routing/issues/44), [S5-P0 #35](https://github.com/Chain-Frost/python-runoff-routing/issues/35), [S5 #7](https://github.com/Chain-Frost/python-runoff-routing/issues/7). **Status:** merged via PR #47 at `0989ca5`; exact-head Windows quality passed 320 tests, strict Ruff/Pyright and wheel. Native numerical parity remains unaccepted.
 
 ## Implemented
 
