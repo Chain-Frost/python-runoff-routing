@@ -138,3 +138,7 @@ This is a source/provenance safeguard, not a native RORB or rainfall-method pari
 ## S5-P2 SHA-pinned CMD reference diagnostic
 
 The [S5 native review contract](S5_RECORDED_NATIVE_REVIEW.md) documents the `review-native` CLI. An actual 201-row CMD replay verified source evidence but **failed frozen printed parity: 11/201 within budget, maximum 0.22707849 m³/s**. The native column mapping is caller-asserted; numerical acceptance remains `unassessed`.
+
+## S5 multi-case offline regression (draft)
+
+The versioned [multi-case regression suite](S5_OFFLINE_REGRESSION.md) extends the single-project SHA-pinned CMD review without creating a second solver. It enumerates each case as computed/pass, computed/fail, unsupported, incomplete or invalid and retains native source fingerprints, CMD raw clocks, control-vector order, peaks, physical-horizon integrals and uniquely attributable source-reported volume separately. All native numerical acceptance remains unassessed; site mappings remain caller-asserted. No private corpus is committed, TOML is deferred and the native comparison remains a failed printed-precision diagnostic.

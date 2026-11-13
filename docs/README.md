@@ -19,6 +19,7 @@
 - [S1/S2 Python integration API and capability matrix](S1_S2_INTEGRATION.md)
 - [S5 JSON projects: import, compare and Python-reference run](PROJECT_JSON.md)
 - [S5 cached CMD reference diagnostics](S5_RECORDED_NATIVE_REVIEW.md)
+- [S5 multi-case offline native regression suite](S5_OFFLINE_REGRESSION.md)
 - [Optional PyROMB-based RORB_GE GIS authoring](RORB_GE_AUTHORING.md)
 - [RORB behavioral audit and warning policy](BEHAVIOUR_AND_WARNINGS.md)
 - [Pull-request template](../.github/pull_request_template.md)
@@ -44,5 +45,6 @@
 - [S1/S2 integration implementation record](work/2026-11-11-s1-s2-integration.md)
 - [S1/S2 implementation merge and acceptance boundary](work/2026-11-12-s1-s2-implementation-merge.md)
 - [PR #29 bounded native/real-GIS acceptance](work/2026-11-11-pr29-native-acceptance.md)
+- [S5 multi-case offline regression work record](work/2026-11-14-s5-offline-regression.md)
 
 Future repository-owned Markdown must be linked here. Policies describe required behaviour; the roadmap describes future implementation. No source document establishes that this package has passed a numerical acceptance gate.

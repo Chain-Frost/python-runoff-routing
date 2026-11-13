@@ -2,6 +2,7 @@
 
 | Work front | Status | Owner | Updated | Next review | Next action |
 | --- | --- | --- | --- | --- | --- |
+| [S5 multi-case offline regression](2026-11-14-s5-offline-regression.md) | Draft; Windows and private replay pending; numerical S2 failed previously | S5 | 2026-11-14 | Draft PR quality review | Run existing Windows CI and isolated private read-only corpus replay; do not accept numerical compatibility. |
 | [Integrated native print review](2026-11-12-integrated-print-review.md) | Merged #45; native numerical parity open | S2 | 2026-11-14 | S5 dependency review | Native print IDs and reporting statistics stay distinct; no native parity claim. |
 | [Native reporting convention](2026-11-11-s2-reporting-conventions.md) | Merged #40; S2 parity open | S2 | 2026-11-14 | Numerical acceptance review | Preserve native inclusive sum and physical flux as different statistics. |
 | [Computational reference guidance](2026-11-11-computational-reference-guidance.md) | Owner wording applied | Local agent | 2026-11-11 | Next procedure investigation | Implement Python procedures and verify against pinned RORB computations. |

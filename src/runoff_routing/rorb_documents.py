@@ -106,6 +106,7 @@ class HydrographReport:
     rows: tuple[HydrographRow, ...]
     time_increment_hours: Decimal | None
     reported_duration_increments: int | None
+    reported_volume_text: str | None = None
 
 
 @dataclass(frozen=True, slots=True)

@@ -9,6 +9,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from collections.abc import Sequence
 from dataclasses import asdict, dataclass
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
@@ -44,6 +45,13 @@ class NativeProjectReview:
     raw_increment_tokens: tuple[str, ...]
     raw_time_tokens: tuple[str, ...]
     printed: RecordedPrintReview
+    raw_discharge_tokens: tuple[str, ...]
+    predicted_discharge_m3_s: tuple[float, ...]
+    source_file_hashes: tuple[tuple[str, str], ...]
+    control_vector_order: tuple[tuple[int, str | None, str | None, str | None], ...]
+    effective_settings: dict[str, object]
+    native_reported_volume_text: str | None
+    native_volume_source: Literal["unique_single_column_out", "unavailable"]
     review_status: Literal["source_verified_diagnostic"] = "source_verified_diagnostic"
     numerical_acceptance: Literal["unassessed"] = "unassessed"
 
@@ -243,20 +251,19 @@ def _check_capture_identity(manifest: dict[str, object], column_id: str, expecte
         raise ProjectError(message)
 
 
-def review_project_native_capture(
+def review_project_native_captures(
     project_path: Path,
     manifest_path: Path,
     *,
     manifest_sha256: str,
     engine_executable_sha256: str,
-    model_print_id: str,
-    native_column_id: str,
-) -> NativeProjectReview:
-    """Compare a file-backed historic JSON project with a pinned CMD S0 capture.
-
-    The caller must establish the native-column/print-site mapping externally;
-    any printed parity is a diagnostic, never an accepted RORB-compatible solve.
-    """
+    print_mappings: Sequence[tuple[str, str]],
+) -> tuple[NativeProjectReview, ...]:
+    """Review all selected CMD sites after a single source check and S2 execution."""
+    mappings = tuple(print_mappings)
+    if not mappings or len({p for p, _ in mappings}) != len(mappings) or len({c for _, c in mappings}) != len(mappings):
+        message = "Native print mappings must be nonempty and one-to-one"
+        raise ProjectError(message)
     loaded = load_project(project_path)
     if loaded.project.rainfall_profile != "legacy-rorb" or not isinstance(loaded.project.model_source, LegacyRunFiles):
         message = "Native S0 review requires a legacy-rorb project backed by original RORB source files"
@@ -265,8 +272,9 @@ def review_project_native_capture(
     profile = _validated_capture_profile(manifest, engine_executable_sha256)
     _check_capture_settings(manifest, loaded.project.model_source, loaded.run)
     count = loaded.run.storm.calculation_increments + 1
-    _check_capture_identity(manifest, native_column_id, count)
-    source, tokens, increments = _checked_report(manifest, manifest_path, native_column_id, count)
+    for _, column in mappings:
+        _check_capture_identity(manifest, column, count)
+    source, _, increments = _checked_report(manifest, manifest_path, mappings[0][1], count)
     report = inspect_output(source).hydrographs
     if report is None:
         message = "Validated native output unexpectedly lacks hydrograph rows"
@@ -283,34 +291,76 @@ def review_project_native_capture(
         message = "Native raw time labels differ from the S0 capture manifest"
         raise ProjectError(message)
     result = execute_loaded_project(loaded)
-    try:
-        printed = review_recorded_print(
-            result.calculation,
-            tokens,
-            model_print_id=model_print_id,
-            native_column_id=native_column_id,
-            engine_profile=profile,
-            raw_native_time_tokens=times,
-        )
-    except (ValueError, ArithmeticError) as exc:
-        message = f"Native printed review rejected evidence or print mapping: {exc}"
-        raise ProjectError(message) from exc
-    return NativeProjectReview(
-        loaded.project.identifier,
-        _string(manifest.get("case_id"), "Native case ID"),
-        result.project_sha256,
-        result.model_sha256,
-        manifest_hash,
-        source.sha256,
-        profile,
-        engine_executable_sha256,
-        model_print_id,
-        native_column_id,
-        "caller_asserted",
-        increments,
-        times,
-        printed,
+    output: list[NativeProjectReview] = []
+    control_order = tuple(
+        (step.code, step.subarea_id, step.reach_id, step.print_id) for step in loaded.run.catchment.controls
     )
+    for print_id, column in mappings:
+        if column not in report.columns:
+            message = f"Native printed column {column!r} is absent"
+            raise ProjectError(message)
+        position = report.columns.index(column) + 2
+        tokens = tuple(source.lines[row.line - 1].split()[position] for row in report.rows)
+        predicted = next((item.discharge_m3_s for item in result.calculation.prints if item.print_id == print_id), ())
+        volume_text = report.reported_volume_text if len(report.columns) == 1 else None
+        try:
+            printed = review_recorded_print(
+                result.calculation,
+                tokens,
+                model_print_id=print_id,
+                native_column_id=column,
+                engine_profile=profile,
+                raw_native_time_tokens=times,
+                native_reported_volume_text=volume_text,
+            )
+        except (ValueError, ArithmeticError) as exc:
+            message = f"Native printed review rejected evidence or print mapping: {exc}"
+            raise ProjectError(message) from exc
+        output.append(
+            NativeProjectReview(
+                loaded.project.identifier,
+                _string(manifest.get("case_id"), "Native case ID"),
+                result.project_sha256,
+                result.model_sha256,
+                manifest_hash,
+                source.sha256,
+                profile,
+                engine_executable_sha256,
+                print_id,
+                column,
+                "caller_asserted",
+                increments,
+                times,
+                printed,
+                tokens,
+                predicted,
+                result.source_file_hashes,
+                control_order,
+                _record(manifest.get("effective_settings"), "S0 effective settings"),
+                volume_text,
+                "unique_single_column_out" if volume_text is not None else "unavailable",
+            )
+        )
+    return tuple(output)
+
+
+def review_project_native_capture(
+    project_path: Path,
+    manifest_path: Path,
+    *,
+    manifest_sha256: str,
+    engine_executable_sha256: str,
+    model_print_id: str,
+    native_column_id: str,
+) -> NativeProjectReview:
+    """Review one caller-mapped CMD print location without launching native RORB."""
+    return review_project_native_captures(
+        project_path,
+        manifest_path,
+        manifest_sha256=manifest_sha256,
+        engine_executable_sha256=engine_executable_sha256,
+        print_mappings=((model_print_id, native_column_id),),
+    )[0]
 
 
 def write_native_review_json(path: Path, review: NativeProjectReview) -> None:
