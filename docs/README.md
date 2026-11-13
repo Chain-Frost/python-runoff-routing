@@ -19,6 +19,7 @@
 - [S6-P1 BoM IFD, ARR temporal patterns and gross rainfall](ARR_BOM_TP_GROSS.md)
 - [S6-P2 ARR2019 temporal-pattern ensemble selection and ARF equations](ARR_S6_P2_SELECTION_ARF.md)
 - [S6-P3 ARR2019 preburst and IL/CL source methods](ARR_S6_P3_PREBURST_LOSSES.md)
+- [Experimental RORBwin 6.52 full-increment loss profile](EXPERIMENTAL_RORBWIN_652_LOSSES.md)
 - [Pull-request template](../.github/pull_request_template.md)
 
 ## Rainfall intake
@@ -27,6 +28,12 @@
 - [S6 real FLTwest archive replay and implementation record](work/2026-11-12-s6-bom-tp-gross.md)
 
 ## Work and handoff
+
+- [S6 controlled crossing, candidate loss profile and half-hour export labels](work/2026-11-14-s6-controlled-loss-kernel.md)
+- [S6 R5 long-duration native default preburst](work/2026-11-14-s6-r5-default-preburst.md)
+- [S6 R2–R4 native loss and preburst experiments](work/2026-11-14-s6-r2-r4-loss-preburst.md)
+- [S6 R0 export timing and R1 ARF experiment](work/2026-11-14-s6-r0-timing-r1-arf.md)
+- [S6 RORBwin local preflight and completed R0 comparison](work/2026-11-13-s6-rorbwin-local-preflight.md)
 
 - [S6 RORBwin native rainfall validation — local agent handoff](work/2026-11-12-s6-rorbwin-local-validation-handoff.md)
 

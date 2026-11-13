@@ -1,5 +1,7 @@
 # S6: native R2–R4 loss and explicit-preburst experiments
 
+Follow-up: [controlled crossing experiment and separate candidate loss profile](2026-11-14-s6-controlled-loss-kernel.md).
+
 **Status:** R2, R3 and corrected R4 completed; experimental Python excess parity fails.
 
 **Owner:** Local Windows agent. **Updated:** 2026-11-14. **Review:** on loss-policy investigation.

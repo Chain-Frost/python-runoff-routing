@@ -35,6 +35,10 @@ Maintain field-level mapping for catchment area, reaches, pluviographs, bursts, 
 
 ## Numerical conventions to characterise
 
+The [experimental RORBwin 6.52 loss profile](EXPERIMENTAL_RORBWIN_652_LOSSES.md) is separately selected
+and has bounded crossing-rule observations. It does not replace the default ARR loss method or
+establish complete native precision/timing acceptance.
+
 Record units at boundaries: rainfall/initial loss in mm, continuing loss in mm/h, areas in km2, reaches in km, flows in m3/s, storage in m3, time increment in hours and other legacy times in increments (R1 Table 5-1).
 
 Verify reach-type factors, slope bounds, dav/kr calculation, initial storage/outflow, time-zero and half-step rainfall-excess conventions, IL crossing within an increment, continuing/proportional losses, dry steps and burst transitions. The manual specifies Regula Falsi for nonlinear routing and a stated convergence criterion; linear routing and special-storage timestep subdivision need their own tests (R1 sections 2.2.5 and 2.4.5.4).

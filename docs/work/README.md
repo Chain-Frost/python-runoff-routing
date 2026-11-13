@@ -1,7 +1,13 @@
 # Work register
 
+- [S6 controlled loss kernel](2026-11-14-s6-controlled-loss-kernel.md): seven crossing/timestep controls,
+  separate opt-in candidate implemented; strict native precision failures retained; default unchanged.
+
+- [S6 R5 default preburst](2026-11-14-s6-r5-default-preburst.md): one long-duration GSAM/Inland case
+  characterised; Jordan short-duration and conditional R6/R7 cases remain unrun.
+
 - [S6 R2–R4 native losses/preburst](2026-11-14-s6-r2-r4-loss-preburst.md): all three effective cases run;
-  R4 preburst observed, experimental Python excess mismatches retained; R5–R7 **NOT RUN**.
+  R4 preburst observed, experimental Python excess mismatches retained; later investigations are linked above.
 
 - [S6 R0 timing and R1 ARF](2026-11-14-s6-r0-timing-r1-arf.md): R1 completed; printed rainfall agrees,
   strict excess precision and CSV timing gates open; later loss/preburst experiments are linked above.
