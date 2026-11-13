@@ -1,5 +1,8 @@
 # Work register
 
+- [S6 RORBwin local preflight](2026-11-13-s6-rorbwin-local-preflight.md): source hashes verified,
+  Windows checks and Python vectors prepared; native R0–R7 **NOT RUN**, interactive capture required.
+
 | Work front | Status | Owner | Updated | Next review | Next action |
 | --- | --- | --- | --- | --- | --- |
 | [S6 local RORBwin 6.52 rainfall validation](2026-11-12-s6-rorbwin-local-validation-handoff.md) | Handoff prepared; no native comparison run | Unassigned (local Windows agent) | 2026-11-12 | On native evidence review | Fingerprint RORBwin and compare synthetic 100 km² rainfall, ARF, preburst and IL/CL vectors before routing; private evidence only. |
