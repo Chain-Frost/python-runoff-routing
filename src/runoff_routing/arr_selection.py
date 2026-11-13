@@ -87,8 +87,8 @@ def select_arr2019_ensemble(
     if not region or not region.strip():
         msg = "Temporal-pattern region must be explicitly supplied"
         raise ARRFormatError(msg)
-    if isinstance(duration_min, bool) or duration_min <= 0:
-        msg = "Design duration must be a positive integer number of minutes"
+    if isinstance(duration_min, bool) or not isinstance(duration_min, int) or not 1 <= duration_min <= 10080:
+        msg = "Design duration must be a positive integer in 1..10080 minutes"
         raise ARRFormatError(msg)
     if not aep_percent.is_finite():
         msg = "AEP must be a finite Decimal percentage, not EY or ARI"
@@ -97,8 +97,8 @@ def select_arr2019_ensemble(
     if aep_band is None:
         msg = f"ARR2019 temporal-pattern frequency selection is not characterised for {aep_percent}% AEP"
         raise ARRFormatError(msg)
-    if isinstance(expected_count, bool) or not 1 <= expected_count <= 20:
-        msg = "Expected ensemble count must be an integer from 1 to 20"
+    if isinstance(expected_count, bool) or not isinstance(expected_count, int) or expected_count != 10:
+        msg = "ARR2019 selection requires exactly ten members; expected_count cannot relax that requirement"
         raise ARRFormatError(msg)
     kind: Literal["point", "areal"] = "point" if area_bin is None else "areal"
     if source.kind != kind:

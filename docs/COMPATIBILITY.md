@@ -1,6 +1,6 @@
 # Compatibility contract
 
-Source references R1-R6 are defined in [SOURCES.md](SOURCES.md). S0 capture and restricted S1 CMD inspection, typed readers/writers and code-7 repair are implemented on main. S2 routing/integration are unmerged drafts; **no RORB numerical stage is accepted**. A limited CMD 6.44 and GUI 6.52 native baseline was captured ([S0 record](work/2026-11-11-s0-native.md)). This is still an investigation and acceptance contract, not proof of full compatibility.
+Source references R1-R6 are defined in [SOURCES.md](SOURCES.md). S0 capture and restricted S1 CMD inspection, typed readers/writers and code-7 repair are implemented on main. Bounded Python-only S2 reach/single-storm routing and S1/S2 typed integration are implemented on `main` following [PR #23](https://github.com/Chain-Frost/python-runoff-routing/pull/23); **no RORB numerical stage is accepted**. The 36 computed CMD whole-catchment profiles still exceed their frozen printed-precision budgets. A limited CMD 6.44 and GUI 6.52 native baseline was captured ([S0 record](work/2026-11-11-s0-native.md)). This is still an investigation and acceptance contract, not proof of full compatibility.
 
 ## Separate reference identities
 

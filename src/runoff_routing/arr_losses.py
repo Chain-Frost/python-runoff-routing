@@ -76,7 +76,18 @@ class PreburstLossSelection:
         if not self.source_sha256 or not self.source_profile or not self.operations:
             msg = "ARR loss selection requires source and method provenance"
             raise ARRFormatError(msg)
+        if self.preburst_percentile not in {10, 25, 50, 75, 90}:
+            msg = "Unsupported legacy preburst percentile"
+            raise ARRFormatError(msg)
         _validate_preburst_depth_basis(self)
+        if self.preburst_above_storm_il_mm != max(Decimal(0), self.preburst_depth_mm - self.storm_initial_loss_mm):
+            msg = "Selected preburst excess must equal preburst minus storm IL once"
+            raise ARRFormatError(msg)
+        if self.burst_initial_loss_mm is not None and self.burst_initial_loss_mm != max(
+            Decimal(0), self.storm_initial_loss_mm - self.preburst_depth_mm
+        ):
+            msg = "Selected burst initial loss must equal storm IL minus preburst once"
+            raise ARRFormatError(msg)
         if self.burst_initial_loss_mm is not None and (
             not self.burst_initial_loss_mm.is_finite() or self.burst_initial_loss_mm < 0
         ):
@@ -99,6 +110,11 @@ def _validate_preburst_depth_basis(selection: PreburstLossSelection) -> None:
         not selection.rainfall_basis_total_mm.is_finite() or selection.rainfall_basis_total_mm < 0
     ):
         msg = "Invalid preburst rainfall depth basis"
+        raise ARRFormatError(msg)
+    if selection.rainfall_basis_total_mm is not None and (
+        selection.preburst_depth_mm != selection.preburst_ratio * selection.rainfall_basis_total_mm
+    ):
+        msg = "Ratio-derived preburst depth must equal ratio times its recorded rainfall basis"
         raise ARRFormatError(msg)
 
 

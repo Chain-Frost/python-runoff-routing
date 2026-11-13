@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import Literal
@@ -264,6 +265,9 @@ class ARRDocument:
             raise ARRFormatError(msg)
         if self.source.byte_length != len(self.raw_bytes):
             msg = "ARR raw bytes do not match source metadata"
+            raise ARRFormatError(msg)
+        if hashlib.sha256(self.raw_bytes).hexdigest() != self.source.sha256:
+            msg = "ARR source SHA-256 does not match the original bytes"
             raise ARRFormatError(msg)
         if not self.ifd_datasets and self.capability == "ifd_validated":
             msg = "Document with no validated IFD cannot declare ifd_validated"

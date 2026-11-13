@@ -324,8 +324,8 @@ def parse_catg(data: bytes) -> ParsedDocument[CatchmentModel]:  # noqa: C901 -- 
                     message = "Code 7 is missing its physical print-location record"
                     raise _problem(message, line_no)
                 physical_label = lines[line_no]
-                if physical_label.strip() == "0" and not any(value == "0" for _, value in records[cursor + 2 :]):
-                    message = "Code 7 consumed the final zero control as its missing location"
+                if physical_label.strip() == "0":
+                    message = "Code 7 requires a location record distinct from the zero control terminator"
                     raise _problem(message, line_no + 1)
                 if physical_label.strip():
                     if _is_comment(physical_label):
@@ -334,12 +334,13 @@ def parse_catg(data: bytes) -> ParsedDocument[CatchmentModel]:  # noqa: C901 -- 
                     if cursor + 1 >= len(records) or records[cursor + 1][0] != line_no + 1:
                         message = "Code 7 print location must immediately follow its control"
                         raise _problem(message, line_no + 1)
-                    label = physical_label.strip()
+                    native_location = physical_label.strip()
                     cursor += 1
                 else:
-                    label = ""
+                    native_location = ""
                 print_id = f"print_{len(prints) + 1}"
-                prints.append(PrintLocation(print_id, label))
+                prints.append(PrintLocation(print_id, native_location))
+                # Inline annotation and the physical native record are distinct.
                 controls.append(ControlStep(7, None, None, print_id, label))
                 spans.append(SourceSpan("print_location", line_no + 1, physical_label))
             else:
@@ -532,6 +533,7 @@ def serialize_catg(model: CatchmentModel) -> bytes:
         "1",
     ]
     reaches = {reach.identifier: reach for reach in model.reaches}
+    print_locations = {point.identifier: point.label for point in model.print_locations}
     for step in model.controls:
         label = _safe_label(step.label)
         if step.code in (1, 5):
@@ -540,8 +542,17 @@ def serialize_catg(model: CatchmentModel) -> bytes:
                 raise ValueError(message)
             lines.append(f"{step.code}, {reaches[step.reach_id].length_km}, -99, {label}")
         elif step.code == 7:
-            # The native code 7 label is a separate character record.
-            lines.extend(("7", label))
+            if step.print_id is None:
+                message = "Missing code 7 print location identity"
+                raise ValueError(message)
+            physical_location = _safe_label(print_locations[step.print_id])
+            if physical_location == "0":
+                message = "Native print location cannot be the zero control terminator"
+                raise ValueError(message)
+            # Preserve the optional inline annotation independently of the
+            # subsequent physical record interpreted as the native print site.
+            control_record = f"7, {label}" if label else "7"
+            lines.extend((control_record, physical_location))
         else:
             lines.append(f"{step.code}, {label}")
     lines.extend(
