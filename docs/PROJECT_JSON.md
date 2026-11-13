@@ -134,3 +134,7 @@ Project comparison checks source **identity and content** independently of its r
 Portable relative filenames are validated against Windows behaviour even when inspected on another operating system. Reserved device names (`CON`, `NUL`, `AUX`, `PRN`, `COM1`–`COM9`, `LPT1`–`LPT9` and their device-name variants) and components ending in a space or dot are rejected rather than being silently normalised. Unicode ordinary filenames remain supported; project roots themselves may be local, mapped or UNC.
 
 This is a source/provenance safeguard, not a native RORB or rainfall-method parity claim.
+
+## S5-P2 SHA-pinned CMD reference diagnostic
+
+The [S5 native review contract](S5_RECORDED_NATIVE_REVIEW.md) documents the `review-native` CLI. An actual 201-row CMD replay verified source evidence but **failed frozen printed parity: 11/201 within budget, maximum 0.22707849 m³/s**. The native column mapping is caller-asserted; numerical acceptance remains `unassessed`.
