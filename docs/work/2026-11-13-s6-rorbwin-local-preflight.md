@@ -1,5 +1,8 @@
 # S6 RORBwin local preflight and Python vectors
 
+Follow-up: [2026-11-14 R0 timing audit and separate R1 ARF experiment](2026-11-14-s6-r0-timing-r1-arf.md).
+The R1–R7 statements below describe the original R0-only stopping point; see the follow-up for current status.
+
 **Status:** R0 native rainfall matched; zero-loss excess ordinates checked; CSV timing acceptance open.
 
 **Owner:** Local Windows agent. **Updated:** 2026-11-13. **Review:** on CSV timing investigation.

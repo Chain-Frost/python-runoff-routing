@@ -1,7 +1,10 @@
 # Work register
 
+- [S6 R0 timing and R1 ARF](2026-11-14-s6-r0-timing-r1-arf.md): R1 completed; printed rainfall agrees,
+  strict excess precision and CSV timing gates open; R2–R7 **NOT RUN**.
+
 - [S6 RORBwin local preflight](2026-11-13-s6-rorbwin-local-preflight.md): R0 native rainfall matched
-  using an editor-saved 6.52 model; zero-loss excess ordinates matched, CSV timing open; R1–R7 **NOT RUN**.
+  using an editor-saved 6.52 model; zero-loss excess ordinates matched; current gates are in the R1 follow-up.
 
 | Work front | Status | Owner | Updated | Next review | Next action |
 | --- | --- | --- | --- | --- | --- |
