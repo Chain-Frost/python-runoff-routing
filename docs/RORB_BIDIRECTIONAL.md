@@ -11,7 +11,7 @@
 - `rorb_model.RunModel` holds three independently parsed or authored models; it rejects depth/area-order and ISA/burst count mismatches. `rorb_model.to_dict/from_dict` and `to_json/from_json` retain typed domain contents using **schema_version=1**, exact explicit units and Decimal **strings**; input RORB files are no longer required after model construction.
 - `rorb_codec.to_s2_payload(run)` is a **narrow reviewed float boundary** for the currently understood one-ISA lumped IL/CL, all-pervious S2 subset. It does not import the separate S2 branch, calculate flow or claim numerical parity. S2 should adapt this boundary when its source branch is integrated; do not fork another authoritative parser.
 
-All model classes are frozen and slot-based. Values at file and JSON boundaries are `Decimal`; conversion to finite `float` is explicit only at the provisional S2 adapter. A nonzero Decimal that underflows to float zero is rejected instead of silently changing a small numerical parameter to zero. Identifiers `area_1`, `reach_1` and `print_1` are deterministic **computational ordinal IDs**. Human text labels and the original graphical drawing are separate metadata. The catchment vector and storm depths stay in source order.
+All model classes are frozen and slot-based. Values at file and JSON boundaries are `Decimal`; conversion to finite `float` is explicit only at the provisional S2 adapter. Identifiers `area_1`, `reach_1` and `print_1` are deterministic **computational ordinal IDs**. Human text labels and the original graphical drawing are separate metadata. The catchment vector and storm depths stay in source order.
 
 ## Example: RORB files → Python → JSON → Python → RORB files
 
@@ -70,6 +70,15 @@ Canonical output loses the original comments, whitespace, line endings and RORB_
 - Ordinary public synthetic tests cover original-byte preservation (including CRLF and cp1252), canonical/JSON round trips, CMD Windows path spelling, Fortran-D numeric tokens, units, stack validation, unsupported/invalid classification, no-clobber and the S2-only float conversion boundary.
 - The user-approved **private** [investigations corpus](https://github.com/Chain-Frost/runoff-routing-investigations/tree/audit/rorb-gui-cmd-forensics/tests/fixtures/rorb/native-corpus) is **not** copied into this public repository. Its independent opt-in regression is `repo-scripts/check_private_parser_corpus.py`. It fingerprints every indexed private file before and after a read-only replay, loads the reviewed baseline `.catg/.stm/.par`, checks a deliberately truncated storm and unknown control, and checks JSON identity. It is **not** part of hosted CI. A full corpus regression must separately characterise each dialect/feature before asserting coverage.
 - Quality gate: Windows/Python 3.14, Ruff 0.16.6, strict Pyright, full synthetic tests and build/installed-wheel import outside the checkout. Native or private fixture execution is not a permitted hosted CI step.
+
+## Optional RORB_GE GIS authoring
+
+[The separately validated GE 002 authoring adapter](RORB_GE_AUTHORING.md) can emit
+graphical nodes/reaches for a typed `CatchmentModel` using geometry
+passed explicitly or matched with a PyROMB-style GDAL/OGR layer.
+It keeps this document's canonical computation vector and code-7 syntax
+unchanged; source geometry does not regenerate computational ordering.
+QGIS/native-engine acceptance and non-tree/multi-print variants remain open.
 
 ## S2 integration handoff
 

@@ -18,8 +18,8 @@ CoefficientOrigin = Literal["arr2019_book2_table_2_4_2", "legacy_datahub"]
 NegativePolicy = Literal["reject", "floor_zero"]
 
 # Published ARR2019 Book 2 v4.1 table 2.4.2, retaining its displayed precision.
-# Note: the 2020 Tony Ladson R gist has Inland Arid g=-0.129; Book 2 has +0.129.
-# The independently developed ryan-tools script uses +0.129, correctly.
+# ARR2019 Book 2, Tony Ladson's 2020 R reference and ryan-tools all use Inland Arid g=+0.129.
+# For South-West WA, Book 2 prints e=3.85E-06; the scripts use e=3.845E-06.
 _PUBLISHED_PARAMETERS: dict[str, tuple[str, ...]] = {
     "East Coast North": ("0.327", "0.241", "0.448", "0.36", "0.00096", "0.48", "-0.21", "0.012", "-0.0013"),
     "Semi-arid Inland Queensland": ("0.159", "0.283", "0.25", "0.308", "7.3E-07", "1", "0.039", "0", "0"),
@@ -190,7 +190,7 @@ def _validate_arf_inputs(
     if not area.is_finite() or not 0 < area <= 30000:
         msg = "ARR ARF catchment area must be in (0, 30000] km2"
         raise ARRFormatError(msg)
-    if isinstance(duration_min, bool) or not 1 <= duration_min <= 10080:
+    if isinstance(duration_min, bool) or not isinstance(duration_min, int) or not 1 <= duration_min <= 10080:
         msg = "ARR ARF duration must be 1..10080 whole minutes"
         raise ARRFormatError(msg)
     if not aep_percent.is_finite() or not 0 < aep_percent <= 50:
