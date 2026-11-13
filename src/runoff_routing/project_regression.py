@@ -479,8 +479,7 @@ def run_suite(path: Path) -> SuiteOutcome:
             continue
         used_ids.add(name)
         try:
-            case_data: object = raw
-            spec = _parse_case(case_data)
+            spec = _parse_case(raw_record if isinstance(raw, dict) else None)
             cases.append(_run_case(spec, root))
         except _CaseError as exc:
             source_status: SourceStatus = "failed" if exc.classification == "invalid" else "not_verified"
