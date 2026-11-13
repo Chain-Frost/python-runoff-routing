@@ -338,7 +338,10 @@ def test_native_review_rejects_zero_based_cmd_row_identity(tmp_path: Path) -> No
 # S5 multi-case offline diagnostics use manufactured evidence only (no native programs).
 def _suite_case(project: Path | None, manifest: Path | None, *, engine_hash: str = ENGINE_SHA) -> dict[str, Any]:
     def entry(path: Path) -> dict[str, str]:
-        return {"path": path.relative_to(path.parents[2]).as_posix(), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
+        return {
+            "path": path.relative_to(path.parents[2]).as_posix(),
+            "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        }
 
     return {
         "case_id": "case-one",
@@ -408,7 +411,12 @@ def test_offline_suite_classifies_every_case_with_source_and_numerics_separate(t
     result = run_suite(suite)
     assert len(result.cases) == 6
     assert [case.classification for case in result.cases] == [
-        "computed/pass", "computed/fail", "unsupported", "incomplete", "invalid", "invalid"
+        "computed/pass",
+        "computed/fail",
+        "unsupported",
+        "incomplete",
+        "invalid",
+        "invalid",
     ]
     assert result.cases[0].source_verification == "verified"
     assert result.cases[0].execution_status == "computed_unvalidated"
@@ -440,7 +448,10 @@ def test_offline_suite_preserves_verified_native_reported_volume_without_gate_in
     assert str(audit.reported_native_volume_m3) == "1.23E+4"
     assert audit.raw_native_time_tokens is not None
     assert result.cases[0].reviews[0].native_volume_source == "unique_single_column_out"
-    assert json.loads(result.to_json())["cases"][0]["prints"][0]["reporting"]["native_reported_volume_token"] == result.cases[0].reviews[0].native_reported_volume_text
+    assert (
+        json.loads(result.to_json())["cases"][0]["prints"][0]["reporting"]["native_reported_volume_token"]
+        == result.cases[0].reviews[0].native_reported_volume_text
+    )
 
 
 def test_offline_suite_handles_incomplete_capture_and_unavailable_file(tmp_path: Path) -> None:
@@ -477,7 +488,10 @@ def test_offline_suite_tampering_unknown_keys_and_unmodified_inputs(tmp_path: Pa
     assert regression_main([str(suite), str(tmp_path / "once.json")]) == 2
     case = _suite_case(project, manifest)
     case["native"]["unknown_option"] = "do-not-guess"
-    suite.write_text(json.dumps({"format": FORMAT, "schema_version": 1, "suite_id": "synthetic-suite", "cases": [case]}), encoding="utf-8")
+    suite.write_text(
+        json.dumps({"format": FORMAT, "schema_version": 1, "suite_id": "synthetic-suite", "cases": [case]}),
+        encoding="utf-8",
+    )
     assert run_suite(suite).cases[0].classification == "invalid"
     suite.write_text('{"format":"' + FORMAT + '","format":"' + FORMAT + '"}', encoding="utf-8")
     with pytest.raises(ProjectError, match="Duplicate"):

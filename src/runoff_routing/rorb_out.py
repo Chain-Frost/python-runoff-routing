@@ -94,16 +94,11 @@ def _validate_duration(rows: tuple[HydrographRow, ...], duration: int | None) ->
 
 
 
-
 def _reported_single_column_volume(source: RorbSource, header_index: int, columns: tuple[str, ...]) -> str | None:
     """Attribute a printed m³ volume only for one uniquely identified hydrograph column."""
     if len(columns) != 1:
         return None
-    matches = [
-        match[1]
-        for line in source.lines[:header_index]
-        if (match := VOLUME.fullmatch(line)) is not None
-    ]
+    matches = [match[1] for line in source.lines[:header_index] if (match := VOLUME.fullmatch(line)) is not None]
     if len(matches) != 1:
         return None
     value = decimal_number(matches[0])

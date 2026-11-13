@@ -367,8 +367,7 @@ def _outcome(
 def _preflight_native(loaded: LoadedProject, manifest_path: Path, native_spec: NativeReference) -> None:
     """Separate unsupported profiles, captured incompleteness and invalid print identity."""
     if loaded.project.rainfall_profile == "arr-2026v1" or (
-        loaded.project.rainfall_profile != "legacy-rorb"
-        or not isinstance(loaded.project.model_source, LegacyRunFiles)
+        loaded.project.rainfall_profile != "legacy-rorb" or not isinstance(loaded.project.model_source, LegacyRunFiles)
     ):
         message = "Offline CMD review requires file-backed legacy-rorb forcing"
         raise _CaseError.unsupported(message)
