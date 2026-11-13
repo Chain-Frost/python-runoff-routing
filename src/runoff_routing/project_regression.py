@@ -216,10 +216,11 @@ class SuiteOutcome:
 
 
 def _object(raw: object, expected: set[str], label: str) -> dict[str, object]:
-    if not isinstance(raw, dict) or set(raw) != expected:
+    data = cast("dict[str, object]", raw) if isinstance(raw, dict) else {}
+    if set(data) != expected:
         message = f"{label} expects exactly {sorted(expected)}"
         raise ProjectError(message)
-    return cast("dict[str, object]", raw)
+    return data
 
 
 def _string(raw: object, label: str) -> str:
@@ -257,7 +258,7 @@ def _parse_case(raw: object) -> CaseSpec:
             message = "Native print_mapping must be an array"
             raise ProjectError(message)
         mappings: list[PrintMapping] = []
-        for entry in raw_mappings:
+        for entry in cast("list[object]", raw_mappings):
             e = _object(entry, {"model_print_id", "native_column_id"}, "Print mapping")
             model_id = _string(e["model_print_id"], "Model print ID")
             column = _string(e["native_column_id"], "Native column ID")
@@ -316,13 +317,13 @@ def load_suite(path: Path) -> RegressionSuite:
     if not isinstance(cases, list) or not cases:
         message = "Regression suite must contain at least one case"
         raise ProjectError(message)
-    return RegressionSuite(identifier, hashlib.sha256(raw).hexdigest(), path, tuple(cases))
+    return RegressionSuite(identifier, hashlib.sha256(raw).hexdigest(), path, tuple(cast("list[object]", cases)))
 
 
 class _CaseError(Exception):
     def __init__(self, classification: Literal["unsupported", "incomplete", "invalid"], message: str) -> None:
         super().__init__(message)
-        self.classification = classification
+        self.classification: Literal["unsupported", "incomplete", "invalid"] = classification
 
     @classmethod
     def unsupported(cls, message: str) -> _CaseError:
@@ -384,10 +385,11 @@ def _preflight_native(loaded: LoadedProject, manifest_path: Path, native_spec: N
         raise _CaseError.invalid(message)
     native = cast("dict[str, object]", manifest_raw)
     engine = native.get("engine")
-    if not isinstance(engine, dict) or engine.get("kind") not in {"RORB_CMD", "RORBwin"}:
+    engine_kind = cast("dict[str, object]", engine).get("kind") if isinstance(engine, dict) else None
+    if engine_kind not in {"RORB_CMD", "RORBwin"}:
         message = "Unrecognised or missing native engine profile"
         raise _CaseError.invalid(message)
-    if engine.get("kind") != "RORB_CMD":
+    if engine_kind != "RORB_CMD":
         message = "Only RORB_CMD retained output is characterised"
         raise _CaseError.unsupported(message)
     outcome = native.get("outcome")
@@ -398,10 +400,11 @@ def _preflight_native(loaded: LoadedProject, manifest_path: Path, native_spec: N
         message = f"Native capture outcome is not a valid calculation: {outcome}"
         raise _CaseError.invalid(message)
     requested = native.get("requested_print_locations")
+    requested_columns = set(cast("dict[str, object]", requested)) if isinstance(requested, dict) else set()
     actual_columns = {mapping.native_column_id for mapping in native_spec.print_mapping}
     expected_model = {entry.identifier for entry in loaded.run.catchment.print_locations}
     mapped_model = {mapping.model_print_id for mapping in native_spec.print_mapping}
-    if not isinstance(requested, dict) or actual_columns != set(requested) or mapped_model != expected_model:
+    if not isinstance(requested, dict) or actual_columns != requested_columns or mapped_model != expected_model:
         message = "Ambiguous or incomplete print-location mapping coverage"
         raise _CaseError.invalid(message)
 
@@ -468,7 +471,8 @@ def run_suite(path: Path) -> SuiteOutcome:
     used_ids: set[str] = set()
     for index, raw in enumerate(suite.cases, start=1):
         fallback = f"case-{index}"
-        identifier = raw.get("case_id") if isinstance(raw, dict) else None
+        raw_record: dict[str, object] = cast("dict[str, object]", raw) if isinstance(raw, dict) else {}
+        identifier = raw_record.get("case_id")
         name = identifier if isinstance(identifier, str) and IDENTIFIER.fullmatch(identifier) else fallback
         if name in used_ids:
             cases.append(_outcome(name, "invalid", "Duplicate case ID"))
