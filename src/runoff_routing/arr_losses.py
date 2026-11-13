@@ -93,8 +93,9 @@ def _validate_selected_preburst_arithmetic(selection: PreburstLossSelection) -> 
     if selection.preburst_percentile not in {10, 25, 50, 75, 90}:
         msg = "Unsupported legacy preburst percentile"
         raise ARRFormatError(msg)
-    _validate_preburst_depth_basis(self)
-    if selection.preburst_above_storm_il_mm != max(Decimal(0), selection.preburst_depth_mm - selection.storm_initial_loss_mm):
+    if selection.preburst_above_storm_il_mm != max(
+        Decimal(0), selection.preburst_depth_mm - selection.storm_initial_loss_mm
+    ):
         msg = "Selected preburst excess must equal preburst minus storm IL once"
         raise ARRFormatError(msg)
     if selection.burst_initial_loss_mm is not None and selection.burst_initial_loss_mm != max(
