@@ -31,6 +31,7 @@
 
 - [S6 controlled crossing, candidate loss profile and half-hour export labels](work/2026-11-14-s6-controlled-loss-kernel.md)
 - [S6 R5 long-duration native default preburst](work/2026-11-14-s6-r5-default-preburst.md)
+- [S6 R6/R7 short defaults and 12-hour area boundary](work/2026-11-14-s6-r6-r7-default-boundary.md)
 - [S6 R2–R4 native loss and preburst experiments](work/2026-11-14-s6-r2-r4-loss-preburst.md)
 - [S6 R0 export timing and R1 ARF experiment](work/2026-11-14-s6-r0-timing-r1-arf.md)
 - [S6 RORBwin local preflight and completed R0 comparison](work/2026-11-13-s6-rorbwin-local-preflight.md)

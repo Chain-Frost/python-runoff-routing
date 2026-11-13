@@ -1,5 +1,9 @@
 # S6 R5: native long-duration default preburst characterisation
 
+**Subsequent investigation:** [R6/R7 defaults and area boundary](2026-11-14-s6-r6-r7-default-boundary.md)
+now characterise a short Jordan case and the Inland 12-hour boundary. Coastal settings and precision remain open.
+The R5-only observations and original next-action statements below are retained as historical context.
+
 **Status:** one R5 run completed; native defaults observed; Python default-pattern equivalence unimplemented.
 
 **Owner:** Local Windows agent. **Updated:** 2026-11-14. **Review:** on selection of conditional R6/R7 cases.

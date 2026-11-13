@@ -1,10 +1,13 @@
 # Work register
 
+- [S6 R6/R7 default boundary](2026-11-14-s6-r6-r7-default-boundary.md): short Jordan and Inland 12-hour
+  boundary characterised, including exactly 75 km²; Coastal settings unresolved; one additional strict residual.
+
 - [S6 controlled loss kernel](2026-11-14-s6-controlled-loss-kernel.md): seven crossing/timestep controls,
   separate opt-in candidate implemented; strict native precision failures retained; default unchanged.
 
 - [S6 R5 default preburst](2026-11-14-s6-r5-default-preburst.md): one long-duration GSAM/Inland case
-  characterised; Jordan short-duration and conditional R6/R7 cases remain unrun.
+  characterised; subsequent R6/R7 observations and remaining gates are linked above.
 
 - [S6 R2–R4 native losses/preburst](2026-11-14-s6-r2-r4-loss-preburst.md): all three effective cases run;
   R4 preburst observed, experimental Python excess mismatches retained; later investigations are linked above.
