@@ -55,4 +55,10 @@ Installed-wheel offline verification against the retained five-subarea RORB_CMD 
 
 ## Reconciled-head quality and evidence limitation
 
-On `f4d9ed0` after merging S5 #47 and S2 #40/#45, [Windows quality run #43486014124](https://github.com/Chain-Frost/python-runoff-routing/actions/runs/43486014124) passed 386 public tests, Ruff, strict Pyright and installed-wheel smoke. The S5 native-review and numerical routing source blobs are unchanged from the old private replay; the upstream parity_metrics source is newer. **The prior 11/201 result is tied to wheel `91b8549`, not a freshly executed private comparison of the reconciled wheel**. No source tolerance or native time convention was changed here.
+On `f4d9ed0` after merging S5 #47 and S2 #40/#45, [Windows quality run #43486014124](https://github.com/Chain-Frost/python-runoff-routing/actions/runs/43486014124) passed 386 public tests, Ruff, strict Pyright and installed-wheel smoke. The S5 native-review and numerical routing source blobs are unchanged from the old private replay; the upstream parity_metrics source is newer. **That earlier result was subsequently reproduced on the exact reconciled wheel `86957d3`**; the 201-row numeric failure is unchanged. No source tolerance or native time convention was changed here.
+
+## Exact reconciled-wheel CMD replay (14 November 2026)
+
+Private evidence commit [`4e7b026`](https://github.com/Chain-Frost/runoff-routing-investigations/commit/4e7b026) verifies the installed wheel built from `86957d3` (SHA-256 `3c02285a0a960c0d69626cd7571867a4147bbc05b288b959ea106b9871921974`), including the hashes of all 23 installed Python modules. All original CMD hashes, 201 raw increment/time labels and effective settings matched without launching RORB or modifying capture files.
+
+**Numerical printed parity remained FAILED: 11/201 within the frozen print budget, first mismatch at index 11, maximum absolute difference 0.22707848694007993 m³/s.** The full comparison rows matched the earlier wheel's replay byte-for-byte. Diagnostic review succeeds but numerical acceptance stays unassessed; the output-site mapping remains caller asserted. Full original inputs and result tables are private; see the [sanitised S5 work record](work/2026-11-12-s5-native-capture-review.md).
