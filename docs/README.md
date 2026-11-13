@@ -4,6 +4,7 @@
 
 - [Repository introduction](../README.md)
 - [Agent instructions](../AGENTS.md)
+- [Current S0–S8 implementation and acceptance status](STATUS.md)
 - [Development guide](DEVELOPMENT.md)
 - [Implementation plan](IMPLEMENTATION_PLAN.md)
 - [Compatibility contract](COMPATIBILITY.md)
@@ -37,7 +38,7 @@
 - [S1 CMD inspection record](work/2026-11-10-s1-inspection.md)
 - [S1 typed parser work record](work/2026-11-11-s1-bidirectional.md)
 - [Native code-7 serialization work record](work/2026-11-11-s1-code7-serialization.md)
-- [S1/S2 integration readiness and dependency register](work/2026-11-11-s1-s2-integration-readiness.md)
+- [S1/S2 **historical** integration-readiness snapshot (superseded status)](work/2026-11-11-s1-s2-integration-readiness.md)
 - [S2 reach-kernel development record](work/2026-11-10-s2-reach-kernel.md)
 - [S2 offline development record](work/2026-11-11-s2-offline-development.md)
 - [S2 printed-ordinate audit record](work/2026-11-11-s2-parity-audit.md)

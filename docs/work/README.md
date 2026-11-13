@@ -1,5 +1,24 @@
 # Work register
 
+## Active next-action register (14 November 2026)
+
+This is the current action list; the linked records below are historical, revision-specific evidence, not independent declarations of today's merge or acceptance state. See the single [stage capability/acceptance matrix](../STATUS.md) and the unchanged [regression gates](../REGRESSION.md). Do not close issues based only on merged implementation or successful diagnostics.
+
+| Workstream | Next specific action | Tracking |
+| --- | --- | --- |
+| S0 reference provenance | Audit selected CMD/GUI manifest effective-input/time-label mappings and enumerate still-uncovered profile/dialect cases; preserve original S0 captures. | [#2](https://github.com/Chain-Frost/python-runoff-routing/issues/2) (implementation issue closed), [S0 native record](2026-11-11-s0-native.md) |
+| S1 source/canonical coverage | Native-check the **annotated** code-7 graphical line separately from the proven bare code-7 physical print-location record; explicitly catalogue unsupported GUI/other source dialects. | [#3](https://github.com/Chain-Frost/python-runoff-routing/issues/3), [S1/S2 integration](../S1_S2_INTEGRATION.md) |
+| S2 CMD/GUI routing parity | Reconcile source/excess conversion and effective reach-6 coefficient precision against new prediction-first private controls; preserve the separate reach-9 failure, original 36-case failures and the frozen all-ordinate budget before any public solver proposal. | [#4](https://github.com/Chain-Frost/python-runoff-routing/issues/4), [S5 failure](2026-11-12-s5-native-capture-review.md) |
+| S3 deterministic extensions | Select one explicit supported-feature boundary (e.g. additional ISA/loss mode) and freeze parser, synthetic and native acceptance fixtures **before enabling** it in routed public models. Do not infer S3 acceptance from S2. | [#5](https://github.com/Chain-Frost/python-runoff-routing/issues/5) |
+| S4 in-memory ensembles | First specify a repeated-event state-isolation and deterministic-order test harness for the existing bounded RunModel; defer acceleration/benchmarks until the selected numerical profile is accepted. | [#6](https://github.com/Chain-Frost/python-runoff-routing/issues/6) |
+| S5 JSON/review expansion | Extend existing JSON-project and S0/S1/S2 review APIs with relocation/asset-hash regression and repeatable offline project-to-native batch diagnostics. Keep caller-supplied HydNNN mapping and the existing **failed** 201-row case as a negative regression. TOML deferred. | [#7](https://github.com/Chain-Frost/python-runoff-routing/issues/7), [#35](https://github.com/Chain-Frost/python-runoff-routing/issues/35), [#44](https://github.com/Chain-Frost/python-runoff-routing/issues/44), [#51](https://github.com/Chain-Frost/python-runoff-routing/issues/51) |
+| S6 implementation integration | Reconcile draft dependency order **#38 → #48 → #49 → #50 → #54** against current main, remove redundant draft material and independently verify ARR/BoM source versions, provenance, units and IFD/TP/ARF/preburst semantics before review. No bulk merge or current-main claim. | [#8](https://github.com/Chain-Frost/python-runoff-routing/issues/8), [#33](https://github.com/Chain-Frost/python-runoff-routing/issues/33), [#54](https://github.com/Chain-Frost/python-runoff-routing/pull/54) |
+| S6 native rainfall gate | Keep R0 raw excess labels at the measured **one-increment** offset, review the R1 ARF/printed-depth arithmetic and investigate six remaining frozen precision failures separately; follow with declared default-pattern/preburst controls, not S2 routed parity. | [#54](https://github.com/Chain-Frost/python-runoff-routing/pull/54), [S6 issue](https://github.com/Chain-Frost/python-runoff-routing/issues/8) |
+| S7 sampling | Draft a versioned, seeded stratified sample plan with exact weighted probability conservation and zero-runoff handling before selecting a native statistical comparison campaign. | [#9](https://github.com/Chain-Frost/python-runoff-routing/issues/9) |
+| S8 completeness/release | Inventory intentionally unsupported GUI/storage/legacy modes and record the future licence/redistribution decision separately; **no publication or release**. | [#10](https://github.com/Chain-Frost/python-runoff-routing/issues/10) |
+
+## Historical work records (dated snapshots)
+
 | Work front | Status | Owner | Updated | Next review | Next action |
 | --- | --- | --- | --- | --- | --- |
 | [Integrated native print review](2026-11-12-integrated-print-review.md) | Merged #45; native numerical parity open | S2 | 2026-11-14 | S5 dependency review | Native print IDs and reporting statistics stay distinct; no native parity claim. |
