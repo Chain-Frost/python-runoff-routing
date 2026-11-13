@@ -182,7 +182,7 @@ def test_expected_count_cannot_override_ten_member_policy(override: int) -> None
 
 
 def test_selection_rejects_out_of_range_duration_even_when_source_is_valid() -> None:
-    with pytest.raises(ARRFormatError, match="1..10080"):
+    with pytest.raises(ARRFormatError, match=r"1\.\.10080"):
         select_arr2019_ensemble(
             _point(), catchment_area_km2=Decimal(50), duration_min=10081, aep_percent=Decimal(1), region=REGION
         )
