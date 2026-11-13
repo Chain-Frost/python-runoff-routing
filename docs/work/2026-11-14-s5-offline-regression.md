@@ -16,9 +16,20 @@ The separately verified five-subarea RORB_CMD capture used 201 authentic output 
 
 ## Quality evidence and outstanding gates
 
-- Public tests: synthetic source/hash/timing, unsupported engine, ambiguity, incomplete reference, native volume and no-clobber cases included in branch; fresh exact-head Windows/Python 3.14, Ruff 0.16.6, strict Pyright, wheel and installed-wheel gates **not yet recorded** here.
+- **PASS** on exact implementation head `6e97f74d90bcfcdab770c663777875bc84c4e510`: [Windows quality run #43505358206](https://github.com/Chain-Frost/python-runoff-routing/actions/runs/43505358206), **Python 3.14.10**; repository hygiene **108 files, 0 errors**; **Ruff 0.16.6 lint/format PASS**; strict **Pyright 0 errors/0 warnings**; **390 public synthetic tests PASS**; production wheel **built** and **installed/imported outside checkout**. This is software validation only, not native numerical acceptance.
 - Private 65-case suite: **NOT RUN** against this branch/installed wheel in the present environment; requires isolated private Windows source access, explicitly asserted print mappings and original corpus hash/index audit.
 - Native process launches: **NONE authorised or attempted** in this task. Original tolerances, goldens, ARR inputs, compatibility profiles and strict S2 backend unchanged.
 - Native numerical acceptance: **unassessed**, while the known CMD failure remains **FAIL**. S2 [#4](https://github.com/Chain-Frost/python-runoff-routing/issues/4) and S5 [#7](https://github.com/Chain-Frost/python-runoff-routing/issues/7) stay open.
 
-**Next action:** run existing Windows/Python 3.14 CI on the exact draft PR head; inspect all quality/wheel checks, correct scoped defects; then execute an offline-only private 65-case read-only replay under an installed wheel and publish **sanitised classifications only**.
+**Next action:** independently review the draft PR and perform the **offline-only private 65-case read-only replay** against the exact installed wheel, then publish **sanitised classifications only**. Keep original S0 S1 clocks and frozen print budgets.
+
+## Private Windows corpus handoff — offline only
+
+1. Use an isolated checkout of `Chain-Frost/runoff-routing-investigations` and the public PR's **built/installed wheel**. Ensure imports resolve to installed site-packages outside the public source checkout; do not call RORB_CMD or RORBwin.
+2. Before calculations, verify every entry in `tests/fixtures/rorb/native-corpus/FILE_INDEX.json` against its original `sha256` and `size_bytes`, and independently verify the 65 `catalogue.json` case manifests and input fingerprints. Reuse the existing private `repo-scripts/s2_offline_campaign.py` hash/index audit; do not change the original catalogue, source manifests, original native outputs or tolerances.
+3. Stage only the necessary **verified byte copies** into a newly created, ignored `.local/s5-offline-<unique-run-id>` folder, with a separate schema-1 file-backed JSON `Project` per supported original CMD case. Construct a versioned S5 suite manifest with **all 65 declared case IDs**; set missing or nonrepresentable project/native entries to `null` so they are explicitly `incomplete`. Do not forge a usable S1 project for captured GUI/ARR profiles.
+4. Supply each `print_1`→`HydNNN` mapping in an independently reviewed private mapping register. A manually entered or single-site positional mapping remains `caller_asserted` and must not be described as independently verified. Reject ambiguous mappings.
+5. Run `py -3.14 -m runoff_routing.project_regression <suite.json> <new-results.json> <new-ordinates.csv>` from an installed-wheel environment. Verify 65 output classifications, frozen print budget, complete native sample horizons, unchanged raw CMD times, manifest/output/engine SHA-256 and physical volume differences. Compare with earlier 36 computed failures/29 other or uncomputed cases; any changed distribution requires a separately explained cause.
+6. Retain case-level private hashes and full CSVs in ignored local storage; report only sanitized classifications and quality metadata in the public PR. Never commit private corpus bytes, publish raw native files, run a native engine, or promote a passing diagnostic to S2/S5 numerical acceptance.
+
+**Private 65-case S5 replay status in this record: NOT RUN.**
