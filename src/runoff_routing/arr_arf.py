@@ -17,6 +17,11 @@ ARF_POLICY_VERSION = "ARR2019_BOOK2_V4_1_2_4_1_TO_2_4_4"
 CoefficientOrigin = Literal["arr2019_book2_table_2_4_2", "legacy_datahub"]
 NegativePolicy = Literal["reject", "floor_zero"]
 
+def _valid_integer_duration(value: object) -> bool:
+    """Guard runtime minute inputs without treating bool/float as an integer."""
+    return isinstance(value, int) and not isinstance(value, bool) and 1 <= value <= 10080
+
+
 # Published ARR2019 Book 2 v4.1 table 2.4.2, retaining its displayed precision.
 # ARR2019 Book 2, Tony Ladson's 2020 R reference and ryan-tools all use Inland Arid g=+0.129.
 # For South-West WA, Book 2 prints e=3.85E-06; the scripts use e=3.845E-06.
@@ -190,7 +195,7 @@ def _validate_arf_inputs(
     if not area.is_finite() or not 0 < area <= 30000:
         msg = "ARR ARF catchment area must be in (0, 30000] km2"
         raise ARRFormatError(msg)
-    if isinstance(duration_min, bool) or not isinstance(duration_min, int) or not 1 <= duration_min <= 10080:
+    if not _valid_integer_duration(duration_min):
         msg = "ARR ARF duration must be 1..10080 whole minutes"
         raise ARRFormatError(msg)
     if not aep_percent.is_finite() or not 0 < aep_percent <= 50:
