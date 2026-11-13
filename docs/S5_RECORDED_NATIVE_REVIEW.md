@@ -52,3 +52,7 @@ The first S5-P2 implementation head `9c36efe` passed [Windows/Python 3.14 qualit
 ## Private CMD replay (13 November 2026)
 
 Installed-wheel offline verification against the retained five-subarea RORB_CMD 6.44 reference validated all source, manifest and executable hashes and all 201 raw time labels without launching RORB or modifying original evidence. **Printed comparison failed: 11/201 ordinates within the frozen budget**, first failure at index 11, maximum absolute difference **0.22707848694007993 m³/s**. The review pipeline succeeded, but the S2 numerical parity gate did not. See the [sanitised record](work/2026-11-12-s5-native-capture-review.md). The original evidence remains private.
+
+## Reconciled-head quality and evidence limitation
+
+On `f4d9ed0` after merging S5 #47 and S2 #40/#45, [Windows quality run #43486014124](https://github.com/Chain-Frost/python-runoff-routing/actions/runs/43486014124) passed 386 public tests, Ruff, strict Pyright and installed-wheel smoke. The S5 native-review and numerical routing source blobs are unchanged from the old private replay; the upstream parity_metrics source is newer. **The prior 11/201 result is tied to wheel `91b8549`, not a freshly executed private comparison of the reconciled wheel**. No source tolerance or native time convention was changed here.
