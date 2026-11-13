@@ -1,5 +1,8 @@
 # S6: R0 export timing audit and separate R1 ARF experiment
 
+Follow-up: [R2–R4 native loss/preburst experiments](2026-11-14-s6-r2-r4-loss-preburst.md).
+The unrun R2–R7 statements below describe this record's earlier stopping point; see the follow-up for current status.
+
 **Status:** R1 completed; printed rainfall agreement observed; strict excess and timing gates open.
 
 **Owner:** Local Windows agent. **Updated:** 2026-11-14. **Review:** before R2–R4.

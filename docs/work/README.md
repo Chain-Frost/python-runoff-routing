@@ -1,7 +1,10 @@
 # Work register
 
+- [S6 R2–R4 native losses/preburst](2026-11-14-s6-r2-r4-loss-preburst.md): all three effective cases run;
+  R4 preburst observed, experimental Python excess mismatches retained; R5–R7 **NOT RUN**.
+
 - [S6 R0 timing and R1 ARF](2026-11-14-s6-r0-timing-r1-arf.md): R1 completed; printed rainfall agrees,
-  strict excess precision and CSV timing gates open; R2–R7 **NOT RUN**.
+  strict excess precision and CSV timing gates open; later loss/preburst experiments are linked above.
 
 - [S6 RORBwin local preflight](2026-11-13-s6-rorbwin-local-preflight.md): R0 native rainfall matched
   using an editor-saved 6.52 model; zero-loss excess ordinates matched; current gates are in the R1 follow-up.
