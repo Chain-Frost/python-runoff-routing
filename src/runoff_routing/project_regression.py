@@ -400,7 +400,7 @@ def _preflight_native(loaded: LoadedProject, manifest_path: Path, native_spec: N
         message = f"Native capture outcome is not a valid calculation: {outcome}"
         raise _CaseError.invalid(message)
     requested = native.get("requested_print_locations")
-    requested_columns = set(cast("dict[str, object]", requested)) if isinstance(requested, dict) else set()
+    requested_columns: set[str] = set(cast("dict[str, object]", requested)) if isinstance(requested, dict) else set()
     actual_columns = {mapping.native_column_id for mapping in native_spec.print_mapping}
     expected_model = {entry.identifier for entry in loaded.run.catchment.print_locations}
     mapped_model = {mapping.model_print_id for mapping in native_spec.print_mapping}
@@ -479,7 +479,8 @@ def run_suite(path: Path) -> SuiteOutcome:
             continue
         used_ids.add(name)
         try:
-            spec = _parse_case(raw)
+            case_data: object = raw
+            spec = _parse_case(case_data)
             cases.append(_run_case(spec, root))
         except _CaseError as exc:
             source_status: SourceStatus = "failed" if exc.classification == "invalid" else "not_verified"
