@@ -93,7 +93,6 @@ def _validate_duration(rows: tuple[HydrographRow, ...], duration: int | None) ->
         raise ValueError(message)
 
 
-
 def _reported_single_column_volume(source: RorbSource, header_index: int, columns: tuple[str, ...]) -> str | None:
     """Attribute a printed m³ volume only for one uniquely identified hydrograph column."""
     if len(columns) != 1:
