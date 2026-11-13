@@ -1,5 +1,26 @@
 # S2 source-volume reporting convention diagnostic
 
+## Owner-requested integration review, 2026-11-13
+
+PR #40 original implementation `ead4b54989c98da68ae4229e1b006d901a58635c` was reviewed against
+main `1cfc72b79b9855f796e1f21d2df27d147d9f225b`. Only the two documentation-index conflicts
+needed resolution; current integration records and reporting links are both retained.
+The reporting module remains byte-identical (Git blob `be4e91a53adfd59ea50920b1cd3c08999712c3d3`).
+
+Windows/Python 3.14.6: repository checks 90 files / zero errors, pinned Ruff lint/format
+(80 Python files), strict Pyright zero errors/warnings, and all 298 non-native tests pass,
+without skips. The first pytest attempt imported the global editable checkout and failed
+collection; explicitly setting this worktree's source path fixed environment selection.
+
+A fresh wheel was built and installed in its own environment. The private #27 verifier
+ran outside this public checkout with no source PYTHONPATH: 36 original reports, 30 CMD
+and six GUI, all 116 columns inclusive-sum consistent, 26 trapezoid exclusions; the
+40-entry evidence inventory verifies before and after. Installed module origin and
+original reporting blob are enforced by that verifier. No new native calculations or
+numerical acceptance are implied. The owner requested #40 merge before #45, conditional
+on review and exact-head hosted checks. The merge commit and hosted result are recorded
+in the PR conversation after publishing; no release or stage closure is authorised here.
+
 - **Date:** 2026-11-11. **Issue:** [#4](https://github.com/Chain-Frost/python-runoff-routing/issues/4).
 - **Branch:** `feat/s2-native-report-volume-20261111` (independent `main` slice; S1/S2 integration PR #23 and ARR/JSON agents remain untouched).
 - **Purpose:** Introduce a pure Decimal-precision reporting audit so the legacy native inclusive sample-sum summary is not conflated with the physical-horizon trapezoid in S2 conservation checks. Preserve raw printed time tokens and a separate sample-index axis. Both candidate intervals use raw print half-unit bounds; no fitted tolerances.

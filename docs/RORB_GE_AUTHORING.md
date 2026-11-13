@@ -68,6 +68,17 @@ including [the native-evidence code-7 physical print-location fix
 #25](https://github.com/Chain-Frost/python-runoff-routing/pull/25), rather than
 creating another RORB grammar.
 
+**Native print-label compatibility boundary:** The original two-file CMD 6.44
+acceptance used a bare `7` control followed by the physical print-location
+line. The integrated S1 parser also preserves a distinct optional graphical
+annotation on the code-7 control record. If `ControlStep.label` is nonempty,
+the writer emits `7, annotation` followed by `PrintLocation.label` on the
+next physical line. This annotated form retains typed/JSON round-trip semantics
+but **has not received a native CMD replay**. To emit the previously accepted
+bare-code-7 variant, the caller must *explicitly* provide an empty
+`ControlStep.label` while retaining the separate physical
+`PrintLocation.label`; the serializer will not silently drop the annotation.
+
 It emits nonempty GE 002 node/reach drawing blocks using PyROMB-informed legacy
 field formatting with an aspect-preserving layout. Control-code, subarea and
 reach order are not changed. The drawing includes one graphical midpoint per

@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "kind": "run",
+  "units": {
+    "area": "km2",
+    "reach_length": "km",
+    "time": "hour",
+    "rainfall_depth": "mm",
+    "kc": "RORB_coefficient",
+    "m": "dimensionless",
+    "initial_loss": "mm",
+    "continuing": "mm/hour",
+    "temporal_pattern": "percent"
+  },
+  "model": {
+    "parameters": {
+      "catchment_reference": "catchment.catg",
+      "storm_reference": "design.stm",
+      "lumped_kc": true,
+      "verbosity": 3,
+      "loss_model": 1,
+      "num_isa": 1,
+      "num_bursts": 1,
+      "routing": [
+        { "isa": 1, "kc": "0.5", "m": "1" }
+      ],
+      "losses": [
+        { "isa": 1, "burst": 1, "initial_loss_mm": "1", "continuing": "0.1" }
+      ]
+    },
+    "catchment": {
+      "title": "Synthetic catchment",
+      "subareas": [
+        { "identifier": "area_1", "area_km2": "2.0", "label": "A" }
+      ],
+      "reaches": [
+        { "identifier": "reach_1", "length_km": "3.0", "label": "Reach A Sub-area A" }
+      ],
+      "controls": [
+        { "code": 1, "subarea_id": "area_1", "reach_id": "reach_1", "print_id": null, "label": "Reach A Sub-area A" },
+        { "code": 7, "subarea_id": null, "reach_id": null, "print_id": "print_1", "label": "Print A" }
+      ],
+      "print_locations": [
+        { "identifier": "print_1", "label": "Print A" }
+      ],
+      "storages": []
+    },
+    "storm": {
+      "title": "Synthetic storm",
+      "timestep_hours": "0.5",
+      "calculation_increments": 5,
+      "start_increment": 0,
+      "percentages": ["60", "40"],
+      "depths_mm": ["20.0"],
+      "subarea_ids": ["area_1"],
+      "pluviograph_count": 1,
+      "isa_count": 1,
+      "burst_count": 1
+    }
+  }
+}
