@@ -1,6 +1,6 @@
 # S5-P2 — verified native CMD outputs for JSON projects
 
-**Updated:** 2026-11-14. **Issues:** [#51](https://github.com/Chain-Frost/python-runoff-routing/issues/51), [#44](https://github.com/Chain-Frost/python-runoff-routing/issues/44), parent [#7](https://github.com/Chain-Frost/python-runoff-routing/issues/7). **Status:** draft; installed-wheel private workflow replay passed, frozen numerical comparison failed. Numerical acceptance unassessed.
+**Updated:** 2026-11-14. **Issues:** [#51](https://github.com/Chain-Frost/python-runoff-routing/issues/51), [#44](https://github.com/Chain-Frost/python-runoff-routing/issues/44), parent [#7](https://github.com/Chain-Frost/python-runoff-routing/issues/7). **Status:** diagnostic infrastructure merged via [PR #52](https://github.com/Chain-Frost/python-runoff-routing/pull/52) at `ad4d822`; authentic installed-wheel workflow passed, frozen numerical comparison failed. Numerical acceptance remains unassessed.
 
 ## Dependencies
 
@@ -71,3 +71,9 @@ S5 #47, S2 volume #40 and integrated print review #45 are merged. PR #52 now tak
 - **Preserved labels:** `source_verified_diagnostic`, `mapping_evidence=caller_asserted`, `numerical_acceptance=unassessed`. Workflow success does not convert the failed numeric parity result into stage acceptance.
 - **Private provenance:** [`runoff-routing-investigations` commit `4e7b026`](https://github.com/Chain-Frost/runoff-routing-investigations/commit/4e7b026), `docs/work/2026-11-14-s5-p2-exact-replay.md` and local retained `evidence/s5-p2-20261114/`. Do not copy raw reference data into the public repository.
 - **Still open:** full 65-case S5 campaign, independent print-site acceptance, RORBwin/GUI compatibility, S2 #4 and S5 #7. No source solver change, tolerance adjustment, RORB launch, merge, release or TOML work.
+
+## Integration disposition, 14 November 2026
+
+- [S5-P2 PR #52](https://github.com/Chain-Frost/python-runoff-routing/pull/52) was **squash-merged** into `main` as `ad4d822cfd5f978b609f9d2a2763d834a7b4f0d0` after source review. The merge contains the S5-specific CMD evidence adapter, 1-based native row handling, synthetic tests and documentation. No duplicate S2 reporting implementation, native engine launch or routing-kernel change was introduced.
+- [Final premerge Windows CI #43491149798](https://github.com/Chain-Frost/python-runoff-routing/actions/runs/43491149798) passed **386** synthetic tests, Ruff 0.16.6, strict Pyright and installed-wheel smoke at `b8c24c8`. The private raw 201-row replay used the byte-identical code revision `86957d3`; **11/201** within frozen print budget, first failure 11, maximum error **0.22707848694007993 m³/s**.
+- **Conclusion:** the native-evidence diagnostic workflow is integrated, but **S2 #4 and S5 #7 remain open**, and RORB_CMD numerical parity is not accepted. The native output column/site mapping remains caller asserted. No S6 rainfall integration or TOML functionality is implied.
