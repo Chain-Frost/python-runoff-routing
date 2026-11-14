@@ -2,6 +2,7 @@
 
 | Work front | Status | Owner | Updated | Next review | Next action |
 | --- | --- | --- | --- | --- | --- |
+| [S6-P2 ARR2019 patterns and ARF](2026-11-12-s6-p2-selection-arf.md) | Draft #49; source arithmetic only; S6 unaccepted | S6 | 2026-11-14 | Reconciled exact-head quality | Enforce exactly ten event IDs and recorded published coefficient precision; no RORBwin parity. |
 | [S6-P1 BoM/temporal-pattern source intake](2026-11-12-s6-bom-tp-gross.md) | Draft #48; source arrays and gross rainfall; S6 unaccepted | S6 | 2026-11-14 | Reconciled exact-head quality | Retain source IDs and unavailable areal AEP labels; native event choice remains unresolved. |
 | [S6-P0 ARR Data Hub source intake](2026-11-11-s6-p0-implementation.md) | Draft #38; source-data only; S6 unaccepted | S6 | 2026-11-14 | Reconciled exact-head quality | Validate original export identities and baselines; no rainfall-method acceptance. |
 | [Integrated native print review](2026-11-12-integrated-print-review.md) | Merged #45; native numerical parity open | S2 | 2026-11-14 | S5 dependency review | Native print IDs and reporting statistics stay distinct; no native parity claim. |
