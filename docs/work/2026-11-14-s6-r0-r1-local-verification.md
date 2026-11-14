@@ -1,5 +1,11 @@
 # S6 R0/R1: local reauthentication and frozen precision controls
 
+**Owner clarification, 2026-11-14:** standing permission covers local RORBwin and RORB_CMD launches
+and calculations without further authorisation. The authority blocker reported below is superseded;
+the frozen N1-N3 protocol can proceed within its three-calculation limit. The earlier NOT RUN labels
+still describe the actual execution status of this offline batch. A separate AGENTS.md correction
+is proposed against main on branch `docs/native-run-standing-permission-20261114`.
+
 **Status:** offline verification complete; R0 retained timing mapping passes for the bounded profile;
 R1 strict excess **FAIL**; native N1-N3 **NOT RUN** because applicable authority was not established.
 **Owner:** Local Windows agent. **Updated:** 2026-11-14. **Review:** before any new native calculation.
