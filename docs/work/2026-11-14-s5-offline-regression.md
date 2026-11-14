@@ -179,3 +179,26 @@ Full CSVs, staged verified copies and both earlier replay packets remain ignored
 Ready for software review, with the same mapping, coverage, numerical and symlink limitations;
 no RORB numerical equivalence or stage closure is implied. Next action: independent mapping and
 coverage review, followed by a selected numerical discrepancy investigation.
+
+### Final publication check: retained S6 profile reconciliation
+
+Another owner-side reconciliation added an isolated S6 loss profile. The final selected and replayed
+public revision is **`c7de1aba4969344f2e85ef0732aa45dee93201a9`**; its built wheel SHA-256 is
+**`6f43d66e7fdb80faa1dc678a35c44dcdff2144eacacdba573d09d86331f94dd0`**.
+This supersedes the preceding revision/fingerprint for final delivery; prior evidence is retained.
+Another clean out-of-tree installed-wheel environment was used. Windows/Python/tool versions are
+unchanged. Source and installed-wheel tests each **691 passed, one skipped** (file symlink unavailable);
+private contracts **8 passed**; hygiene **156 files/0 errors**; Ruff 0.16.6 lint/format pass
+(**142 files**); strict Pyright zero errors/warnings. Exact-head
+[Windows CI #43552014162](https://github.com/Chain-Frost/python-runoff-routing/actions/runs/43552014162)
+passed. No native process was launched.
+
+Again verified all 1,026 indexed originals before/after and all 65 catalogue manifest/input fingerprints.
+The 65-case S5 results and full ordinate CSV remain byte-identical to the preceding revision:
+**36 computed/fail, 29 incomplete, zero pass/unsupported/invalid**, with the same 16,836 unchanged
+predictions and raw tokens, mapping limitations and numerical blockers. Fresh prior API and four
+linear controls reproduce their earlier dispositions. Final private summary/table/environment/quality
+packet: `docs/evidence/s5-final-65-20261114/` on the private evidence branch; full per-case records
+are shared with the verified identical preceding packet. Final installed import and raw artifacts
+are under the private ignored `.local/s5-final/` directory. Ready for software review only;
+S2/S5 numerical acceptance remains open.
