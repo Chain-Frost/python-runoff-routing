@@ -1,5 +1,9 @@
 # S6 N1-N3: native coefficient pair and saved-parameter reopen
 
+**Current follow-up:** [N4 completion review](2026-11-14-s6-n4-completion-review.md) supersedes
+the historical next-action paragraph below: N4 is complete, source sensitivity is established,
+strict residuals remain, and N5 was unnecessary. This N1-N3 capture is preserved unchanged.
+
 **Owner correction, 2026-11-14:** there is no three-run limit. The owner has removed the
 handoff's cap; further relevant local experiments may proceed under standing permission.
 Three runs describes this completed batch, not a current restriction.

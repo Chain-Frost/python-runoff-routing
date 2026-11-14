@@ -1,5 +1,10 @@
 # S6 R0/R1: rainfall quantisation, export clocks and frozen follow-up protocol
 
+**Current follow-up:** [N4 completion review](2026-11-14-s6-n4-completion-review.md) records
+authenticated N1-N4 evidence and the reconciled #56 -> #64 -> #68 stack on current main.
+The unavailable-source and NOT RUN statements below describe the original review only.
+Strict equivalence remains failed; no numerical acceptance or issue closure follows.
+
 **Local follow-up:** [fresh Windows reauthentication and frozen controls](2026-11-14-s6-r0-r1-local-verification.md)
 supersedes this review's unavailable-private-evidence and bounded R0 timing-open gates. R1 remains
 strictly failing; N1-N3 remain unrun. The text below preserves this earlier review's scope and evidence date.

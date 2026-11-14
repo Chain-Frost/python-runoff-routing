@@ -1,6 +1,6 @@
 # S6 N4: controlled ARF-coefficient sensitivity — pre-run protocol
 
-**Execution follow-up:** [N4 native result](2026-11-14-s6-n4-native-result.md): completed once after the local freeze; 121.88 mm, 24/24 changed forcing cells, strict source FAIL 0/24, replay FAIL 22/24. The pre-run specification below is retained as written.
+**Execution follow-up:** [N4 native result](2026-11-14-s6-n4-native-result.md): completed once after the local freeze; 121.88 mm, 24/24 changed forcing cells, strict source FAIL 0/24, replay FAIL 22/24. The [completion review](2026-11-14-s6-n4-completion-review.md) checks every frozen hypothesis and all 201 records; N5 is unnecessary. The pre-run specification below is retained as written.
 
 **Status at preregistration:** N4 PLANNED / NOT RUN. This is an independent, documentation-only protocol; **the local
 private 24-cell predictions have not yet been frozen** and must be generated and SHA-256 pinned

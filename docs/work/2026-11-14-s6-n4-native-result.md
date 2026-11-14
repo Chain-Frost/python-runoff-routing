@@ -1,5 +1,11 @@
 # S6 N4: native coefficient-sensitivity result
 
+**Completion audit:** [complete rainfall/excess and hypothesis review](2026-11-14-s6-n4-completion-review.md)
+reauthenticates the original capture without rerunning it, publishes all 24 signed-error rows,
+checks all 201 records against every frozen candidate, and reconciles the current PR stack.
+Two-decimal written-total serialization is observed; the complete internal quantisation mechanism
+remains unproven. Coastal is deferred until the Python routing engine is working and numerically validated.
+
 **Status:** one N4 calculation completed; coefficient sensitivity demonstrated; strict numerical
 acceptance **FAIL**. **Owner:** Local Windows agent. **Updated:** 2026-11-14.
 **Review:** before selecting another precision experiment.
