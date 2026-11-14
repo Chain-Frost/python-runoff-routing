@@ -146,3 +146,36 @@ attached. #66's successful Windows run is on another commit with the same tree, 
 Resolve integration separately and repeat affected checks. Independently establish physical print
 mapping, address the 29 coverage gaps and investigate the 36 numerical failures. S2 #4 and S5 #7
 remain open. No merge, release, publication, new automation or native execution is authorised.
+
+### Refreshed PR head after concurrent main reconciliation
+
+The PR owner advanced #58 during final publication checks. The preceding `b23f7338` evidence is
+retained as an earlier snapshot; its conflict/hosted-status observations are superseded here.
+**Final selected public revision: `8d6b1b8c60d2920fe163fa20e27aac08685aabd3`.**
+An isolated checkout, newly built wheel and another fresh out-of-tree virtual environment were used.
+**Wheel SHA-256: `2f6a104665e3a27c8691e0e51667a6928157ab46a7e4d529a42fc30b530208c3`.**
+Windows/Python/tool versions remain as above. Installed imports resolve to the new environment's
+`env/Lib/site-packages/runoff_routing/__init__.py`, using isolated-mode Python.
+
+Exact refreshed-head checks: hygiene **147 files/0 errors**; Ruff **0.16.6** lint/format pass
+(**133 files**); strict Pyright **0 errors/0 warnings**; source and installed-wheel tests each
+**670 passed, one skipped** (same unavailable Windows file symlink); eight private contracts pass.
+[Exact-head hosted Windows quality](https://github.com/Chain-Frost/python-runoff-routing/actions/runs/43551785615)
+also passed. The refreshed PR is **mergeable** at this check, without any merge by this validation task.
+
+The full corpus was independently re-audited and replayed with the new installed wheel:
+**36 computed/fail, 29 incomplete; zero pass/unsupported/invalid**. All **1,026** indexed files
+verified again before and after. All **16,836** shared predictions and original tokens reproduce the
+fresh prior API; the complete S5 result JSON and ordinate CSV are **byte-identical** to the preceding
+implementation snapshot. Thus the concurrent main reconciliation introduced no observed numerical
+or classification change. Across computed cases **1,498/16,836** ordinates meet the unchanged budget;
+maximum absolute error **0.3574415134574167 m3/s**. All 36 peak indices agree, while ordinate, peak
+magnitude and volume diagnostics remain independently reported. All 36 unique single-column native
+reported volumes are retained separately from inclusive sums and physical trapezoids.
+
+The 65-row private table and full per-case reports are retained in the private investigations
+branch `audit/s5-current-65-20261114`, under `docs/evidence/s5-refreshed-65-20261114/`.
+Full CSVs, staged verified copies and both earlier replay packets remain ignored/private.
+Ready for software review, with the same mapping, coverage, numerical and symlink limitations;
+no RORB numerical equivalence or stage closure is implied. Next action: independent mapping and
+coverage review, followed by a selected numerical discrepancy investigation.
