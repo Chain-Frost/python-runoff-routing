@@ -1,35 +1,45 @@
 # Python runoff routing
 
-Public, in-development Python implementation of RORB procedures. Existing RORB_CMD and RORBwin executables remain the computational source of truth for separately fingerprinted effective-input profiles.
+Public, in-development Python implementation of selected RORB rainfall-runoff procedures. RORB_CMD and RORBwin are separately fingerprinted native reference engines; they are **not** interchangeable or required for normal Python execution.
 
-**Status (2026-11-14):** S0 native-reference capture, S1 typed parsing, bounded S2 Python-only kernel/integration and S5 JSON project execution plus a SHA-pinned CMD diagnostic are merged. The S5 multi-case offline regression extension is a draft. The existing 201-ordinate CMD check **fails** strict numerical parity (11/201 within the fixed print budget). No numerical stage, ensemble, Monte Carlo or production solver is accepted.
+## Current status (14 November 2026)
 
-The first usable milestone reads existing RORB inputs and reproduces supported single-storm calculations. RORB_CMD and RORBwin are separate reference engines, not interchangeable ground truth. Production calculations will run in Python, without launching RORB for every event.
+The public `main` branch contains S0 reference-capture tools, restricted S1 typed RORB input/output readers, an integrated S2 Python-only single-storm routing implementation ([#23](https://github.com/Chain-Frost/python-runoff-routing/pull/23)), and S5 JSON project import, execution and read-only native diagnostics ([#47](https://github.com/Chain-Frost/python-runoff-routing/pull/47), [#52](https://github.com/Chain-Frost/python-runoff-routing/pull/52)). **Implementation and synthetic-test success do not establish native numerical equivalence.** The exact-wheel S5 CMD diagnostic verified its sources but **failed** frozen S2 printed parity: 11/201 ordinates within budget; first mismatch at index 11; maximum error 0.22707848694007993 m³/s.
 
-## Start here
+S6 ARR Data Hub source intake [#38](https://github.com/Chain-Frost/python-runoff-routing/pull/38), BoM IFD/temporal patterns [#48](https://github.com/Chain-Frost/python-runoff-routing/pull/48), ARR2019 ARFs/selection [#49](https://github.com/Chain-Frost/python-runoff-routing/pull/49) and explicit preburst/loss preparation [#50](https://github.com/Chain-Frost/python-runoff-routing/pull/50) have **merged as bounded Python source/method slices**. An experimental RORBwin 6.52 loss profile [#54](https://github.com/Chain-Frost/python-runoff-routing/pull/54) and separate R0/R1 native rainfall investigation [#56](https://github.com/Chain-Frost/python-runoff-routing/pull/56) remain independently tracked; neither native rainfall nor routed-output acceptance follows from these partial implementations. S2 and full S5/S6 native acceptance remain open, and no production-compatible solver, ensemble or Monte Carlo claim is made. See the [current S0–S8 capability/acceptance matrix](docs/STATUS.md), [active next actions](docs/work/README.md), [compatibility contract](docs/COMPATIBILITY.md) and [regression contract](docs/REGRESSION.md).
 
-- [Implementation plan](docs/IMPLEMENTATION_PLAN.md): scope, stage gates and linked workpacks.
-- [Compatibility contract](docs/COMPATIBILITY.md): file dialects, GUI/CMD differences and numerical conventions.
-- [Regression contract](docs/REGRESSION.md): reference capture, acceptance and performance evidence.
-- [S5 offline multi-case regression](docs/S5_OFFLINE_REGRESSION.md): source-pinned CMD diagnostics, statuses and CLI usage.
-- [Development guide](docs/DEVELOPMENT.md): Windows setup and local-only checks.
-- [Work register](docs/work/README.md) and [documentation index](docs/README.md).
+## Supported entry points on main
 
-## Local development
+- The source-aware S1 model and restricted `.par` / `.catg` / DESIGN `.stm` subset are documented in [S1/S2 integration](docs/S1_S2_INTEGRATION.md). Unsupported or uncharacterised legacy features fail closed.
+- `runoff_routing.integration.read_run_json` and `run_model` calculate a supported, already-supplied storm in Python; calculated results are **unvalidated against native routing**.
+- `python -m runoff_routing.project_json` provides `validate`, `inspect`, `import-rorb`, `compare`, `export-run`, `run`, `compare-runs` and `review-native`. The last command reviews an existing SHA-pinned CMD capture; it does **not** launch RORB. See [JSON project usage](docs/PROJECT_JSON.md) and [native review limitations](docs/S5_RECORDED_NATIVE_REVIEW.md).
+- `python -m runoff_routing.project_regression <suite.json> <results.json> [details.csv]` provides a source-pinned **offline-only** multi-case CMD diagnostic; computed pass/fail classifications are not native numerical acceptance. It never launches RORB. See [S5 offline regression](docs/S5_OFFLINE_REGRESSION.md).
+- `repo-scripts/rorb_inspect.py` and `repo-scripts/rorb_reference.py` are developer scripts, not a general accepted native-compatible routing CLI. No `[project.scripts]` console entry point is configured.
 
-Windows with Python 3.14 is the acceptance environment. Use the normal Python installation; no virtual environment is required by this project.
+## Development and smoke example
 
-```powershell
+Windows / CPython 3.14 is the acceptance environment. The project does not require a virtual environment, although using one is supported.
+
+~~~powershell
 py -3.14 -m pip install -e ".[dev]"
 py -3.14 repo-scripts/check_local.py
-```
+~~~
 
-Alternatively double-click `check_local.cmd`. Build validation at package milestones uses `py -3.14 -m build`; install the resulting wheel and test from outside the checkout.
+A source-controlled synthetic example can be calculated without starting RORB:
 
-Main contains S0 evidence capture, S1 typed source-preserving subset parsers for CMD .par, RORB_GE .catg and DESIGN .stm, an unvalidated Python S2 reference and S5 JSON execution/diagnostics. Local scripts include `repo-scripts/rorb_reference.py` and `repo-scripts/rorb_inspect.py`; they are not accepted as a full routing solver. See the [live dependency and acceptance register](docs/work/2026-11-11-s1-s2-integration-readiness.md).
+~~~python
+from pathlib import Path
+from runoff_routing.integration import read_run_json, run_model
 
-## Development and publication controls
+model = read_run_json(Path("examples/synthetic-run.json").read_text(encoding="utf-8"))
+result = run_model(model)
+print(result.to_csv())
+~~~
 
-The pre-existing, owner-approved single-lane Windows/Python 3.14 quality workflow `.github/workflows/quality.yml` runs non-native checks. It cannot prove numerical equivalence. No additional hosted automation, release jobs or package publication are authorised.
+Run the example from the checkout root after installing the package. This checks Python execution, **not** native parity. For package milestones, `py -3.14 -m build` builds a wheel; verify the installed import from outside the checkout. `check_local.cmd` is the Windows wrapper. The approved [Windows quality workflow](.github/workflows/quality.yml) performs non-native checks only.
 
-Do not commit RORB executables, manuals, unapproved samples, client models or generated outputs. Keep local reference material under ignored `.local/`. A future licence and package publication need separate owner approval; the repository is already public. This project is not represented as endorsed by RORB's authors or custodians.
+## Navigation and data controls
+
+- [Documentation index](docs/README.md), [S6 detailed capability and native gates](docs/ARR_S6_INTEGRATION.md), [implementation roadmap](docs/IMPLEMENTATION_PLAN.md), [development guide](docs/DEVELOPMENT.md), [source register](docs/SOURCES.md).
+- Preserve original effective inputs, native clock labels, engine identities and frozen tolerances. Public code uses the strict mathematical reference backend. A separate **private, opt-in experimental CMD-compatible** mode is under investigation and is neither merged here nor numerically accepted.
+- Do not commit private raw captures, local paths, native executables, manuals, client models or unapproved input datasets. Keep unapproved local material in ignored `.local/`. TOML, publication and releases remain deferred and require separate owner decisions. This project is not endorsed by RORB's authors or custodians.

@@ -4,6 +4,7 @@
 
 - [Repository introduction](../README.md)
 - [Agent instructions](../AGENTS.md)
+- [Current S0–S8 implementation and acceptance status](STATUS.md)
 - [Development guide](DEVELOPMENT.md)
 - [Implementation plan](IMPLEMENTATION_PLAN.md)
 - [Compatibility contract](COMPATIBILITY.md)
@@ -14,14 +15,21 @@
 - [S0 local reference capture](REFERENCE_CAPTURE.md)
 - [S1 CMD inspection](S1-INSPECTION.md)
 - [S1 bidirectional typed RORB model](RORB_BIDIRECTIONAL.md)
+- [S2 first-discrepancy / runoff-onset diagnostic](S2_ONSET_AUDIT.md): additive pure printed-budget classification; no native numerical acceptance.
 - [S2 native versus physical-volume reporting conventions](S2_REPORTING_CONVENTIONS.md): exact Decimal print-unit audit; not numerical parity.
 - [S2 reporting-convention work record](work/2026-11-11-s2-reporting-conventions.md)
 - [S1/S2 Python integration API and capability matrix](S1_S2_INTEGRATION.md)
 - [S5 JSON projects: import, compare and Python-reference run](PROJECT_JSON.md)
 - [S5 cached CMD reference diagnostics](S5_RECORDED_NATIVE_REVIEW.md)
-- [S5 multi-case offline native regression suite](S5_OFFLINE_REGRESSION.md)
+- [S5 multi-case offline regression API/CLI and acceptance boundary](S5_OFFLINE_REGRESSION.md)
 - [Optional PyROMB-based RORB_GE GIS authoring](RORB_GE_AUTHORING.md)
 - [RORB behavioral audit and warning policy](BEHAVIOUR_AND_WARNINGS.md)
+- [S6-P0 ARR2026v1 source capability matrix](ARR_S6_P0.md)
+- [S6-P0 legacy ARR2016 Data Hub TXT contract](ARR_LEGACY_TXT.md)
+- [S6-P1 BoM IFD and ARR temporal patterns — source-only gross rainfall](ARR_BOM_TP_GROSS.md)
+- [S6-P2 ARR2019 temporal-pattern bins and published ARF equations](ARR_S6_P2_SELECTION_ARF.md)
+- [S6-P3 legacy preburst and explicit IL/CL preparation](ARR_S6_P3_PREBURST_LOSSES.md)
+- [S6 reconciliation capability and acceptance matrix](ARR_S6_INTEGRATION.md)
 - [Pull-request template](../.github/pull_request_template.md)
 
 ## Work and handoff
@@ -38,7 +46,7 @@
 - [S1 CMD inspection record](work/2026-11-10-s1-inspection.md)
 - [S1 typed parser work record](work/2026-11-11-s1-bidirectional.md)
 - [Native code-7 serialization work record](work/2026-11-11-s1-code7-serialization.md)
-- [S1/S2 integration readiness and dependency register](work/2026-11-11-s1-s2-integration-readiness.md)
+- [S1/S2 **historical** integration-readiness snapshot (superseded status)](work/2026-11-11-s1-s2-integration-readiness.md)
 - [S2 reach-kernel development record](work/2026-11-10-s2-reach-kernel.md)
 - [S2 offline development record](work/2026-11-11-s2-offline-development.md)
 - [S2 printed-ordinate audit record](work/2026-11-11-s2-parity-audit.md)
@@ -46,5 +54,11 @@
 - [S1/S2 implementation merge and acceptance boundary](work/2026-11-12-s1-s2-implementation-merge.md)
 - [PR #29 bounded native/real-GIS acceptance](work/2026-11-11-pr29-native-acceptance.md)
 - [S5 multi-case offline regression work record](work/2026-11-14-s5-offline-regression.md)
+- [S6-P0 source-intake implementation record](work/2026-11-11-s6-p0-implementation.md)
+- [S6-P1 BoM/TP implementation record](work/2026-11-12-s6-bom-tp-gross.md)
+- [S6-P2 selection and ARF audit](work/2026-11-12-s6-p2-selection-arf.md)
+- [S6-P3 legacy preburst/loss implementation](work/2026-11-12-s6-p3-preburst-loss.md)
+- [S6 native RORBwin local handoff](work/2026-11-12-s6-rorbwin-local-validation-handoff.md)
+- [S6 reconciliation and remaining validation record](work/2026-11-14-s6-reconciliation.md)
 
 Future repository-owned Markdown must be linked here. Policies describe required behaviour; the roadmap describes future implementation. No source document establishes that this package has passed a numerical acceptance gate.
