@@ -563,3 +563,53 @@ def test_native_raw_clock_must_match_exact_source_timestep(tmp_path: Path) -> No
             model_print_id="print_1",
             native_column_id="Hyd001",
         )
+
+
+def test_offline_suite_rejects_unmapped_actual_native_column(tmp_path: Path) -> None:
+    """An extra native column must not disappear from a passing suite decision."""
+    root = tmp_path / "extra-column"
+    root.mkdir()
+    project, manifest, _ = _synthetic_case(root)
+    output = manifest.parent / "historic.out"
+    lines = output.read_text(encoding="utf-8").splitlines()
+    header = lines.index("Inc Time Hyd001")
+    lines[header] = "Inc Time Hyd001 Hyd002"
+    for index in range(header + 1, header + 7):
+        assert len(lines[index].split()) == 3
+        lines[index] += " 999999.0000"
+    output.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    data: dict[str, Any] = json.loads(manifest.read_text(encoding="utf-8"))
+    original = output.read_bytes()
+    data["outputs"][0]["sha256"] = hashlib.sha256(original).hexdigest()
+    data["outputs"][0]["size_bytes"] = len(original)
+    data["hydrograph_check"]["columns"] = ["Inc", "Time", "Hyd001", "Hyd002"]
+    manifest.write_text(json.dumps(data, indent=2, sort_keys=True), encoding="utf-8")
+
+    outcome = run_suite(_suite_file(tmp_path, [_suite_case(project, manifest)])).cases[0]
+    assert outcome.classification == "invalid"
+    assert outcome.execution_status == "not_computed"
+    assert outcome.source_verification == "failed"
+    assert "column coverage" in (outcome.reason or "")
+
+
+def test_offline_suite_preserves_recognised_unsupported_rorb_dialect(tmp_path: Path) -> None:
+    """Supported source verification must not relabel an unsupported dialect invalid."""
+    root = tmp_path / "impervious"
+    root.mkdir()
+    project, manifest, _ = _synthetic_case(root)
+    catchment = project.parent / "catchment.catg"
+    content = catchment.read_text(encoding="utf-8")
+    marker = "C Impervious Fraction Data\n0, -99"
+    assert content.count(marker) == 1
+    catchment.write_text(content.replace(marker, "C Impervious Fraction Data\n2, -99"), encoding="utf-8")
+    assert inspect_file(catchment).status == "unsupported"
+
+    document: dict[str, Any] = json.loads(project.read_text(encoding="utf-8"))
+    document["model_source"]["catchment"]["sha256"] = hashlib.sha256(catchment.read_bytes()).hexdigest()
+    project.write_text(json.dumps(document, indent=2, sort_keys=True), encoding="utf-8")
+
+    outcome = run_suite(_suite_file(tmp_path, [_suite_case(project, manifest)])).cases[0]
+    assert outcome.classification == "unsupported"
+    assert outcome.source_verification == "not_verified"
+    assert outcome.execution_status == "not_computed"
+    assert "Impervious fractions" in (outcome.reason or "")

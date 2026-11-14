@@ -201,3 +201,25 @@ def test_cmd_one_based_report_rejects_truncated_end(tmp_path: Path) -> None:
     doc = inspect_file(_write(tmp_path, text, "truncated-cmd.out"))
     assert doc.status == "invalid"
     assert doc.hydrographs is None
+
+
+@pytest.mark.parametrize("value", ["NaN", "-1", "not-a-number", "Infinity"])
+def test_invalid_single_column_volume_remains_structured_inspection(
+    tmp_path: Path, value: str
+) -> None:
+    """Optional printed-volume failures must not escape the S1 inspector API."""
+    output = (
+        "RORBWin Output File\n"
+        "Time increment (hours)= 0.50\n"
+        "Duration of calculations: 2\n"
+        f"Volume,m3 {value}\n"
+        "Inc Time Hyd001\n"
+        "0 0.00 1.0\n"
+        "1 0.50 1.0\n"
+        "2 1.00 1.0\n"
+        "End of hydrograph\n"
+    )
+    inspected = inspect_file(_write(tmp_path, output, name="bad-volume.out"))
+    assert inspected.status == "invalid"
+    assert inspected.hydrographs is None
+    assert any(problem.code == "output_record" and problem.severity == "error" for problem in inspected.diagnostics)

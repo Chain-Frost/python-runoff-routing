@@ -142,3 +142,21 @@ S5-P2 #51 open for numerical and source/profile coverage; separately verify
 physical print-site mapping, address 29 unrepresented/incomplete projects and
 investigate the 36 failed hydrographs. No broader numerical acceptance,
 new native execution, release, publication, licence change or tolerance edit.
+
+## Independent software review corrections (unmerged candidate)
+
+Three reproducible review findings were raised against PR #58 after the
+65-case replay: a second native hydrograph column could be omitted from a
+passing suite comparison; a recognised unsupported source dialect could
+be classified as malformed/invalid; and an invalid printed volume could
+escape the S1 inspector's structured error result.
+
+The isolated follow-up candidate **does not change native evidence or numerical
+calculation**. It requires source-verified complete native column coverage
+before a computed/pass classification; propagates the source parser's typed
+`unsupported` distinction through S5 project loading; and keeps optional
+printed-volume validation inside S1's structured inspection error boundary.
+Manufactured regression tests exercise all three cases. The candidate needs
+exact-head Windows/Python 3.14 quality and independent review before integration.
+No separate 65-case private replay or S2/S5 numerical acceptance is inferred
+from these source/diagnostic corrections.
