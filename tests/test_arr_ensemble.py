@@ -68,8 +68,7 @@ def test_all_ten_original_event_ids_and_exact_gross_ordinates_retained() -> None
     ensemble = build_explicit_arr2019_ensemble(bom, bom.probability("1%"), patterns, selection)
     assert ensemble.event_ids == tuple(f"{ordinal:04d}" for ordinal in range(1, 11))
     assert all(
-        storm.increments_mm == (Decimal(10), Decimal(20), Decimal(30), Decimal(40))
-        for storm in ensemble.gross_storms
+        storm.increments_mm == (Decimal(10), Decimal(20), Decimal(30), Decimal(40)) for storm in ensemble.gross_storms
     )
     assert all(storm.end_times_min == (15, 30, 45, 60) for storm in ensemble.gross_storms)
     assert ensemble.areal_storms is None
@@ -94,16 +93,17 @@ def test_areal_source_keeps_missing_aep_and_applies_explicit_arf_once() -> None:
     bom = _bom()
     patterns = _patterns(areal=True)
     selection = _selection(patterns, areal=True)
-    arf = calculate_arr2019_arf(
-        catchment_area_km2=Decimal(100), duration_min=60, aep_percent=Decimal(1)
-    )
+    arf = calculate_arr2019_arf(catchment_area_km2=Decimal(100), duration_min=60, aep_percent=Decimal(1))
     ensemble = build_explicit_arr2019_ensemble(bom, bom.probability("1%"), patterns, selection, arf=arf)
     assert ensemble.selection.aep_band is None
     assert ensemble.areal_storms is not None
     assert len(ensemble.areal_storms) == 10
     assert all(item.gross.pattern_event_id == f"{i:04d}" for i, item in enumerate(ensemble.areal_storms, 1))
     assert all(item.total_mm == sum(item.increments_mm) for item in ensemble.areal_storms)
-    assert all(item.total_mm == item.gross.total_mm * arf.factor for item in ensemble.areal_storms)
+    assert all(
+        item.increments_mm == tuple(value * arf.factor for value in item.gross.increments_mm)
+        for item in ensemble.areal_storms
+    )
     record = json.loads(explicit_ensemble_inventory_json(ensemble))
     assert record["selection"]["aep_band"] is None
     assert record["selection"]["area_bin"] == "100"
@@ -116,22 +116,16 @@ def test_source_and_selection_order_cannot_be_swapped_or_forged() -> None:
     bom = _bom()
     patterns = _patterns()
     selection = _selection(patterns)
-    alternate = parse_pattern_csv(
-        patterns.raw_bytes.replace(b"0001", b"0099", 1), kind="point"
-    )
+    alternate = parse_pattern_csv(patterns.raw_bytes.replace(b"0001", b"0099", 1), kind="point")
     with pytest.raises(ARRFormatError, match="SHA-256"):
         build_explicit_arr2019_ensemble(bom, bom.probability("1%"), alternate, selection)
     with pytest.raises(ARRFormatError, match="source-order policy"):
         build_explicit_arr2019_ensemble(
             bom, bom.probability("1%"), patterns, replace(selection, patterns=tuple(reversed(selection.patterns)))
         )
+    generated = build_explicit_arr2019_ensemble(bom, bom.probability("1%"), patterns, selection)
     with pytest.raises(ARRFormatError, match="source order"):
-        replace(
-            build_explicit_arr2019_ensemble(bom, bom.probability("1%"), patterns, selection),
-            gross_storms=tuple(reversed(build_explicit_arr2019_ensemble(
-                bom, bom.probability("1%"), patterns, selection
-            ).gross_storms)),
-        )
+        replace(generated, gross_storms=tuple(reversed(generated.gross_storms)))
 
 
 def test_probability_and_arf_mismatch_fail_without_hidden_conversion() -> None:

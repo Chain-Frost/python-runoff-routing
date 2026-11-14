@@ -23,9 +23,7 @@ selection = select_arr2019_ensemble(
     aep_percent=Decimal("1"),
     region="S-SW Flatlands (West)",
 )
-ensemble = build_explicit_arr2019_ensemble(
-    bom, bom.probability("1%"), pattern_source, selection, arf=reviewed_arf
-)
+ensemble = build_explicit_arr2019_ensemble(bom, bom.probability("1%"), pattern_source, selection, arf=reviewed_arf)
 ledger = explicit_ensemble_inventory_json(ensemble)
 ```
 

@@ -51,8 +51,7 @@ class ExplicitARR2019Ensemble:
         if self.areal_storms is not None and (
             len(self.areal_storms) != 10
             or any(
-                adjusted.gross != gross
-                for gross, adjusted in zip(self.gross_storms, self.areal_storms, strict=True)
+                adjusted.gross != gross for gross, adjusted in zip(self.gross_storms, self.areal_storms, strict=True)
             )
         ):
             msg = "ARR2019 areal storms must retain the corresponding original gross events"
@@ -134,9 +133,7 @@ def explicit_ensemble_inventory_json(ensemble: ExplicitARR2019Ensemble) -> str:
                 "end_times_min": list(storm.end_times_min),
                 "gross_increments_mm": [str(value) for value in storm.increments_mm],
                 "gross_total_mm": str(storm.total_mm),
-                "areal_increments_mm": (
-                    None if adjusted is None else [str(value) for value in adjusted.increments_mm]
-                ),
+                "areal_increments_mm": (None if adjusted is None else [str(value) for value in adjusted.increments_mm]),
                 "areal_total_mm": None if adjusted is None else str(adjusted.total_mm),
             }
         )
