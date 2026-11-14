@@ -136,10 +136,10 @@ def compare_ifd_tables(document: ARRDocument, response: _RecIFDResponse) -> dict
     }
 
 
-def _compare_pattern_row(
+def _compare_pattern_metadata(
     original: Pattern, row: dict[str, object], kind: PatternKind, number: int, differences: _Differences
 ) -> None:
-    """Compare numeric coordinates numerically but identifiers exactly as strings."""
+    """Compare original identifying fields separately from numeric increments."""
     if _decimal(row.get("duration"), "duration") != Decimal(original.duration_min):
         differences.add(f"pattern {number}: duration differs")
     if _decimal(row.get("timestep"), "timestep") != Decimal(original.timestep_min):
@@ -156,6 +156,13 @@ def _compare_pattern_row(
             differences.add(f"pattern {number}: areal bin differs")
         if original.aep_band is not None:
             differences.add(f"pattern {number}: source areal AEP={original.aep_band} not in upstream CSV API")
+
+
+def _compare_pattern_row(
+    original: Pattern, row: dict[str, object], kind: PatternKind, number: int, differences: _Differences
+) -> None:
+    """Compare numeric increments after checking the source metadata."""
+    _compare_pattern_metadata(original, row, kind, number, differences)
     increments = _sequence(row.get("increments"), "increments")
     if len(increments) != len(original.increments_percent):
         differences.add(f"pattern {number}: increment count differs")
