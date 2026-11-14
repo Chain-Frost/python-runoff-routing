@@ -24,9 +24,9 @@
 | --- | --- | --- | --- |
 | Source-data | Synthetic parser tests and local offline BoM/FLTwest replays, original hashes retained | Implemented and CI-tested; no ARR2026 method acceptance | Authenticated current ARR2026 optional exports and provenance |
 | ARR2019 arithmetic | Decimal coefficients, independent published ARF example, source TP order and loss mass balance | Source/formula stage only | Independent effective-storm computations by frozen reference policy |
-| RORBwin R0/R1 | R0 24/24 zero-loss rainfall exact; R1 24/24 printed rainfall consistent | **Unaccepted**: R1 strict excess FAIL | Characterise saved/reopened full-precision source, one-increment raw CSV label offset and step-16 residual without changing tolerances |
-| RORBwin experimental losses | Separate [merged experimental PR #54](https://github.com/Chain-Frost/python-runoff-routing/pull/54) (code only): 42/42 initial crossing controls; six retained R2–R5 strict residuals plus one separate R7 residual; Inland 12-hour default boundary observed | **Unaccepted**; experimental, not selected as default; Coastal effective settings still unverified | Diagnose seven strict residuals, verify Coastal effective inputs and default GSAM/Jordan source-pattern generation without changing the frozen numerical allowance |
-| Routed hydrograph | No accepted generated-storm routing campaign | **Not assessed** | Compare all ordinates only after effective-input parity |
+| RORBwin R0/R1 | R0 24/24 zero-loss rainfall exact; R1 24/24 printed rainfall consistent | **Unaccepted**: R1 strict excess FAIL | Retain the tested one-increment export-label mapping and R1/N1 step-16 strict residual; further precision probes deferred pending S2 routing validation |
+| RORBwin experimental losses | Separate [merged experimental PR #54](https://github.com/Chain-Frost/python-runoff-routing/pull/54) (code only): 42/42 initial crossing controls; six retained R2–R5 strict residuals plus one separate R7 residual; Inland 12-hour default boundary observed | **Unaccepted**; experimental, not selected as default; Coastal deferred until S2 working/validated | Preserve seven strict residuals and limited Inland/Jordan observations; defer Coastal and further precision work until S2 parity is validated; no tolerance change |
+| Routed hydrograph | No accepted generated-storm routing campaign | **Not assessed** | Prioritise S2 strict routing validation independently; keep end-to-end S6-to-S2 acceptance separate |
 
 ## Not implemented or unaccepted
 
