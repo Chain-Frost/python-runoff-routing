@@ -4,6 +4,7 @@
 
 - [Repository introduction](../README.md)
 - [Agent instructions](../AGENTS.md)
+- [Current S0–S8 implementation and acceptance status](STATUS.md)
 - [Development guide](DEVELOPMENT.md)
 - [Implementation plan](IMPLEMENTATION_PLAN.md)
 - [Compatibility contract](COMPATIBILITY.md)
@@ -14,6 +15,7 @@
 - [S0 local reference capture](REFERENCE_CAPTURE.md)
 - [S1 CMD inspection](S1-INSPECTION.md)
 - [S1 bidirectional typed RORB model](RORB_BIDIRECTIONAL.md)
+- [S2 first-discrepancy / runoff-onset diagnostic](S2_ONSET_AUDIT.md): additive pure printed-budget classification; no native numerical acceptance.
 - [S2 native versus physical-volume reporting conventions](S2_REPORTING_CONVENTIONS.md): exact Decimal print-unit audit; not numerical parity.
 - [S2 reporting-convention work record](work/2026-11-11-s2-reporting-conventions.md)
 - [S1/S2 Python integration API and capability matrix](S1_S2_INTEGRATION.md)
@@ -27,17 +29,10 @@
 - [S6-P2 ARR2019 temporal-pattern bins and published ARF equations](ARR_S6_P2_SELECTION_ARF.md)
 - [S6-P3 legacy preburst and explicit IL/CL preparation](ARR_S6_P3_PREBURST_LOSSES.md)
 - [S6 reconciliation capability and acceptance matrix](ARR_S6_INTEGRATION.md)
-- [Experimental RORBwin 6.52 full-increment loss profile — draft #54](EXPERIMENTAL_RORBWIN_652_LOSSES.md)
+- [Experimental RORBwin 6.52 loss profile — draft #54](EXPERIMENTAL_RORBWIN_652_LOSSES.md)
 - [Pull-request template](../.github/pull_request_template.md)
 
 ## Work and handoff
-
-- [S6 R0 model preflight and zero-loss comparison](work/2026-11-13-s6-rorbwin-local-preflight.md)
-- [S6 R0 export clocks and R1 ARF comparison](work/2026-11-14-s6-r0-timing-r1-arf.md)
-- [S6 R2–R4 native loss/preburst evidence](work/2026-11-14-s6-r2-r4-loss-preburst.md)
-- [S6 controlled IL/CL candidate and native controls](work/2026-11-14-s6-controlled-loss-kernel.md)
-- [S6 R5 GSAM/Inland default preburst](work/2026-11-14-s6-r5-default-preburst.md)
-- [S6 R6/R7 12-hour area boundary and Jordan defaults](work/2026-11-14-s6-r6-r7-default-boundary.md)
 
 - [Work register](work/README.md)
 - [Bootstrap record](work/2026-11-09-bootstrap.md)
@@ -51,7 +46,7 @@
 - [S1 CMD inspection record](work/2026-11-10-s1-inspection.md)
 - [S1 typed parser work record](work/2026-11-11-s1-bidirectional.md)
 - [Native code-7 serialization work record](work/2026-11-11-s1-code7-serialization.md)
-- [S1/S2 integration readiness and dependency register](work/2026-11-11-s1-s2-integration-readiness.md)
+- [S1/S2 **historical** integration-readiness snapshot (superseded status)](work/2026-11-11-s1-s2-integration-readiness.md)
 - [S2 reach-kernel development record](work/2026-11-10-s2-reach-kernel.md)
 - [S2 offline development record](work/2026-11-11-s2-offline-development.md)
 - [S2 printed-ordinate audit record](work/2026-11-11-s2-parity-audit.md)
@@ -63,6 +58,12 @@
 - [S6-P2 selection and ARF audit](work/2026-11-12-s6-p2-selection-arf.md)
 - [S6-P3 legacy preburst/loss implementation](work/2026-11-12-s6-p3-preburst-loss.md)
 - [S6 native RORBwin local handoff](work/2026-11-12-s6-rorbwin-local-validation-handoff.md)
+- [RORBwin R0 effective settings and zero-loss preflight](work/2026-11-13-s6-rorbwin-local-preflight.md)
+- [RORBwin R0 time-label and R1 ARF observations](work/2026-11-14-s6-r0-timing-r1-arf.md)
+- [RORBwin R2–R4 precision and losses](work/2026-11-14-s6-r2-r4-loss-preburst.md)
+- [RORBwin controlled experimental IL/CL](work/2026-11-14-s6-controlled-loss-kernel.md)
+- [RORBwin R5 Inland GSAM preburst](work/2026-11-14-s6-r5-default-preburst.md)
+- [RORBwin R6/R7 12-hour Jordan/GSAM boundary](work/2026-11-14-s6-r6-r7-default-boundary.md)
 - [S6 reconciliation and remaining validation record](work/2026-11-14-s6-reconciliation.md)
 
 Future repository-owned Markdown must be linked here. Policies describe required behaviour; the roadmap describes future implementation. No source document establishes that this package has passed a numerical acceptance gate.

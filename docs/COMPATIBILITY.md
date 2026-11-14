@@ -35,9 +35,9 @@ Maintain field-level mapping for catchment area, reaches, pluviographs, bursts, 
 
 ## Numerical conventions to characterise
 
-The [experimental RORBwin 6.52 full-increment loss profile](EXPERIMENTAL_RORBWIN_652_LOSSES.md)
-is a separately selected, bounded candidate. It does not replace the legacy ARR loss
-method or establish complete native CSV precision, timing or routed-flow acceptance.
+The [RORBwin 6.52 full-increment CL candidate](EXPERIMENTAL_RORBWIN_652_LOSSES.md)
+is a separately selected experimental profile. It does not replace the default loss method or
+establish native precision, GUI timing or routed-hydrograph numerical acceptance.
 
 
 Record units at boundaries: rainfall/initial loss in mm, continuing loss in mm/h, areas in km2, reaches in km, flows in m3/s, storage in m3, time increment in hours and other legacy times in increments (R1 Table 5-1).
