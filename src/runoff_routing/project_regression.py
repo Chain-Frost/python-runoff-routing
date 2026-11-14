@@ -19,6 +19,7 @@ from typing import Literal, cast
 
 from .project_json import LegacyRunFiles, LoadedProject, ProjectError, SourceFile, load_project
 from .project_native_review import NativeProjectReview, review_project_native_captures
+from .rorb_codec import FormatProblem
 
 FORMAT = "python-runoff-routing-offline-regression"
 VERSION = 1
@@ -365,6 +366,19 @@ def _outcome(
     return CaseOutcome(case_id, category, source_status, "not_computed", "not_assessed", reason)
 
 
+def _validate_native_column_coverage(manifest: dict[str, object], mapped: set[str]) -> None:
+    """Check all captured output columns are mapped; verified source must agree later."""
+    check = manifest.get("hydrograph_check")
+    columns = cast("dict[str, object]", check).get("columns") if isinstance(check, dict) else None
+    if not isinstance(columns, list) or not all(isinstance(item, str) for item in cast("list[object]", columns)):
+        message = "Native output column coverage must be a recorded string array"
+        raise _CaseError.invalid(message)
+    recorded = cast("list[str]", columns)
+    if recorded[:2] != ["Inc", "Time"] or len(recorded) != len(mapped) + 2 or set(recorded[2:]) != mapped:
+        message = "Native output column coverage does not match complete caller mappings"
+        raise _CaseError.invalid(message)
+
+
 def _preflight_native(loaded: LoadedProject, manifest_path: Path, native_spec: NativeReference) -> None:
     """Separate unsupported profiles, captured incompleteness and invalid print identity."""
     if loaded.project.rainfall_profile == "arr-2026v1" or (
@@ -407,6 +421,7 @@ def _preflight_native(loaded: LoadedProject, manifest_path: Path, native_spec: N
     if not isinstance(requested, dict) or actual_columns != requested_columns or mapped_model != expected_model:
         message = "Ambiguous or incomplete print-location mapping coverage"
         raise _CaseError.invalid(message)
+    _validate_native_column_coverage(native, actual_columns)
 
 
 def _run_case(spec: CaseSpec, root: Path) -> CaseOutcome:
@@ -422,6 +437,9 @@ def _run_case(spec: CaseSpec, root: Path) -> CaseOutcome:
         loaded = load_project(project)
     except (ProjectError, ValueError) as exc:
         message = f"Project cannot be verified: {exc}"
+        source_problem = exc.__cause__
+        if isinstance(source_problem, FormatProblem) and source_problem.status == "unsupported":
+            raise _CaseError.unsupported(message) from exc
         raise _CaseError.invalid(message) from exc
     _preflight_native(loaded, manifest_path, spec.native)
     try:

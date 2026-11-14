@@ -136,13 +136,12 @@ def inspect_output(source: RorbSource) -> Inspection:
         rows = _read_rows(source, index, len(fields))
         _validate_time(rows, timestep)
         _validate_duration(rows, duration)
+        volume = _reported_single_column_volume(source, index, tuple(fields[2:]))
     except ValueError as exc:
         return Inspection(
             "output_report", "invalid", source, (Diagnostic("output_record", str(exc), "error", index + 1),)
         )
-    report = HydrographReport(
-        tuple(fields[2:]), rows, timestep, duration, _reported_single_column_volume(source, index, tuple(fields[2:]))
-    )
+    report = HydrographReport(tuple(fields[2:]), rows, timestep, duration, volume)
     notes = [
         Diagnostic("print_identity_unverified", "HydNNN labels do not establish native print locations", "warning")
     ]
