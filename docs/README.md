@@ -1,5 +1,7 @@
 # Documentation index
 
+- [S6 N1/N4 arithmetic and excess-export investigation](work/2026-11-14-s6-n1-n4-arithmetic-export.md)
+
 ## Introduction and policy
 
 - [Repository introduction](../README.md)
