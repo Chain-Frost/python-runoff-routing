@@ -1,0 +1,8 @@
+Results - ARR Data Hub
+[STARTTXT]
+Input Data Information
+[INPUTDATA]
+Latitude,-31.0
+Longitude,149.0
+[END_INPUTDATA]
+[ENDTXT]

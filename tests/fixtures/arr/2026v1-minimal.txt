@@ -1,0 +1,35 @@
+Results - ARR Data Hub
+Data Hub Version,2026v1
+[STARTTXT]
+Input Data Information
+[INPUTDATA]
+Latitude,-30.000
+Longitude,150.000
+Centroid_Used,True Centroid
+[END_INPUTDATA]
+Temporal Patterns
+[TP]
+code,SYN
+Download URL: https://example.invalid/not-fetched.zip
+[END_TP]
+Default IFD Depths
+[RECIFD]
+Default Current (2030) Baseline
+[RECCURRENTBASELINE]
+min (h)\AEP(%),63.2,1.0
+5 (0.08),9.60,30.0
+60 (1.0),15.0,70.000
+[RECCURRENTBASELINE_META]
+Datasets,Synthetic IFD (2026)
+Note,Illustrative values only, not for design
+[END_RECCURRENTBASELINE]
+Default Historical (1961-1990) Baseline
+[RECHISTORICALBASELINE]
+min (h)\AEP(%),63.2,1.0
+5 (0.08),8.0,25.0
+60 (1.0),13.0,60.0
+[RECHISTORICALBASELINE_META]
+Datasets,Synthetic IFD (2026)
+[END_RECHISTORICALBASELINE]
+[END_RECIFD]
+[ENDTXT]

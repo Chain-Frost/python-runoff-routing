@@ -1,0 +1,29 @@
+{
+  "title": ["SYNTHETIC ONLY — illustrative ARR format"],
+  "datahub_version": "2026v1",
+  "input_data": {
+    "Latitude": -30.000,
+    "Longitude": 150.000,
+    "Centroid_Used": "True Centroid"
+  },
+  "layers": {
+    "PointTP": {"code": "SYN", "url": "https://example.invalid/not-fetched.zip"},
+    "RecIFD": {
+      "Default Current (2030) Baseline": {
+        "index": [5, 60],
+        "columns": [63.2, 1.0],
+        "data": [[9.60, 30.0], [15.0, 70.000]]
+      },
+      "Default Historical (1961-1990) Baseline": {
+        "index": [5, 60],
+        "columns": [63.2, 1.0],
+        "data": [[8.0, 25.0], [13.0, 60.0]]
+      },
+      "Default Native Baseline": {
+        "index": [5, 60],
+        "columns": [63.2, 1.0],
+        "data": [[8.0, 25.0], [13.0, 60.0]]
+      }
+    }
+  }
+}
