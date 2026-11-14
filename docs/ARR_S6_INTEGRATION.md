@@ -1,6 +1,6 @@
 # S6 rainfall-preparation capability and acceptance matrix
 
-**Reconciliation date:** 2026-11-14. **Status:** four draft implementation PRs, source and arithmetic validation only. Neither RORBwin compatibility nor design hydrology acceptance is claimed. Parent #8 and #33 remain open.
+**Integration update:** 2026-11-14. Source-preparation PRs [#38](https://github.com/Chain-Frost/python-runoff-routing/pull/38), [#48](https://github.com/Chain-Frost/python-runoff-routing/pull/48), [#49](https://github.com/Chain-Frost/python-runoff-routing/pull/49) and [#50](https://github.com/Chain-Frost/python-runoff-routing/pull/50) are **implemented, tested and merged** in dependency order. Their exact-head Windows/Python 3.14 checks passed (454, 503, 613 and 649 non-native tests, respectively), with pinned Ruff, strict Pyright, wheel build and installed-wheel imports. **Source/arithmetic capability is not native numerical or hydrological acceptance.** Issues #8 and #33 remain open.
 
 | Stage | Recognised and parsed | Source validation | Python event / arithmetic | Native effective-input acceptance | Routed acceptance |
 | --- | --- | --- | --- | --- | --- |
@@ -22,10 +22,10 @@
 
 | Gate | Evidence | Status | Next proof |
 | --- | --- | --- | --- |
-| Source-data | Synthetic parser tests and local offline BoM/FLTwest replays, original hashes retained | Source-format only; exact-head CI required | Authenticated current ARR2026 optional exports and provenance |
+| Source-data | Synthetic parser tests and local offline BoM/FLTwest replays, original hashes retained | Implemented and CI-tested; no ARR2026 method acceptance | Authenticated current ARR2026 optional exports and provenance |
 | ARR2019 arithmetic | Decimal coefficients, independent published ARF example, source TP order and loss mass balance | Source/formula stage only | Independent effective-storm computations by frozen reference policy |
 | RORBwin R0/R1 | R0 24/24 zero-loss rainfall exact; R1 24/24 printed rainfall consistent | **Unaccepted**: R1 strict excess FAIL | Characterise saved/reopened full-precision source, one-increment raw CSV label offset and step-16 residual without changing tolerances |
-| RORBwin experimental losses | Separate PR #54 full-increment CL: 42/42 isolated controls, six cached strict precision residual failures | **Unaccepted**, not selected as default | Additional conditional controls, GSAM/Jordan profiles, remaining failures |
+| RORBwin experimental losses | Separate [draft PR #54](https://github.com/Chain-Frost/python-runoff-routing/pull/54): 42/42 initial crossing controls; six retained R2–R5 strict residuals plus one separate R7 residual; Inland 12-hour default boundary observed | **Unaccepted**; experimental, not selected as default; Coastal effective settings still unverified | Independently reconcile PR #54, diagnose residuals, verify Coastal effective inputs and default GSAM/Jordan sources |
 | Routed hydrograph | No accepted generated-storm routing campaign | **Not assessed** | Compare all ordinates only after effective-input parity |
 
 ## Not implemented or unaccepted
