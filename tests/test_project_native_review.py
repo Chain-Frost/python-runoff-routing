@@ -21,9 +21,14 @@ ROOT = Path(__file__).absolute().parents[1]
 ENGINE_SHA = "a" * 64
 
 
-def _synthetic_case(tmp_path: Path) -> tuple[Path, Path, str]:
+def _synthetic_case(
+    tmp_path: Path, *, effective_timestep: str = "0.5", printed_timestep: str = "0.50"
+) -> tuple[Path, Path, str]:
     """Write an S0-shaped, source-verified manufactured fixture (not RORB output)."""
-    model = read_run_json((ROOT / "examples/synthetic-run.json").read_text(encoding="utf-8"))
+    model_json = (ROOT / "examples/synthetic-run.json").read_text(encoding="utf-8")
+    model_document: dict[str, Any] = json.loads(model_json)
+    model_document["model"]["storm"]["timestep_hours"] = effective_timestep
+    model = read_run_json(json.dumps(model_document))
     project_folder = tmp_path / "Historic RORB Project"
     evidence = tmp_path / "retained S0 evidence"
     project_folder.mkdir()
@@ -51,7 +56,7 @@ def _synthetic_case(tmp_path: Path) -> tuple[Path, Path, str]:
     text = (
         "RORBWin Output File\n"
         "Program version 6.44 synthetic\n"
-        "Time increment (hours)= 0.50\n"
+        f"Time increment (hours)= {printed_timestep}\n"
         f"Duration of calculations: {model.storm.calculation_increments}\n"
         "Inc Time Hyd001\n"
         f"{rows}\n"
@@ -496,3 +501,73 @@ def test_offline_suite_tampering_unknown_keys_and_unmodified_inputs(tmp_path: Pa
     suite.write_text('{"format":"' + FORMAT + '","format":"' + FORMAT + '"}', encoding="utf-8")
     with pytest.raises(ProjectError, match="Duplicate"):
         run_suite(suite)
+
+
+@pytest.mark.parametrize("printed_timestep", ["0.12", "0.13"])
+def test_native_rounded_timestep_remains_source_verified(
+    tmp_path: Path, printed_timestep: str
+) -> None:
+    """A 0.125-hour source can be displayed to two decimals without losing its identity."""
+    root = tmp_path / "case"
+    root.mkdir()
+    project, manifest, digest = _synthetic_case(
+        root, effective_timestep="0.125", printed_timestep=printed_timestep
+    )
+    checked = review_project_native_capture(
+        project,
+        manifest,
+        manifest_sha256=digest,
+        engine_executable_sha256=ENGINE_SHA,
+        model_print_id="print_1",
+        native_column_id="Hyd001",
+    )
+    assert checked.raw_time_tokens[0] == "0.12"
+    assert checked.raw_time_tokens[-1] == "0.75"
+    assert checked.mapping_evidence == "caller_asserted"
+    assert checked.numerical_acceptance == "unassessed"
+    suite = _suite_file(tmp_path, [_suite_case(project, manifest)])
+    outcome = run_suite(suite).cases[0]
+    assert outcome.classification == "computed/pass"
+    assert outcome.source_verification == "verified"
+    assert outcome.execution_status == "computed_unvalidated"
+
+
+def test_native_timestep_discrepancy_outside_header_precision_rejected(tmp_path: Path) -> None:
+    project, manifest, digest = _synthetic_case(
+        tmp_path, effective_timestep="0.125", printed_timestep="0.122"
+    )
+    with pytest.raises(ProjectError, match="beyond its printed precision"):
+        review_project_native_capture(
+            project,
+            manifest,
+            manifest_sha256=digest,
+            engine_executable_sha256=ENGINE_SHA,
+            model_print_id="print_1",
+            native_column_id="Hyd001",
+        )
+
+
+def test_native_raw_clock_must_match_exact_source_timestep(tmp_path: Path) -> None:
+    project, manifest, _ = _synthetic_case(
+        tmp_path, effective_timestep="0.125", printed_timestep="0.12"
+    )
+    output = manifest.parent / "historic.out"
+    text = output.read_text(encoding="utf-8")
+    assert "1 0.12 " in text
+    output.write_text(text.replace("1 0.12 ", "1 0.14 ", 1), encoding="utf-8")
+    capture: dict[str, Any] = json.loads(manifest.read_text(encoding="utf-8"))
+    output_bytes = output.read_bytes()
+    capture["outputs"][0]["sha256"] = hashlib.sha256(output_bytes).hexdigest()
+    capture["outputs"][0]["size_bytes"] = len(output_bytes)
+    capture["hydrograph_check"]["raw_time_labels"][0] = "0.14"
+    revised = json.dumps(capture, sort_keys=True, indent=2).encode("utf-8")
+    manifest.write_bytes(revised)
+    with pytest.raises(ProjectError, match="raw time labels differ"):
+        review_project_native_capture(
+            project,
+            manifest,
+            manifest_sha256=hashlib.sha256(revised).hexdigest(),
+            engine_executable_sha256=ENGINE_SHA,
+            model_print_id="print_1",
+            native_column_id="Hyd001",
+        )

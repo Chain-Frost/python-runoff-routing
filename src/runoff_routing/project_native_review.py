@@ -241,6 +241,16 @@ def _validated_capture_profile(manifest: dict[str, object], executable_sha256: s
     return f"RORB_CMD {version} sha256={executable_sha256}"
 
 
+def _within_reported_print_precision(observed: Decimal, expected: Decimal) -> bool:
+    """Compare displayed times using their half-last-place budget, not a float epsilon.
+
+    Native CMD may print h=0.125 as 0.12 (or 0.13). Source timestep
+    identity is verified independently against S0 effective settings.
+    """
+    unit = Decimal(1).scaleb(observed.as_tuple().exponent)
+    return abs(observed - expected) <= unit / 2
+
+
 def _check_capture_identity(manifest: dict[str, object], column_id: str, expected_rows: int) -> None:
     if type(manifest.get("expected_steps")) is not int or manifest["expected_steps"] != expected_rows:
         message = "Native S0 expected steps do not match the S1 storm horizon"
@@ -283,8 +293,17 @@ def review_project_native_captures(
     if report is None:
         message = "Validated native output unexpectedly lacks hydrograph rows"
         raise ProjectError(message)
-    if report.time_increment_hours != loaded.run.storm.timestep_hours:
-        message = "Native output timestep differs from original S1 storm"
+    source_step = loaded.run.storm.timestep_hours
+    if not _within_reported_print_precision(report.time_increment_hours, source_step):
+        message = "Native output timestep differs from exact S1 storm beyond its printed precision"
+        raise ProjectError(message)
+    # CMD 6.44's characterised Inc labels are 1..N+1, with raw time
+    # printed at Inc * effective h. Do not shift or rewrite source tokens.
+    if any(
+        not _within_reported_print_precision(row.time_hours, source_step * row.increment)
+        for row in report.rows
+    ):
+        message = "Native raw time labels differ from exact S1 timestep beyond their printed precision"
         raise ProjectError(message)
     checks = _record(manifest.get("hydrograph_check"), "S0 hydrograph check")
     if checks.get("rows") != count or checks.get("columns") != ["Inc", "Time", *report.columns]:

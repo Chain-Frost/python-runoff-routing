@@ -82,6 +82,26 @@ The results JSON is source-derived and immutable once written. It retains suite/
 
 For a uniquely identified **single-column** retained `.out` table, the S1 output reader can attach a single pre-table printed `Volume,m³` token. Its exact printed text, native-inclusive sum, physical trapezoid and independently assessed print-precision interval consistency are reported **separately**. A missing, repeated, ambiguous, or multi-column volume is `unavailable`, not zero or an inferred value. This statistic is not a catchment water-balance proof. Rainfall-excess and physical water-balance comparisons remain **unassessed** until source/time semantics are independently characterised.
 
+## Printed native timestep precision
+
+For the characterised CMD 6.44 1-based report, the immutable S0 effective
+timestep is checked **exactly** against the S1 source storm before reviewing
+the output table. A separately printed native header can round that exact
+value: an original 0.125-hour step may display as 0.12 or 0.13 hours.
+The reviewer accepts a header only within **half of its last displayed
+decimal place** and independently checks **every raw Inc/Time value** against
+`Inc * exact_source_timestep` using that time token's own displayed
+precision. Both endpoints of a half-unit rounding tie are admitted; no
+time-label shift, resampling, source change, user-tuned tolerance or discharge
+budget change is permitted. Mismatched clocks still fail closed, and all
+original tokens are retained in the diagnostic.
+
+This specifically addresses the **one invalid timestep-header classification**
+in the prior private 65-case replay. The corrected source head has **not** yet
+been replayed against the private 65-case corpus; no 36/36 computed result
+is claimed for it. Independently approved physical print mappings and S2
+native numerical acceptance remain outstanding.
+
 ## Profile and acceptance limits
 
 The retained native-review adapter currently supports file-backed `legacy-rorb` projects, pinned RORB_CMD manifest and executable identity, one verified S0 `.out` table, one-burst/one-ISA pervious IL/CL DESIGN storms and characterised 1-based CMD labels. RORBwin captures, unsupported topologies or profiles and unprocessed ARR2016/2026 assets fail closed. Original `.par` paths are retained but not followed. TOML remains deferred.

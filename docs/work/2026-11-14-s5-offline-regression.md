@@ -74,3 +74,23 @@ handoff, superseded only by this explicitly limited diagnostic replay.
 
 **Next action:** independently review physical print mappings and assess the rounded native timestep
 header guard, then rerun the affected exact-wheel suite. S2 #4 and S5 #7 remain open.
+
+## Independent follow-up — native reported-timestep precision
+
+A narrowly scoped successor branch `fix/s5-native-printed-timestep-20261114`
+guards the known 0.125-hour source / 0.12-hour printed-header discrepancy
+without loosening numerical discharge budgets or altering source effective
+settings. It checks the printed header at half-last-place resolution and
+requires **every original CMD Inc/Time token** to represent
+`Inc * exact_source_timestep` within that token's own printed resolution.
+A disagreement beyond either printed allowance fails closed. Synthetic
+tests cover both rounding ties, a false-header-precision case and a
+hash-consistent but inconsistent native raw-clock case.
+
+This is a **candidate source correction**, not evidence of a new private
+installed-wheel replay or numerical acceptance. The previous 35 computed
+failures, one rejected header and 29 incomplete classifications remain
+historical facts from the earlier wheel. Before acceptance, run exact-head
+Windows/Python 3.14 non-native quality and repeat a read-only private
+65-case replay with independently reviewed print mappings; retain any
+unexpected difference as a failure pending independent explanation.
