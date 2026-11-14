@@ -65,3 +65,18 @@ The historical S2 branch heads are preserved as immutable links above. Their num
 ### Post-review register collision resolved without rewriting history
 
 A concurrent [S6 status reconciliation PR #59](https://github.com/Chain-Frost/python-runoff-routing/pull/59) changed `docs/work/README.md` on `main` after this review's earlier CI pass. This review branch retains #59's complete work-register entry and all its source/status content, then adds only this historical S2 backlog entry. The integration merge parent is pinned to `42ff6a04c923571292545b8b75cc041b512617c4`. No S6 source, parser, rainfall method, acceptance policy or native artifact was altered to resolve the documentation conflict.
+
+## Completed consolidation decisions — owner-authorised 2026-11-14
+
+This section records **actual outcomes after** the dated and subsequently reconciled review tables above. It does not recast original PR heads, evidence observations, or scientific acceptance as changed.
+
+| Action | Pull request | Retained result |
+| --- | --- | --- |
+| Merged review documentation | [#57](https://github.com/Chain-Frost/python-runoff-routing/pull/57) → `4194b3c565c6cd39a08b247d993ad44555533ad2` | Historical exact head/base and S2/S6 decision matrix retained on main |
+| Closed superseded S2 drafts unmerged | [#14](https://github.com/Chain-Frost/python-runoff-routing/pull/14), [#18](https://github.com/Chain-Frost/python-runoff-routing/pull/18), [#21](https://github.com/Chain-Frost/python-runoff-routing/pull/21) | S1/S2 kernel, printed diagnostics, source bytes/CP1252/annotated compatibility and regression tests already represented on main; no original branch deleted |
+| Merged additive onset successor | [#60](https://github.com/Chain-Frost/python-runoff-routing/pull/60) → `b0129d8dd501edc4801c4e0acab1ffc88de4e700` | Exact #46 Python module/test Git blobs preserved; Windows/Python 3.14 CI [#43548597636](https://github.com/Chain-Frost/python-runoff-routing/actions/runs/43548597636) successful |
+| Closed original additive draft unmerged | [#46](https://github.com/Chain-Frost/python-runoff-routing/pull/46) | Original 35/36 read-only private onset classification remains separate from S2 native numerical acceptance |
+| Merged ARR source-note reconciliation | [#61](https://github.com/Chain-Frost/python-runoff-routing/pull/61) → `5b4687efceacfde7bc1875416b10c93e93e622ba` | #34 unique production/development, Select All, envelope, rounding, preburst and source-provenance cautions carried into canonical `docs/ARR_S6_P0.md` without a second source contract |
+| Closed old ARR documentation predecessor unmerged | [#34](https://github.com/Chain-Frost/python-runoff-routing/pull/34) | Historical original contract and exact head remain available by immutable PR/commit link |
+
+**Remaining open public PRs at this verified snapshot:** [#54](https://github.com/Chain-Frost/python-runoff-routing/pull/54) experimental RORBwin loss profile; [#56](https://github.com/Chain-Frost/python-runoff-routing/pull/56) R0/R1 timing/ARF precision audit; and [#58](https://github.com/Chain-Frost/python-runoff-routing/pull/58) S5 offline native regression. These are separately assigned technical workstreams. S2 [issue #4](https://github.com/Chain-Frost/python-runoff-routing/issues/4), S5 [#7](https://github.com/Chain-Frost/python-runoff-routing/issues/7) and S6 [#8](https://github.com/Chain-Frost/python-runoff-routing/issues/8) remain numerically unaccepted. No release, parser replacement, tolerance/golden rewrite, hidden time shift, native process or additional hosted automation is authorised by the consolidation.

@@ -16,8 +16,12 @@ Test with Windows/Python 3.14, Ruff 0.16.6, strict Pyright, all non-native pytes
 
 The `audit_offline_comparison` convenience wrapper consumes an **already verified** `OfflineComparison` record, not raw native files. It does not read source/compare files, infer native `HydNNN` identities, or classify unsupported/incomplete as passing. No private full-corpus installed-wheel replay against this new API, new native run, acceptance decision, merge, release or issue closure is claimed.
 
-**Next:** review exact-head Windows results, then run a private read-only 36-case verification using this exact installed wheel and compare every first-mismatch index against the separately recorded private completion packet before making any computational attribution.
+**Next:** the pure additive API is now merged through successor [#60](https://github.com/Chain-Frost/python-runoff-routing/pull/60) (`b0129d8dd501edc4801c4e0acab1ffc88de4e700`); Windows/Python 3.14 quality [run 43548597636](https://github.com/Chain-Frost/python-runoff-routing/actions/runs/43548597636) passed, including out-of-tree installed-wheel import. The historical private 36-case onset observation is *not* a fresh successor-wheel corpus replay. Native/casual source attribution and S2 equivalence remain open; preserve original time labels and frozen budgets.
 
 ## Non-destructive successor integration (2026-11-14)
 
 The new reconciliation branch copies the original `onset_diagnostics.py` and `test_onset_diagnostics.py` **byte-for-byte** from [#46](https://github.com/Chain-Frost/python-runoff-routing/pull/46) head `e9605bc870351786c8c238d6a1957ea972ba60ea`, without changing the old branch, existing native source data, or frozen parity policy. The original [#46 Windows quality run](https://github.com/Chain-Frost/python-runoff-routing/actions/runs/43127167387) passed, but this successor must independently pass its exact-head Windows/Python 3.14 Ruff/strict Pyright/public pytest/installed-wheel checks before merge. A historical 35/36 first-at-onset classification is separate private retrospective evidence, not a new native replay or causal attribution. No RORB CMD/RORBwin execution is performed by the successor.
+
+## Post-merge reconciliation (2026-11-14)
+
+The code/test Git blobs from original [#46](https://github.com/Chain-Frost/python-runoff-routing/pull/46) are byte-identical on public `main` following merged #60. The original draft was closed **unmerged**, without deleting its branch or rewriting its source. No new native run or tolerances were introduced; the independent strict mathematical S2 solver remains unchanged.
