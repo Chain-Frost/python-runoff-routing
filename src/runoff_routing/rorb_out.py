@@ -11,6 +11,7 @@ from .rorb_documents import Diagnostic, HydrographReport, HydrographRow, Inspect
 STEP = re.compile(r"\s*Time increment \(hours\)\s*=\s*(\S+)\s*", re.IGNORECASE)
 DURATION = re.compile(r"\s*Duration of calculations:\s*(\d+)\s*", re.IGNORECASE)
 HYDRO = re.compile(r"Hyd\d+", re.IGNORECASE)
+VOLUME = re.compile(r"\s*Volume\s*,\s*m(?:³|3)\s+(\S+)\s*", re.IGNORECASE)
 NUMERIC_START = re.compile(r"^[+-]?(?:\d|\.\d|\*|nan|inf)", re.IGNORECASE)
 
 
@@ -92,6 +93,20 @@ def _validate_duration(rows: tuple[HydrographRow, ...], duration: int | None) ->
         raise ValueError(message)
 
 
+def _reported_single_column_volume(source: RorbSource, header_index: int, columns: tuple[str, ...]) -> str | None:
+    """Attribute a printed m³ volume only for one uniquely identified hydrograph column."""
+    if len(columns) != 1:
+        return None
+    matches = [match[1] for line in source.lines[:header_index] if (match := VOLUME.fullmatch(line)) is not None]
+    if len(matches) != 1:
+        return None
+    value = decimal_number(matches[0])
+    if not value.is_finite() or value < 0:
+        message = "Invalid source-reported volume in m3"
+        raise ValueError(message)
+    return matches[0]
+
+
 def inspect_output(source: RorbSource) -> Inspection:
     headers = [(index, line.split()) for index, line in enumerate(source.lines) if line.split()[:2] == ["Inc", "Time"]]
     if not headers:
@@ -121,11 +136,12 @@ def inspect_output(source: RorbSource) -> Inspection:
         rows = _read_rows(source, index, len(fields))
         _validate_time(rows, timestep)
         _validate_duration(rows, duration)
+        volume = _reported_single_column_volume(source, index, tuple(fields[2:]))
     except ValueError as exc:
         return Inspection(
             "output_report", "invalid", source, (Diagnostic("output_record", str(exc), "error", index + 1),)
         )
-    report = HydrographReport(tuple(fields[2:]), rows, timestep, duration)
+    report = HydrographReport(tuple(fields[2:]), rows, timestep, duration, volume)
     notes = [
         Diagnostic("print_identity_unverified", "HydNNN labels do not establish native print locations", "warning")
     ]

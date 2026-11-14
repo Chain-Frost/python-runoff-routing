@@ -13,6 +13,7 @@ S6 ARR Data Hub source intake [#38](https://github.com/Chain-Frost/python-runoff
 - The source-aware S1 model and restricted `.par` / `.catg` / DESIGN `.stm` subset are documented in [S1/S2 integration](docs/S1_S2_INTEGRATION.md). Unsupported or uncharacterised legacy features fail closed.
 - `runoff_routing.integration.read_run_json` and `run_model` calculate a supported, already-supplied storm in Python; calculated results are **unvalidated against native routing**.
 - `python -m runoff_routing.project_json` provides `validate`, `inspect`, `import-rorb`, `compare`, `export-run`, `run`, `compare-runs` and `review-native`. The last command reviews an existing SHA-pinned CMD capture; it does **not** launch RORB. See [JSON project usage](docs/PROJECT_JSON.md) and [native review limitations](docs/S5_RECORDED_NATIVE_REVIEW.md).
+- `python -m runoff_routing.project_regression <suite.json> <results.json> [details.csv]` provides source-pinned **offline-only** CMD regression diagnostics. Every declared case is classified; native numerical acceptance remains unassessed. No native executable is launched. See [S5 offline regression](docs/S5_OFFLINE_REGRESSION.md).
 - `repo-scripts/rorb_inspect.py` and `repo-scripts/rorb_reference.py` are developer scripts, not a general accepted native-compatible routing CLI. No `[project.scripts]` console entry point is configured.
 
 ## Development and smoke example

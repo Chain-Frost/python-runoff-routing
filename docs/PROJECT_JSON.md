@@ -138,3 +138,7 @@ This is a source/provenance safeguard, not a native RORB or rainfall-method pari
 ## S5-P2 SHA-pinned CMD reference diagnostic
 
 The [S5 native review contract](S5_RECORDED_NATIVE_REVIEW.md) documents the `review-native` CLI. An actual 201-row CMD replay verified source evidence but **failed frozen printed parity: 11/201 within budget, maximum 0.22707849 m³/s**. The native column mapping is caller-asserted; numerical acceptance remains `unassessed`.
+
+## S5 multi-case offline diagnostics (numerical acceptance not implied)
+
+The [source-pinned offline suite](S5_OFFLINE_REGRESSION.md) extends the merged single-project SHA-pinned CMD adapter rather than implementing another parser or solver. It classifies each declared case as `computed/pass`, `computed/fail`, `unsupported`, `incomplete`, or `invalid`, retaining original fingerprints, raw CMD increment/time labels, control order and separate physical versus native volume statistics. The `model_print_id` / `HydNNN` mapping remains **caller asserted**. A previous 201-row CMD diagnostic **failed** frozen numerical parity (11/201 within budget); software integration does not change that result or establish native acceptance. TOML is deferred.

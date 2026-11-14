@@ -13,15 +13,22 @@ import pytest
 from runoff_routing.integration import canonical_run_bytes, read_run_json, run_model
 from runoff_routing.project_json import LegacyRunFiles, Project, ProjectError, SourceFile, main, write_project
 from runoff_routing.project_native_review import review_project_native_capture, write_native_review_json
+from runoff_routing.project_regression import FORMAT, run_suite, write_suite_results
+from runoff_routing.project_regression import main as regression_main
 from runoff_routing.rorb_inspect import inspect_file
 
 ROOT = Path(__file__).absolute().parents[1]
 ENGINE_SHA = "a" * 64
 
 
-def _synthetic_case(tmp_path: Path) -> tuple[Path, Path, str]:
+def _synthetic_case(
+    tmp_path: Path, *, effective_timestep: str = "0.5", printed_timestep: str = "0.50"
+) -> tuple[Path, Path, str]:
     """Write an S0-shaped, source-verified manufactured fixture (not RORB output)."""
-    model = read_run_json((ROOT / "examples/synthetic-run.json").read_text(encoding="utf-8"))
+    model_json = (ROOT / "examples/synthetic-run.json").read_text(encoding="utf-8")
+    model_document: dict[str, Any] = json.loads(model_json)
+    model_document["model"]["storm"]["timestep_hours"] = effective_timestep
+    model = read_run_json(json.dumps(model_document))
     project_folder = tmp_path / "Historic RORB Project"
     evidence = tmp_path / "retained S0 evidence"
     project_folder.mkdir()
@@ -49,7 +56,7 @@ def _synthetic_case(tmp_path: Path) -> tuple[Path, Path, str]:
     text = (
         "RORBWin Output File\n"
         "Program version 6.44 synthetic\n"
-        "Time increment (hours)= 0.50\n"
+        f"Time increment (hours)= {printed_timestep}\n"
         f"Duration of calculations: {model.storm.calculation_increments}\n"
         "Inc Time Hyd001\n"
         f"{rows}\n"
@@ -331,3 +338,278 @@ def test_native_review_rejects_zero_based_cmd_row_identity(tmp_path: Path) -> No
             model_print_id="print_1",
             native_column_id="Hyd001",
         )
+
+
+# S5 multi-case offline diagnostics use manufactured evidence only (no native programs).
+def _suite_case(project: Path | None, manifest: Path | None, *, engine_hash: str = ENGINE_SHA) -> dict[str, Any]:
+    def entry(path: Path) -> dict[str, str]:
+        return {
+            "path": path.relative_to(path.parents[2]).as_posix(),
+            "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        }
+
+    return {
+        "case_id": "case-one",
+        "project": entry(project) if project is not None else None,
+        "native": {
+            "manifest": entry(manifest),
+            "engine_executable_sha256": engine_hash,
+            "print_mapping": [{"model_print_id": "print_1", "native_column_id": "Hyd001"}],
+        }
+        if manifest is not None
+        else None,
+    }
+
+
+def _suite_file(tmp_path: Path, entries: list[dict[str, Any]]) -> Path:
+    target = tmp_path / "suite.json"
+    target.write_text(
+        json.dumps({"format": FORMAT, "schema_version": 1, "suite_id": "synthetic-suite", "cases": entries}),
+        encoding="utf-8",
+    )
+    return target
+
+
+def _restamp_native(manifest: Path, *, flow: str | None = None, reported_volume: str | None = None) -> None:
+    original: dict[str, Any] = json.loads(manifest.read_text(encoding="utf-8"))
+    output = manifest.parent / "historic.out"
+    content = output.read_text(encoding="utf-8")
+    if flow is not None:
+        original_row = next(line for line in content.splitlines() if line.startswith("1 0.50 "))
+        content = content.replace(original_row, f"1 0.50 {flow}")
+    if reported_volume is not None:
+        content = content.replace("Inc Time Hyd001", f"Volume,m³  {reported_volume}\nInc Time Hyd001")
+    output.write_text(content, encoding="utf-8")
+    original["outputs"][0]["size_bytes"] = len(output.read_bytes())
+    original["outputs"][0]["sha256"] = hashlib.sha256(output.read_bytes()).hexdigest()
+    manifest.write_text(json.dumps(original, indent=2, sort_keys=True), encoding="utf-8")
+
+
+def test_offline_suite_classifies_every_case_with_source_and_numerics_separate(tmp_path: Path) -> None:
+    first_root = tmp_path / "first"
+    second_root = tmp_path / "second"
+    third_root = tmp_path / "third"
+    first_root.mkdir()
+    second_root.mkdir()
+    third_root.mkdir()
+    passing_project, passing_manifest, _ = _synthetic_case(first_root)
+    failing_project, failing_manifest, _ = _synthetic_case(second_root)
+    unsupported_project, unsupported_manifest, _ = _synthetic_case(third_root)
+    _restamp_native(failing_manifest, flow="999.0000")
+    tampered_manifest: dict[str, Any] = json.loads(unsupported_manifest.read_text(encoding="utf-8"))
+    tampered_manifest["engine"]["kind"] = "RORBwin"
+    unsupported_manifest.write_text(json.dumps(tampered_manifest), encoding="utf-8")
+    one = _suite_case(passing_project, passing_manifest)
+    two = _suite_case(failing_project, failing_manifest)
+    three = _suite_case(unsupported_project, unsupported_manifest)
+    four = _suite_case(passing_project, None)
+    five = _suite_case(passing_project, passing_manifest)
+    six = _suite_case(passing_project, passing_manifest)
+    two["case_id"] = "case-two"
+    three["case_id"] = "case-three"
+    four["case_id"] = "case-four"
+    five["case_id"] = "case-five"
+    six["case_id"] = "case-six"
+    five["project"]["sha256"] = "0" * 64
+    six["native"]["print_mapping"].append({"model_print_id": "print_1", "native_column_id": "Hyd002"})
+    suite = _suite_file(tmp_path, [one, two, three, four, five, six])
+    result = run_suite(suite)
+    assert len(result.cases) == 6
+    assert [case.classification for case in result.cases] == [
+        "computed/pass",
+        "computed/fail",
+        "unsupported",
+        "incomplete",
+        "invalid",
+        "invalid",
+    ]
+    assert result.cases[0].source_verification == "verified"
+    assert result.cases[0].execution_status == "computed_unvalidated"
+    assert result.cases[1].source_verification == "verified"
+    assert result.cases[1].native_print_budget == "outside"
+    assert result.cases[0].reviews[0].raw_increment_tokens == ("1", "2", "3", "4", "5", "6")
+    assert result.cases[0].reviews[0].raw_time_tokens[0] == "0.50"
+    assert result.cases[0].reviews[0].mapping_evidence == "caller_asserted"
+    report = json.loads(result.to_json())
+    assert report["native_numerical_acceptance"] == "unassessed"
+    assert report["counts"]["computed/fail"] == 1
+    assert report["counts"]["invalid"] == 2
+    assert report["cases"][0]["prints"][0]["printed"]["samples"] == 6
+    assert report["cases"][0]["control_vector_order"]
+    assert report["cases"][0]["effective_settings"]
+    assert result.to_csv().count("case-one,computed/pass") == 6
+    assert result.to_csv().count("case-two,computed/fail") == 6
+
+
+def test_offline_suite_preserves_verified_native_reported_volume_without_gate_inference(tmp_path: Path) -> None:
+    root = tmp_path / "single"
+    root.mkdir()
+    project, manifest, _ = _synthetic_case(root)
+    _restamp_native(manifest, reported_volume="1.23E+04")
+    suite = _suite_file(tmp_path, [_suite_case(project, manifest)])
+    result = run_suite(suite)
+    assert result.cases[0].classification == "computed/pass"
+    audit = result.cases[0].reviews[0].printed.native_reporting
+    assert str(audit.reported_native_volume_m3) == "1.23E+4"
+    assert audit.raw_native_time_tokens is not None
+    assert result.cases[0].reviews[0].native_volume_source == "unique_single_column_out"
+    assert (
+        json.loads(result.to_json())["cases"][0]["prints"][0]["reporting"]["native_reported_volume_token"]
+        == result.cases[0].reviews[0].native_reported_volume_text
+    )
+
+
+def test_offline_suite_handles_incomplete_capture_and_unavailable_file(tmp_path: Path) -> None:
+    root = tmp_path / "case"
+    root.mkdir()
+    project, manifest, _ = _synthetic_case(root)
+    native: dict[str, Any] = json.loads(manifest.read_text(encoding="utf-8"))
+    native["outcome"] = "incomplete_output"
+    manifest.write_text(json.dumps(native), encoding="utf-8")
+    case = _suite_case(project, manifest)
+    missing = _suite_case(project, manifest)
+    missing["case_id"] = "missing-case"
+    missing["native"]["manifest"]["path"] = "absent/manifest.json"
+    suite = _suite_file(tmp_path, [case, missing])
+    assert [item.classification for item in run_suite(suite).cases] == ["incomplete", "incomplete"]
+
+
+def test_offline_suite_tampering_unknown_keys_and_unmodified_inputs(tmp_path: Path) -> None:
+    root = tmp_path / "case"
+    root.mkdir()
+    project, manifest, _ = _synthetic_case(root)
+    originals = (project.read_bytes(), manifest.read_bytes(), (manifest.parent / "historic.out").read_bytes())
+    suite = _suite_file(tmp_path, [_suite_case(project, manifest)])
+    output, csv_file = tmp_path / "summary.json", tmp_path / "samples.csv"
+    result = run_suite(suite)
+    write_suite_results(output, result, details_csv=csv_file)
+    assert output.exists()
+    assert csv_file.exists()
+    with pytest.raises(FileExistsError):
+        write_suite_results(tmp_path / "another.json", result, details_csv=csv_file)
+    assert not (tmp_path / "another.json").exists()
+    assert originals == (project.read_bytes(), manifest.read_bytes(), (manifest.parent / "historic.out").read_bytes())
+    assert regression_main([str(suite), str(tmp_path / "once.json")]) == 0
+    assert regression_main([str(suite), str(tmp_path / "once.json")]) == 2
+    case = _suite_case(project, manifest)
+    case["native"]["unknown_option"] = "do-not-guess"
+    suite.write_text(
+        json.dumps({"format": FORMAT, "schema_version": 1, "suite_id": "synthetic-suite", "cases": [case]}),
+        encoding="utf-8",
+    )
+    assert run_suite(suite).cases[0].classification == "invalid"
+    suite.write_text('{"format":"' + FORMAT + '","format":"' + FORMAT + '"}', encoding="utf-8")
+    with pytest.raises(ProjectError, match="Duplicate"):
+        run_suite(suite)
+
+
+@pytest.mark.parametrize("printed_timestep", ["0.12", "0.13"])
+def test_native_rounded_timestep_remains_source_verified(tmp_path: Path, printed_timestep: str) -> None:
+    """A 0.125-hour source can be displayed to two decimals without losing its identity."""
+    root = tmp_path / "case"
+    root.mkdir()
+    project, manifest, digest = _synthetic_case(root, effective_timestep="0.125", printed_timestep=printed_timestep)
+    checked = review_project_native_capture(
+        project,
+        manifest,
+        manifest_sha256=digest,
+        engine_executable_sha256=ENGINE_SHA,
+        model_print_id="print_1",
+        native_column_id="Hyd001",
+    )
+    assert checked.raw_time_tokens[0] == "0.12"
+    assert checked.raw_time_tokens[-1] == "0.75"
+    assert checked.mapping_evidence == "caller_asserted"
+    assert checked.numerical_acceptance == "unassessed"
+    suite = _suite_file(tmp_path, [_suite_case(project, manifest)])
+    outcome = run_suite(suite).cases[0]
+    assert outcome.classification == "computed/pass"
+    assert outcome.source_verification == "verified"
+    assert outcome.execution_status == "computed_unvalidated"
+
+
+def test_native_timestep_discrepancy_outside_header_precision_rejected(tmp_path: Path) -> None:
+    project, manifest, digest = _synthetic_case(tmp_path, effective_timestep="0.125", printed_timestep="0.122")
+    with pytest.raises(ProjectError, match="beyond its printed precision"):
+        review_project_native_capture(
+            project,
+            manifest,
+            manifest_sha256=digest,
+            engine_executable_sha256=ENGINE_SHA,
+            model_print_id="print_1",
+            native_column_id="Hyd001",
+        )
+
+
+def test_native_raw_clock_must_match_exact_source_timestep(tmp_path: Path) -> None:
+    project, manifest, _ = _synthetic_case(tmp_path, effective_timestep="0.125", printed_timestep="0.12")
+    output = manifest.parent / "historic.out"
+    text = output.read_text(encoding="utf-8")
+    assert "1 0.12 " in text
+    output.write_text(text.replace("1 0.12 ", "1 0.14 ", 1), encoding="utf-8")
+    capture: dict[str, Any] = json.loads(manifest.read_text(encoding="utf-8"))
+    output_bytes = output.read_bytes()
+    capture["outputs"][0]["sha256"] = hashlib.sha256(output_bytes).hexdigest()
+    capture["outputs"][0]["size_bytes"] = len(output_bytes)
+    capture["hydrograph_check"]["raw_time_labels"][0] = "0.14"
+    revised = json.dumps(capture, sort_keys=True, indent=2).encode("utf-8")
+    manifest.write_bytes(revised)
+    with pytest.raises(ProjectError, match="raw time labels differ"):
+        review_project_native_capture(
+            project,
+            manifest,
+            manifest_sha256=hashlib.sha256(revised).hexdigest(),
+            engine_executable_sha256=ENGINE_SHA,
+            model_print_id="print_1",
+            native_column_id="Hyd001",
+        )
+
+
+def test_offline_suite_rejects_unmapped_actual_native_column(tmp_path: Path) -> None:
+    """An extra native column must not disappear from a passing suite decision."""
+    root = tmp_path / "extra-column"
+    root.mkdir()
+    project, manifest, _ = _synthetic_case(root)
+    output = manifest.parent / "historic.out"
+    lines = output.read_text(encoding="utf-8").splitlines()
+    header = lines.index("Inc Time Hyd001")
+    lines[header] = "Inc Time Hyd001 Hyd002"
+    for index in range(header + 1, header + 7):
+        assert len(lines[index].split()) == 3
+        lines[index] += " 999999.0000"
+    output.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    data: dict[str, Any] = json.loads(manifest.read_text(encoding="utf-8"))
+    original = output.read_bytes()
+    data["outputs"][0]["sha256"] = hashlib.sha256(original).hexdigest()
+    data["outputs"][0]["size_bytes"] = len(original)
+    data["hydrograph_check"]["columns"] = ["Inc", "Time", "Hyd001", "Hyd002"]
+    manifest.write_text(json.dumps(data, indent=2, sort_keys=True), encoding="utf-8")
+
+    outcome = run_suite(_suite_file(tmp_path, [_suite_case(project, manifest)])).cases[0]
+    assert outcome.classification == "invalid"
+    assert outcome.execution_status == "not_computed"
+    assert outcome.source_verification == "failed"
+    assert "column coverage" in (outcome.reason or "")
+
+
+def test_offline_suite_preserves_recognised_unsupported_rorb_dialect(tmp_path: Path) -> None:
+    """Supported source verification must not relabel an unsupported dialect invalid."""
+    root = tmp_path / "impervious"
+    root.mkdir()
+    project, manifest, _ = _synthetic_case(root)
+    catchment = project.parent / "catchment.catg"
+    content = catchment.read_text(encoding="utf-8")
+    marker = "C Impervious Fraction Data\n0, -99"
+    assert content.count(marker) == 1
+    catchment.write_text(content.replace(marker, "C Impervious Fraction Data\n2, -99"), encoding="utf-8")
+    assert inspect_file(catchment).status == "unsupported"
+
+    document: dict[str, Any] = json.loads(project.read_text(encoding="utf-8"))
+    document["model_source"]["catchment"]["sha256"] = hashlib.sha256(catchment.read_bytes()).hexdigest()
+    project.write_text(json.dumps(document, indent=2, sort_keys=True), encoding="utf-8")
+
+    outcome = run_suite(_suite_file(tmp_path, [_suite_case(project, manifest)])).cases[0]
+    assert outcome.classification == "unsupported"
+    assert outcome.source_verification == "not_verified"
+    assert outcome.execution_status == "not_computed"
+    assert "Impervious fractions" in (outcome.reason or "")
