@@ -19,7 +19,7 @@ from .integration_reporting import RecordedPrintReview, review_recorded_print
 from .project_execution import execute_loaded_project
 from .project_json import LegacyRunFiles, ProjectError, load_project
 from .reference import verify_manifest
-from .rorb_documents import RorbSource
+from .rorb_documents import HydrographReport, RorbSource
 from .rorb_model import RunModel
 from .rorb_out import inspect_output
 
@@ -247,8 +247,25 @@ def _within_reported_print_precision(observed: Decimal, expected: Decimal) -> bo
     Native CMD may print h=0.125 as 0.12 (or 0.13). Source timestep
     identity is verified independently against S0 effective settings.
     """
-    unit = Decimal(1).scaleb(observed.as_tuple().exponent)
+    unit = Decimal(1).scaleb(int(observed.as_tuple().exponent))
     return abs(observed - expected) <= unit / 2
+
+
+def _validate_printed_native_clocks(report: HydrographReport, source_step: Decimal) -> None:
+    """Require reported header and every native clock to encode the S0/S1 timestep."""
+    if report.time_increment_hours is None or not _within_reported_print_precision(
+        report.time_increment_hours, source_step
+    ):
+        message = "Native output timestep differs from exact S1 storm beyond its printed precision"
+        raise ProjectError(message)
+    # For this CMD 6.44 profile, original Inc labels are 1..N+1
+    # and raw times print Inc * exact effective h. No time shifting.
+    if any(
+        not _within_reported_print_precision(row.time_hours, source_step * row.increment)
+        for row in report.rows
+    ):
+        message = "Native raw time labels differ from exact S1 timestep beyond their printed precision"
+        raise ProjectError(message)
 
 
 def _check_capture_identity(manifest: dict[str, object], column_id: str, expected_rows: int) -> None:
@@ -293,18 +310,7 @@ def review_project_native_captures(
     if report is None:
         message = "Validated native output unexpectedly lacks hydrograph rows"
         raise ProjectError(message)
-    source_step = loaded.run.storm.timestep_hours
-    if not _within_reported_print_precision(report.time_increment_hours, source_step):
-        message = "Native output timestep differs from exact S1 storm beyond its printed precision"
-        raise ProjectError(message)
-    # CMD 6.44's characterised Inc labels are 1..N+1, with raw time
-    # printed at Inc * effective h. Do not shift or rewrite source tokens.
-    if any(
-        not _within_reported_print_precision(row.time_hours, source_step * row.increment)
-        for row in report.rows
-    ):
-        message = "Native raw time labels differ from exact S1 timestep beyond their printed precision"
-        raise ProjectError(message)
+    _validate_printed_native_clocks(report, loaded.run.storm.timestep_hours)
     checks = _record(manifest.get("hydrograph_check"), "S0 hydrograph check")
     if checks.get("rows") != count or checks.get("columns") != ["Inc", "Time", *report.columns]:
         message = "Native hydrograph table differs from the S0 capture check"
