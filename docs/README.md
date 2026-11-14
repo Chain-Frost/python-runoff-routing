@@ -29,6 +29,7 @@
 - [S6-P2 ARR2019 temporal-pattern bins and published ARF equations](ARR_S6_P2_SELECTION_ARF.md)
 - [S6-P3 legacy preburst and explicit IL/CL preparation](ARR_S6_P3_PREBURST_LOSSES.md)
 - [S6 reconciliation capability and acceptance matrix](ARR_S6_INTEGRATION.md)
+- [Opt-in experimental RORBwin 6.52 full-increment loss candidate](EXPERIMENTAL_RORBWIN_652_LOSSES.md)
 - [Pull-request template](../.github/pull_request_template.md)
 
 ## Work and handoff
@@ -58,5 +59,11 @@
 - [S6-P3 legacy preburst/loss implementation](work/2026-11-12-s6-p3-preburst-loss.md)
 - [S6 native RORBwin local handoff](work/2026-11-12-s6-rorbwin-local-validation-handoff.md)
 - [S6 reconciliation and remaining validation record](work/2026-11-14-s6-reconciliation.md)
+- [S6 R0 native zero-loss preflight](work/2026-11-13-s6-rorbwin-local-preflight.md)
+- [S6 R0/R1 native timing and ARF comparison](work/2026-11-14-s6-r0-timing-r1-arf.md)
+- [S6 R2–R4 preburst and loss observations](work/2026-11-14-s6-r2-r4-loss-preburst.md)
+- [S6 bounded IL/CL control cases](work/2026-11-14-s6-controlled-loss-kernel.md)
+- [S6 R5 GSAM/Inland default preburst](work/2026-11-14-s6-r5-default-preburst.md)
+- [S6 R6/R7 Jordan/GSAM 12-hour boundary](work/2026-11-14-s6-r6-r7-default-boundary.md)
 
 Future repository-owned Markdown must be linked here. Policies describe required behaviour; the roadmap describes future implementation. No source document establishes that this package has passed a numerical acceptance gate.
