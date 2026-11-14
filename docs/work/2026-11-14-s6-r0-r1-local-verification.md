@@ -3,6 +3,10 @@
 **Owner correction, 2026-11-14:** there is no three-run limit. The cap in the original handoff
 and frozen protocol is superseded; it is not a blocker to further relevant local experiments.
 
+**Current status:** [N4 completion review](2026-11-14-s6-n4-completion-review.md) confirms the
+later N1-N4 campaign and unchanged evidence. Standing permission is merged in #65; no current
+three-run cap or launch-authorisation blocker applies. Earlier statements below are historical.
+
 **Native follow-up completed:** [N1-N3 results](2026-11-14-s6-n123-native-precision.md) supersede
 the prospective NOT RUN/reopen status below. Exactly three calculations were performed; all
 repeat the strict failure. This record preserves the offline freeze and its original outcomes.
