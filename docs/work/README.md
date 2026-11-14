@@ -1,5 +1,8 @@
 # Work register
 
+- [S6 N1/N4 arithmetic and export](2026-11-14-s6-n1-n4-arithmetic-export.md): shared mixed-precision
+  model reproduces 48/48 tokens and a new preregistered control; original strict numerical failures remain.
+
 ## Active next-action register (14 November 2026)
 
 This is the current action list; the linked records below are historical, revision-specific evidence, not independent declarations of today's merge or acceptance state. See the single [stage capability/acceptance matrix](../STATUS.md) and the unchanged [regression gates](../REGRESSION.md). Do not close issues based only on merged implementation or successful diagnostics.
