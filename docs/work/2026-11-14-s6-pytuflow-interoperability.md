@@ -13,3 +13,8 @@ Exact-head quality check and existing Windows/Python 3.14 CI must be recorded af
 ## Next action
 
 Use a separately controlled Windows/Python 3.14 environment to install/verify the exact PyTUFLOW 1.3.0 wheel, run optional offline source comparisons on rights-cleared Data Hub JSON and point/areal CSV/ZIP (both areal layouts), and record complete original hash/ID/axis/unit outcomes and import failures. Preserve separate RORBwin native input and solver acceptance gates, with S6 #8 and #33 open.
+
+
+## Actual historical-source diagnostic replay
+
+See the [Margaret River evidence record](2026-11-14-s6-margaret-river-source-replay.md): four source hashes verified, 203/203 overlapping BoM values equal, 1,611 original TP patterns each total exactly 100%, explicit incomplete 40,000-km² cohort and upstream area-bin source-policy differences. This is a **source-reproduced audit**, not an installed PyTUFLOW or ARR2026 numerical pass. The original files remain out of the public repo.

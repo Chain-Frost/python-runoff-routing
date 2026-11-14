@@ -38,3 +38,34 @@ Inputs are original local, rights-cleared or synthetic files only. The command d
 - **Generated RORBwin input, excess-ordinate, S2 routed numerical and ARR2026 policy parity: NOT ASSESSED.** Issue #8 remains open.
 
 This is an independently reviewable source-validation slice. See [work record](work/2026-11-14-s6-pytuflow-interoperability.md) and [S6 matrix](ARR_S6_INTEGRATION.md).
+
+## Original Margaret River legacy-source replay (14 November 2026)
+
+This local forensic replay used four original previously uploaded files, recovered from the owner's private ChatGPT Library. **It did not import/run PyTUFLOW**, because the environment has Linux/Python 3.13.5 without the third-party package. Only the pinned 1.3.0 CSV-parser and area-bin source expressions were reproduced for comparison. No copyrighted original source files were committed.
+
+| Original source | Bytes | SHA-256 |
+| --- | ---: | --- |
+| depths_margaret_river_ifds.csv | 1,721 | `0ca11f66c2a1cb7e48e8bd6fc852f52dfa68014377c16301f5d57495c54864db` |
+| depths_margaret_river_all_design.csv | 3,352 | `7a739958861f82c26e37a568ebabc56fe1dfe16f442b891d7978d54e710a5197` |
+| FLTwest.zip | 57,322 | `0cd57da5e7dffd8f235b72d3e59c83ac1ab9f2e54f03e94201340e307ed83adb` |
+| Areal_FLTwest.zip | 60,674 | `61c60366f953669a9879c5e2c6619b3c420c3a3dceeb296fa41e91606b3c213f` |
+
+The independent source replay verified ZIP integrity and unchanged SHA-256 for each file; BoM IFD **29 durations × 7 AEPs** agrees with the All Design product in **203/203** common source-depth cells. Original 24-hour/1% depth: **129 mm**, with no ARF or loss adjustment. The point ZIP contains **720 events / 14,340 increments**; areal contains **891 / 27,216**. All **1,611 patterns** sum to 100% with Decimal arithmetic. Pinned-upstream-style integer-ID and shortest-string float reproduction returns the same ID strings **1,611/1,611** and source percentage values **41,556/41,556** for *these* files, without establishing general high-precision fidelity; only **3,410/41,556** source decimals are exactly representable in binary64.
+
+**Concrete non-equivalence:** The original areal CSV lacks an AEP column. Its **10,080-minute / 40,000-km²** area bin has just **one** source pattern. The pinned PyTUFLOW `TemporalPatternSet.patterns()` source returns a nonempty incomplete areal cohort; the independent ARR2019 selector requires exactly ten and rejects it. This case is outside the illustrative 100-km² example.
+
+**Area-bin boundary differs in the source code:**
+
+| Illustrative catchment area (km²) | PyTUFLOW 1.3.0 `nearest_areal_tp_area` | ARR2019 `select_arr2019_ensemble` |
+| ---: | ---: | ---: |
+| 100 | 100 | 100 |
+| 100.001 | 200 | 100 |
+| 125 | 200 | 100 |
+| 139.999 | 200 | 100 |
+| 140 | 200 | 200 |
+| 200.001 | 500 | 200 |
+| 299.999 | 500 | 200 |
+| 300 | 500 | 500 |
+
+This is a policy discrepancy to retain, **not** a finding that either one matches RORBwin. The 100-km² value is an illustrative test area, not a surveyed catchment area. See the independent [local replay work record](work/2026-11-14-s6-margaret-river-source-replay.md). No authentic 2026v1 ARR Data Hub `RecIFD` JSON was located among these originals, so the 1990/2030 baseline runtime comparison remains **not run**.
+
