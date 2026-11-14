@@ -2,6 +2,7 @@
 
 | Work front | Status | Owner | Updated | Next review | Next action |
 | --- | --- | --- | --- | --- | --- |
+| [S2 onset-relative diagnostic](2026-11-12-s2-onset-audit.md) | Reconciled original #46 additive API, synthetic tests and retained 35/36 onset classification; numerical S2 unaccepted | S2 | 2026-11-14 | Windows CI and installed-wheel review | Preserve unshifted CMD/GUI raw labels and frozen original budgets; keep #4 open. |
 | [Public PR reconciliation review](2026-11-14-pr-backlog-disposition.md) | Original 10-PR inventory with subsequent independently merged S6 changes documented | Unassigned | 2026-11-14 | Owner staged retirement | Historical S2 #14/#18/#21 source already integrated; preserve failures and close only after verified documentation. |
 | [S6 reconciliation and native gates](2026-11-14-s6-reconciliation.md) | Merged #38/#48/#49/#50; native/routed S6 unaccepted | S6 | 2026-11-14 | Native and source acceptance review | Keep #8/#33 open; review experimental draft #54 separately. |
 | [S6-P3 preburst and loss policies](2026-11-12-s6-p3-preburst-loss.md) | Merged #50; source preparation quality accepted, native S6 open | S6 | 2026-11-14 | Source/native acceptance review | Original preburst/ratio and full-storm loss policies remain distinct. |
