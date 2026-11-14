@@ -1,5 +1,9 @@
 # Work register
 
+- [S6 N1-N3 native precision controls](2026-11-14-s6-n123-native-precision.md): three runs complete;
+  coefficient-pair and saved/reopened excess vectors identical; strict 0/24 source and 23/24 replay
+  failures persist. Standing local run permission recorded on main; three-run limit reached.
+
 - [S6 R0/R1 local verification](2026-11-14-s6-r0-r1-local-verification.md): fresh 602-file inventory,
   original manifests and source/executable checks pass; bounded R0 timing mapping passes;
   R1 remains 0/24 strict and 23/24 printed-depth replay. N1-N3 frozen, not run without established authority.

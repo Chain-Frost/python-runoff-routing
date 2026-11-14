@@ -1,5 +1,9 @@
 # S6 R0/R1: local reauthentication and frozen precision controls
 
+**Native follow-up completed:** [N1-N3 results](2026-11-14-s6-n123-native-precision.md) supersede
+the prospective NOT RUN/reopen status below. Exactly three calculations were performed; all
+repeat the strict failure. This record preserves the offline freeze and its original outcomes.
+
 **Owner clarification, 2026-11-14:** standing permission covers local RORBwin and RORB_CMD launches
 and calculations without further authorisation. The authority blocker reported below is superseded;
 the frozen N1-N3 protocol can proceed within its three-calculation limit. The earlier NOT RUN labels
