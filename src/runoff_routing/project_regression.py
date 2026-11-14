@@ -370,7 +370,7 @@ def _validate_native_column_coverage(manifest: dict[str, object], mapped: set[st
     """Check all captured output columns are mapped; verified source must agree later."""
     check = manifest.get("hydrograph_check")
     columns = cast("dict[str, object]", check).get("columns") if isinstance(check, dict) else None
-    if not isinstance(columns, list) or not all(isinstance(item, str) for item in columns):
+    if not isinstance(columns, list) or not all(isinstance(item, str) for item in cast("list[object]", columns)):
         message = "Native output column coverage must be a recorded string array"
         raise _CaseError.invalid(message)
     recorded = cast("list[str]", columns)
