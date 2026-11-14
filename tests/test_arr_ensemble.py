@@ -35,7 +35,11 @@ def _bom(*, probability: str = "1%") -> BoMIFD:
 
 
 def _patterns(*, areal: bool = False, last_percent: str = "40") -> PatternSet:
-    head = "EventID,Duration,TimeStep,Region,Area,Increments" if areal else "EventID,Duration,TimeStep,Region,AEP,Increments"
+    head = (
+        "EventID,Duration,TimeStep,Region,Area,Increments"
+        if areal
+        else "EventID,Duration,TimeStep,Region,AEP,Increments"
+    )
     rows = [head]
     for ordinal in range(1, 11):
         field = "100" if areal else "rare"
@@ -63,7 +67,10 @@ def test_all_ten_original_event_ids_and_exact_gross_ordinates_retained() -> None
     selection = _selection(patterns)
     ensemble = build_explicit_arr2019_ensemble(bom, bom.probability("1%"), patterns, selection)
     assert ensemble.event_ids == tuple(f"{ordinal:04d}" for ordinal in range(1, 11))
-    assert all(storm.increments_mm == (Decimal(10), Decimal(20), Decimal(30), Decimal(40)) for storm in ensemble.gross_storms)
+    assert all(
+        storm.increments_mm == (Decimal(10), Decimal(20), Decimal(30), Decimal(40))
+        for storm in ensemble.gross_storms
+    )
     assert all(storm.end_times_min == (15, 30, 45, 60) for storm in ensemble.gross_storms)
     assert ensemble.areal_storms is None
     assert ensemble.hydrological_acceptance == "not_assessed"
@@ -75,11 +82,12 @@ def test_all_ten_original_event_ids_and_exact_gross_ordinates_retained() -> None
     assert len(record["events"]) == 10
     assert record["events"][0]["source_order_ordinal_1_based"] == 1
     assert record["events"][0]["source_event_id"] == "0001"
-    assert record["events"][0]["gross_increments_mm"] == ["10.0", "20.0", "30.0", "40.0"]
+    assert record["events"][0]["gross_increments_mm"] == ["10", "20", "30", "40"]
     assert record["events"][0]["areal_increments_mm"] is None
     assert record["operations"][-1] == "NO_REPRESENTATIVE_EVENT_NO_LOSSES_NO_PREBURST_NO_EMBEDDED_BURST_NO_ROUTING"
+    attribute = "probability_label"
     with pytest.raises(FrozenInstanceError):
-        setattr(ensemble, "probability_label", "2%")
+        setattr(ensemble, attribute, "2%")
 
 
 def test_areal_source_keeps_missing_aep_and_applies_explicit_arf_once() -> None:

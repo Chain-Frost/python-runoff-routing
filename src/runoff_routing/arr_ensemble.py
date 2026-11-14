@@ -10,7 +10,7 @@ import json
 from dataclasses import dataclass
 from typing import Literal
 
-from runoff_routing.arr_arf import ARFResult, AreaAdjustedHyetograph, apply_arr2019_arf_to_bom_storm
+from runoff_routing.arr_arf import AreaAdjustedHyetograph, ARFResult, apply_arr2019_arf_to_bom_storm
 from runoff_routing.arr_data import ARRFormatError
 from runoff_routing.arr_patterns import PatternSet
 from runoff_routing.arr_selection import TP_SELECTION_POLICY, TemporalPatternSelection, select_arr2019_ensemble
@@ -50,7 +50,10 @@ class ExplicitARR2019Ensemble:
             raise ARRFormatError(msg)
         if self.areal_storms is not None and (
             len(self.areal_storms) != 10
-            or any(adjusted.gross != gross for gross, adjusted in zip(self.gross_storms, self.areal_storms, strict=True))
+            or any(
+                adjusted.gross != gross
+                for gross, adjusted in zip(self.gross_storms, self.areal_storms, strict=True)
+            )
         ):
             msg = "ARR2019 areal storms must retain the corresponding original gross events"
             raise ARRFormatError(msg)
