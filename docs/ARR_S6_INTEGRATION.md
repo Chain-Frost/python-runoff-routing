@@ -33,3 +33,6 @@
 Automatic ARR2026 IFD/SSP selection and uplift; jurisdictional losses and preburst; ARR2026 temporal pattern methods; default RORBwin GSAM/Jordan profiles; catchment spatial region verification; spatial rainfall; embedded-burst filtering; RORB file output; automatic representative hydrograph selection. No end-to-end hydrological design certification.
 
 See [P0](ARR_S6_P0.md), [P1](ARR_BOM_TP_GROSS.md), [P2](ARR_S6_P2_SELECTION_ARF.md), [P3](ARR_S6_P3_PREBURST_LOSSES.md), [reconciliation work record](work/2026-11-14-s6-reconciliation.md) and [separate native PR #54](https://github.com/Chain-Frost/python-runoff-routing/pull/54).
+
+
+**Optional third-party verification:** [PyTUFLOW 1.3.0 source-interop review](ARR_PYTUFLOW_INTEROPERABILITY.md) under [#63](https://github.com/Chain-Frost/python-runoff-routing/issues/63) is a separate offline audit. It does not change defaults, mandatory dependencies or any numerical acceptance gate.
