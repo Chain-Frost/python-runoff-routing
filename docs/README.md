@@ -21,6 +21,12 @@
 - [S5 cached CMD reference diagnostics](S5_RECORDED_NATIVE_REVIEW.md)
 - [Optional PyROMB-based RORB_GE GIS authoring](RORB_GE_AUTHORING.md)
 - [RORB behavioral audit and warning policy](BEHAVIOUR_AND_WARNINGS.md)
+- [S6-P0 ARR2026v1 source capability matrix](ARR_S6_P0.md)
+- [S6-P0 legacy ARR2016 Data Hub TXT contract](ARR_LEGACY_TXT.md)
+- [S6-P1 BoM IFD and ARR temporal patterns — source-only gross rainfall](ARR_BOM_TP_GROSS.md)
+- [S6-P2 ARR2019 temporal-pattern bins and published ARF equations](ARR_S6_P2_SELECTION_ARF.md)
+- [S6-P3 legacy preburst and explicit IL/CL preparation](ARR_S6_P3_PREBURST_LOSSES.md)
+- [S6 reconciliation capability and acceptance matrix](ARR_S6_INTEGRATION.md)
 - [Pull-request template](../.github/pull_request_template.md)
 
 ## Work and handoff
@@ -44,5 +50,11 @@
 - [S1/S2 integration implementation record](work/2026-11-11-s1-s2-integration.md)
 - [S1/S2 implementation merge and acceptance boundary](work/2026-11-12-s1-s2-implementation-merge.md)
 - [PR #29 bounded native/real-GIS acceptance](work/2026-11-11-pr29-native-acceptance.md)
+- [S6-P0 source-intake implementation record](work/2026-11-11-s6-p0-implementation.md)
+- [S6-P1 BoM/TP implementation record](work/2026-11-12-s6-bom-tp-gross.md)
+- [S6-P2 selection and ARF audit](work/2026-11-12-s6-p2-selection-arf.md)
+- [S6-P3 legacy preburst/loss implementation](work/2026-11-12-s6-p3-preburst-loss.md)
+- [S6 native RORBwin local handoff](work/2026-11-12-s6-rorbwin-local-validation-handoff.md)
+- [S6 reconciliation and remaining validation record](work/2026-11-14-s6-reconciliation.md)
 
 Future repository-owned Markdown must be linked here. Policies describe required behaviour; the roadmap describes future implementation. No source document establishes that this package has passed a numerical acceptance gate.

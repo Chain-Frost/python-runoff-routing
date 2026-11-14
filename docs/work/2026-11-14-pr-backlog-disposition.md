@@ -1,6 +1,6 @@
 # Outstanding PRs — public S2/S6 reconciliation review
 
-**Snapshot:** 2026-11-14. **Observed main:** `e00e34d8e74ab5e5454aeb03e3f2af3532b12ed7`. **Open PRs inspected:** 10. **Status:** owner review pending; no existing PR merged/closed or active branch changed.
+**Original review:** 2026-11-14, main `e00e34d8e74ab5e5454aeb03e3f2af3532b12ed7`, **10 PRs then open**. **Post-review reconciliation:** main `f9ae827fc164357e1ab2ecf24281044d8c19eef9`; S6 predecessor PRs #38, #48, #49, #50 merged independently. The 10-row matrix below intentionally preserves original reviewed heads/bases and reported quality at that historical snapshot; the subsequent status table supplies the newer state. This consolidation did not merge those implementation PRs.
 
 All shortened SHAs below link to their **full immutable commit IDs**. The recorded PR base SHA can predate the current `main` above. GitHub's `mergeable=false` must be resolved by a fresh non-destructive integration review; it does not itself identify which paths conflict.
 
@@ -31,7 +31,7 @@ All shortened SHAs below link to their **full immutable commit IDs**. The record
 1. **Public S2 historical:** compare tests and error semantics against `main` for #14 → #18 → #21. Record any genuinely absent coverage in a new narrowly scoped PR, and only then seek owner authorisation to close these three as superseded. Never merge their historical stacked source trees wholesale.
 2. **Additive S2:** resolve #46 conflicts by a new isolated worktree or owner-coordinated non-destructive branch update, rerun exact-head Windows/Python 3.14, Ruff 0.16.6, strict Pyright, pytest and installed-wheel import, and review separately. No S2 acceptance follows from merging it.
 3. **S6 documentation:** audit #34 against issue #33 and #38's actual data contracts. Transfer uniquely justified source/provenance claims in coordination with the assigned rainfall implementation owner; avoid modifying #38/#48/#49/#50/#54 in this consolidation.
-4. **S6 implementation:** preserve the existing review chain **#38 → #48 → #49 → #50 → #54**, with no retarget, merge or change from this work. Historical source schema, version-specific IFDs, printed-depth precision, R0 time labels, ARFs and full-increment experimental loss policy remain separate validation questions.
+4. **S6 implementation:** preserve the completed source-integration history **#38 → #48 → #49 → #50**, independently merged after the original snapshot. #54 remains a separately controlled experimental RORBwin branch at the new checked head and base recorded below. The separate R0/R1 timing/precision #56, source IFD and native losses still have independent acceptance gates. No S6 branch is modified by this cleanup.
 
 ## Validation boundary and safety
 
@@ -40,3 +40,24 @@ Reported public **Windows CI successful** at the exact listed heads: #34 (430482
 This inventory was assembled through GitHub API metadata, changed-file lists, source comparisons and stored CI results. It did **not** run a local Windows/Python 3.14 worktree, native executable or installed-wheel replay, and it does **not** verify private corpus bytes. No private corpus, native raw data or local research information was transferred into the public repository.
 
 **Next action:** owner reviews candidate retirement #14/#18/#21, non-destructive reconciliation #46, and separate S6 source-contract preservation #34. Issue [#4](https://github.com/Chain-Frost/python-runoff-routing/issues/4) and S6 [#33](https://github.com/Chain-Frost/python-runoff-routing/issues/33) remain open; a software merge is not hydrological acceptance.
+
+## Reconciliation after concurrent merges — exact GitHub status
+
+This later read was pinned to main `f9ae827fc164357e1ab2ecf24281044d8c19eef9`. It does not rewrite original source-head observations, acceptance results, or original PR snapshot decisions.
+
+| PR | Updated head SHA | Updated base | State at this read |
+| --- | --- | --- | --- |
+| [#38](https://github.com/Chain-Frost/python-runoff-routing/pull/38) | `3ba24ca09daa4b5342ab5421b9a79bda301f3de8` | `main` | Merged independently as `855ea542baf2003917491386390253c3fbf6c5e5` |
+| [#48](https://github.com/Chain-Frost/python-runoff-routing/pull/48) | `0df1c88d6a579fb8bb2454b5b239dadc0bf47d7f` | `main` | Merged independently as `3770144651215a497cb058522fd79068b72f46fe` |
+| [#49](https://github.com/Chain-Frost/python-runoff-routing/pull/49) | `354ff437d390053544e53b8690efb49590383ca4` | `main` | Merged independently as `3b4b0577893e3ca388ca50d4089c178311fb2623` |
+| [#50](https://github.com/Chain-Frost/python-runoff-routing/pull/50) | `5f1034381c3132cf51beeea82ef2e75906fe9540` | `main` | Merged independently as `f9ae827fc164357e1ab2ecf24281044d8c19eef9` |
+| [#54](https://github.com/Chain-Frost/python-runoff-routing/pull/54) | `9f10f8e8a37b256859904be326f16a939dd9023a` | `main` | Open, separate assignment |
+| [#55](https://github.com/Chain-Frost/python-runoff-routing/pull/55) | `e50e2841d3b146f6037e478477621dcc1d3772c9` | `main` | Open, separate assignment |
+| [#56](https://github.com/Chain-Frost/python-runoff-routing/pull/56) | `d61fdadc91d74e9379d861c53a939ad982dc4898` | `feat/s6-rorbwin-native-rainfall` | Open, separate assignment |
+| [#58](https://github.com/Chain-Frost/python-runoff-routing/pull/58) | `734b665de395aa1afc0890b4f0b7c545d4e84d96` | `main` | Open, separate assignment |
+
+### Historical S2 tests and code retained on main
+
+At the original comparison, #21's `src/runoff_routing/reach_analysis.py` and `reach_routing.py` were byte-identical to `main`; the other routing/diagnostic files on main had additional code. Main `legacy_inputs.py` delegates to authoritative S1 `rorb_codec` rather than the older self-contained #21 grammar. Current public tests separately exercise CP1252 source-byte decoding, invalid CP1252, annotated all-pervious input and unsupported impervious flags; old tests under #21 cover equivalent behavior with different function names. The maintained `parity_metrics` module also contains the earlier printed/balance functionality and newer nonlinear diagnostics. **No historical S2 branch should be merged wholesale.** Recheck specific error wording and malformed-source cases if reviving any old tests; no new tests or source fixes are claimed from this review.
+
+The historical S2 branch heads are preserved as immutable links above. Their numerical printed-precision failures remain valid; no staged merge implies S2 acceptance. New S5 [#58](https://github.com/Chain-Frost/python-runoff-routing/pull/58), status [#55](https://github.com/Chain-Frost/python-runoff-routing/pull/55), and R0/R1 [#56](https://github.com/Chain-Frost/python-runoff-routing/pull/56) are active separate assignments, excluded from the original retirement cohort.

@@ -1,0 +1,132 @@
+Results - ARR Data Hub
+[STARTTXT]
+Input Data Information
+[INPUTDATA]
+Latitude,-30.00500
+Longitude,150.100
+[END_INPUTDATA]
+
+River Region
+[RIVREG]
+Division,Synthetic Basin
+River Number,17
+River Name,Synthetic River
+[RIVREG_META]
+Time Accessed,10 May 2019 08:00AM
+Version,2016_v1
+[END_RIVREG]
+
+ARF Parameters
+[LONGARF]
+Zone,Invented Zone
+a,0.06
+b,0.300
+c,0.100
+d,0.320
+e,1.2e-04
+f,0.65
+g,0.0
+h,0.0
+i,-0.0003
+[LONGARF_META]
+Time Accessed,10 May 2019 08:00AM
+Version,2016_v1
+[END_LONGARF]
+Storm Losses
+[LOSSES]
+ID,31415.0
+Storm Initial Losses (mm),21.0
+Storm Continuing Losses (mm/h),2.00
+[LOSSES_META]
+Time Accessed,10 May 2019 08:00AM
+Version,2016_v1
+[END_LOSSES]
+Temporal Patterns
+[TP]
+code,DemoPoint
+Label,Synthetic Point Region
+[TP_META]
+Time Accessed,10 May 2019 08:00AM
+Version,2016_v2
+[END_TP]
+Areal Temporal Patterns
+[ATP]
+CODE,DemoAreal
+arealabel,Synthetic Areal Region
+per_intersect,0.80
+[ATP_META]
+Time Accessed,10 May 2019 08:00AM
+Version,2016_v2
+[END_ATP]
+BOM IFD Depths
+[BOMIFD]
+No data,No data found at this location!
+[BOMIFD_META]
+Time Accessed,10 May 2019 08:00AM
+[END_BOMIFD]
+Synthetic PREBURST
+[PREBURST]
+min (h)\AEP(%),50,1,
+60 (1.0),2.0 (0.010),7.00 (1.020),
+120 (2.0),0.1 (0.001),1.0 (0.200),
+[PREBURST_META]
+Time Accessed,10 May 2019 08:00AM
+Version,2018_v1
+Note,Synthetic only, not design data
+[END_PREBURST]
+Synthetic PREBURST10
+[PREBURST10]
+min (h)\AEP(%),50,1,
+60 (1.0),0.1 (0.010),7.00 (1.020),
+120 (2.0),0.1 (0.001),1.0 (0.200),
+[PREBURST10_META]
+Time Accessed,10 May 2019 08:00AM
+Version,2018_v1
+Note,Synthetic only, not design data
+[END_PREBURST10]
+Synthetic PREBURST25
+[PREBURST25]
+min (h)\AEP(%),50,1,
+60 (1.0),0.5 (0.010),7.00 (1.020),
+120 (2.0),0.1 (0.001),1.0 (0.200),
+[PREBURST25_META]
+Time Accessed,10 May 2019 08:00AM
+Version,2018_v1
+Note,Synthetic only, not design data
+[END_PREBURST25]
+Synthetic PREBURST75
+[PREBURST75]
+min (h)\AEP(%),50,1,
+60 (1.0),8.0 (0.010),7.00 (1.020),
+120 (2.0),0.1 (0.001),1.0 (0.200),
+[PREBURST75_META]
+Time Accessed,10 May 2019 08:00AM
+Version,2018_v1
+Note,Synthetic only, not design data
+[END_PREBURST75]
+Synthetic PREBURST90
+[PREBURST90]
+min (h)\AEP(%),50,1,
+60 (1.0),12.0 (0.010),7.00 (1.020),
+120 (2.0),0.1 (0.001),1.0 (0.200),
+[PREBURST90_META]
+Time Accessed,10 May 2019 08:00AM
+Version,2018_v1
+Note,Synthetic only, not design data
+[END_PREBURST90]
+Climate Change Factors
+[CCF]
+,RCP 4.5,RCP 8.5
+2030,0.400 (3%),0.800 (6%)
+[CCF_META]
+Time Accessed,10 May 2019 08:00AM
+Version,2016_v1
+[END_CCF]
+Baseflow
+[BASEFLOW]
+Downstream,0
+Area (km2),400
+[BASEFLOW_META]
+Version,2016_v1
+[END_BASEFLOW]
+[ENDTXT]
