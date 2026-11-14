@@ -95,7 +95,16 @@ def test_areal_missing_aep_stays_missing() -> None:
     assert source.patterns[0].aep_band is None
     result = compare_pattern_rows(
         source,
-        [{"event_id": 1, "duration": 60, "timestep": 30.0, "region": "SYNTHETIC", "area": 100, "increments": [50.0, 50.0]}],
+        [
+            {
+                "event_id": 1,
+                "duration": 60,
+                "timestep": 30.0,
+                "region": "SYNTHETIC",
+                "area": 100,
+                "increments": [50.0, 50.0],
+            }
+        ],
     )
     assert result["status"] == "source_difference"
 
