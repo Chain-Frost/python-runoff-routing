@@ -32,11 +32,13 @@ MAX_DIFF_SAMPLES = 10
 class _RecIFDResponse(Protocol):
     def ifd_table(self, year: int) -> dict[str, object]:
         """Return PyTUFLOW's recommended original RecIFD table for a baseline year."""
+        ...
 
 
 class _PatternFrame(Protocol):
     def to_dict(self, orient: str) -> list[dict[str, object]]:
         """Return PyTUFLOW's parsed CSV rows."""
+        ...
 
 
 def _sequence(value: object, field: str) -> list[object]:
@@ -66,7 +68,7 @@ class _Differences:
     """Bounded examples with a complete mismatch count."""
 
     count: int = 0
-    examples: list[str] = field(default_factory=list)
+    examples: list[str] = field(default_factory=list[str])
 
     def add(self, message: str) -> None:
         """Record every mismatch but cap potentially large report examples."""
