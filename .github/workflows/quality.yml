@@ -44,6 +44,7 @@ jobs:
             python -c "import pathlib, runoff_routing; p=pathlib.Path(runoff_routing.__file__).resolve(); root=pathlib.Path(r'$target').resolve(); assert p.is_relative_to(root), p; assert (p.parent / 'py.typed').is_file(); print(p)"
             python -c "from runoff_routing.bom_ifd import parse_bom_ifd_csv; from runoff_routing.arr_patterns import parse_pattern_zip; from runoff_routing.arr_storm import storm_from_bom; print('S6 source wheel imports OK')"
             python -c "from runoff_routing.arr_import import parse_arr_json; from runoff_routing.arr_arf import calculate_arr2019_arf; from runoff_routing.arr_losses import select_legacy_preburst_loss; print('S6 preparation wheel imports OK')"
+            python -c "from decimal import Decimal; from runoff_routing.rorbwin_losses import calculate_rorbwin_652_excess; r=calculate_rorbwin_652_excess((Decimal(10),), timestep_min=60, initial_loss_mm=Decimal(0), continuing_loss_mm_per_hour=Decimal(0)); assert r.excess_increments_mm == (Decimal(10),); print('S6 experimental installed-wheel smoke OK')"
           } finally {
             Pop-Location
           }
