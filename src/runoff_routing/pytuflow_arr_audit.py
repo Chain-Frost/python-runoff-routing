@@ -13,13 +13,14 @@ import json
 import sys
 import zipfile
 from collections.abc import Callable
+from dataclasses import dataclass, field
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Protocol, cast
 
-from runoff_routing.arr_data import ARRDocument, ARRFormatError
+from runoff_routing.arr_data import ARRDocument, ARRFormatError, IFDDataset
 from runoff_routing.arr_import import parse_arr_json
-from runoff_routing.arr_patterns import PatternKind, PatternSet, read_pattern_file
+from runoff_routing.arr_patterns import Pattern, PatternKind, PatternSet, read_pattern_file
 
 PYTUFLOW_VERSION = "1.3.0"
 PYTUFLOW_TAG_COMMIT = "1a9459ddec9fb14e339cbfcd5413a701b6ab1ac9"
@@ -41,7 +42,7 @@ class _PatternFrame(Protocol):
 def _sequence(value: object, field: str) -> list[object]:
     if not isinstance(value, list):
         msg = f"PyTUFLOW {field} must be a list"
-        raise ValueError(msg)
+        raise TypeError(msg)
     return cast("list[object]", value)
 
 
@@ -60,42 +61,53 @@ def _decimal(value: object, field: str) -> Decimal:
     return number
 
 
+@dataclass(slots=True)
+class _Differences:
+    """Bounded examples with a complete mismatch count."""
+
+    count: int = 0
+    examples: list[str] = field(default_factory=list)
+
+    def add(self, message: str) -> None:
+        """Record every mismatch but cap potentially large report examples."""
+        self.count += 1
+        if len(self.examples) < MAX_DIFF_SAMPLES:
+            self.examples.append(message)
+
+
+def _ifd_differences(public: IFDDataset, upstream: dict[str, object]) -> _Differences:
+    """Compare original IFD axes, shape and individual values without interpolation."""
+    differences = _Differences()
+    durations = tuple(_decimal(value, "duration") for value in _sequence(upstream.get("index"), "index"))
+    probabilities = tuple(_decimal(value, "AEP") for value in _sequence(upstream.get("columns"), "columns"))
+    depths = tuple(
+        tuple(_decimal(value, "depth") for value in _sequence(row, "depth row"))
+        for row in _sequence(upstream.get("data"), "data")
+    )
+    if durations != tuple(Decimal(value) for value in public.durations_min):
+        differences.add("duration axis differs")
+    if probabilities != public.aep_percent:
+        differences.add("AEP axis differs")
+    if len(depths) != len(public.depths_mm):
+        differences.add("depth row count differs")
+    for i, (observed_row, source_row) in enumerate(zip(depths, public.depths_mm, strict=False)):
+        if len(observed_row) != len(source_row):
+            differences.add(f"depth row {i} column count differs")
+        for j, (observed, original) in enumerate(zip(observed_row, source_row, strict=False)):
+            if observed != original:
+                differences.add(f"depth[{i}][{j}]: original={original} upstream={observed}")
+    return differences
+
+
 def compare_ifd_tables(document: ARRDocument, response: _RecIFDResponse) -> dict[str, object]:
-    """Audit 1990/2030 recommended IFD tables without selecting a baseline for RORB."""
+    """Audit recommended 1990/2030 IFD source without selecting a RORB baseline."""
     comparisons: list[dict[str, object]] = []
     for year, baseline in ((1990, "historical_1961_1990"), (2030, "current_2030")):
         public = next((dataset for dataset in document.ifd_datasets if dataset.baseline == baseline), None)
         if public is None:
             comparisons.append({"baseline": baseline, "status": "not_in_original_source"})
             continue
-        upstream = response.ifd_table(year)
-        durations = tuple(_decimal(value, "duration") for value in _sequence(upstream.get("index"), "index"))
-        probabilities = tuple(_decimal(value, "AEP") for value in _sequence(upstream.get("columns"), "columns"))
-        depths = tuple(
-            tuple(_decimal(value, "depth") for value in _sequence(row, "depth row"))
-            for row in _sequence(upstream.get("data"), "data")
-        )
-        examples: list[str] = []
-        mismatches = 0
-
-        def record(message: str) -> None:
-            nonlocal mismatches
-            mismatches += 1
-            if len(examples) < MAX_DIFF_SAMPLES:
-                examples.append(message)
-
-        if durations != tuple(Decimal(value) for value in public.durations_min):
-            record("duration axis differs")
-        if probabilities != public.aep_percent:
-            record("AEP axis differs")
-        if len(depths) != len(public.depths_mm):
-            record("depth row count differs")
-        for i, (observed_row, source_row) in enumerate(zip(depths, public.depths_mm)):
-            if len(observed_row) != len(source_row):
-                record(f"depth row {i} column count differs")
-            for j, (observed, original) in enumerate(zip(observed_row, source_row)):
-                if observed != original:
-                    record(f"depth[{i}][{j}]: original={original} upstream={observed}")
+        differences = _ifd_differences(public, response.ifd_table(year))
         comparisons.append(
             {
                 "baseline": baseline,
@@ -103,9 +115,9 @@ def compare_ifd_tables(document: ARRDocument, response: _RecIFDResponse) -> dict
                 "duration_unit": public.duration_unit,
                 "probability_unit": public.probability_unit,
                 "depth_unit": public.depth_unit,
-                "status": "source_numeric_match" if mismatches == 0 else "source_numeric_difference",
-                "difference_count": mismatches,
-                "examples": examples,
+                "status": "source_numeric_match" if differences.count == 0 else "source_numeric_difference",
+                "difference_count": differences.count,
+                "examples": differences.examples,
             }
         )
     return {
@@ -124,43 +136,42 @@ def compare_ifd_tables(document: ARRDocument, response: _RecIFDResponse) -> dict
     }
 
 
+def _compare_pattern_row(
+    original: Pattern, row: dict[str, object], kind: PatternKind, number: int, differences: _Differences
+) -> None:
+    """Compare numeric coordinates numerically but identifiers exactly as strings."""
+    if _decimal(row.get("duration"), "duration") != Decimal(original.duration_min):
+        differences.add(f"pattern {number}: duration differs")
+    if _decimal(row.get("timestep"), "timestep") != Decimal(original.timestep_min):
+        differences.add(f"pattern {number}: timestep differs")
+    for label, source_value in (("event_id", original.event_id), ("region", original.region)):
+        observed = str(row.get(label, "<missing>"))
+        if observed != source_value:
+            differences.add(f"pattern {number} {label}: original={source_value!r} upstream={observed!r}")
+    if kind == "point":
+        if row.get("aep_band") != original.aep_band:
+            differences.add(f"pattern {number}: point AEP band differs")
+    else:
+        if str(row.get("area", "<missing>")) != original.area_bin:
+            differences.add(f"pattern {number}: areal bin differs")
+        if original.aep_band is not None:
+            differences.add(f"pattern {number}: source areal AEP={original.aep_band} not in upstream CSV API")
+    increments = _sequence(row.get("increments"), "increments")
+    if len(increments) != len(original.increments_percent):
+        differences.add(f"pattern {number}: increment count differs")
+    for i, (source_value, observed_value) in enumerate(zip(original.increments_percent, increments, strict=False)):
+        observed = _decimal(observed_value, "increment")
+        if observed != source_value:
+            differences.add(f"pattern {number} increment {i}: original={source_value} upstream={observed}")
+
+
 def compare_pattern_rows(source: PatternSet, upstream_rows: list[dict[str, object]]) -> dict[str, object]:
-    """Retain the original event IDs, missing fields and full-precision increments."""
-    examples: list[str] = []
-    mismatches = 0
-
-    def record(message: str) -> None:
-        nonlocal mismatches
-        mismatches += 1
-        if len(examples) < MAX_DIFF_SAMPLES:
-            examples.append(message)
-
+    """Retain original IDs, missing fields and full-precision increments."""
+    differences = _Differences()
     if len(source.patterns) != len(upstream_rows):
-        record(f"pattern count original={len(source.patterns)} upstream={len(upstream_rows)}")
-    for i, (original, row) in enumerate(zip(source.patterns, upstream_rows)):
-        expected = {
-            "event_id": original.event_id,
-            "duration": str(original.duration_min),
-            "timestep": str(original.timestep_min),
-            "region": original.region,
-        }
-        if source.kind == "point":
-            expected["aep_band"] = original.aep_band or ""
-        else:
-            expected["area"] = original.area_bin or ""
-            if original.aep_band is not None:
-                record(f"pattern {i}: explicit source areal AEP={original.aep_band} absent from upstream CSV API")
-        for field, value in expected.items():
-            actual = str(row.get(field, "<missing>"))
-            if actual != value:
-                record(f"pattern {i} {field}: original={value!r} upstream={actual!r}")
-        increments = _sequence(row.get("increments"), "increments")
-        if len(increments) != len(original.increments_percent):
-            record(f"pattern {i}: increment count original={len(original.increments_percent)} upstream={len(increments)}")
-        for j, (raw, value) in enumerate(zip(original.increments_percent, increments)):
-            observed = _decimal(value, "increment")
-            if observed != raw:
-                record(f"pattern {i} increment {j}: original={raw} upstream={observed}")
+        differences.add(f"pattern count original={len(source.patterns)} upstream={len(upstream_rows)}")
+    for i, (original, row) in enumerate(zip(source.patterns, upstream_rows, strict=False)):
+        _compare_pattern_row(original, row, source.kind, i, differences)
     return {
         "kind": f"{source.kind}_TP_Increments",
         "source_sha256": source.source_sha256,
@@ -173,9 +184,9 @@ def compare_pattern_rows(source: PatternSet, upstream_rows: list[dict[str, objec
         "original_area_bins": sorted({pattern.area_bin for pattern in source.patterns if pattern.area_bin is not None}),
         "original_aep_bands": sorted({pattern.aep_band for pattern in source.patterns if pattern.aep_band is not None}),
         "increment_unit": "percent",
-        "status": "source_numeric_and_identity_match" if mismatches == 0 else "source_difference",
-        "difference_count": mismatches,
-        "examples": examples,
+        "status": "source_numeric_and_identity_match" if differences.count == 0 else "source_difference",
+        "difference_count": differences.count,
+        "examples": differences.examples,
         "policy": "source_rows_only_no_tuflow_fallback_or_RORB_selection",
     }
 
@@ -207,10 +218,42 @@ def _load_upstream() -> tuple[
     api = importlib.import_module("pytuflow.arr.api_client")
     tp = importlib.import_module("pytuflow.arr.temporal_patterns")
     return (
-        cast("Callable[[dict[str, object]], _RecIFDResponse]", getattr(api, "ArrApiResponse")),
-        cast("Callable[[str], _PatternFrame]", getattr(tp, "parse_point_tp_csv")),
-        cast("Callable[[str], _PatternFrame]", getattr(tp, "parse_areal_tp_csv")),
+        cast("Callable[[dict[str, object]], _RecIFDResponse]", api.ArrApiResponse),
+        cast("Callable[[str], _PatternFrame]", tp.parse_point_tp_csv),
+        cast("Callable[[str], _PatternFrame]", tp.parse_areal_tp_csv),
     )
+
+
+def _audit_ifd(path: Path, factory: Callable[[dict[str, object]], _RecIFDResponse]) -> dict[str, object]:
+    """Compare one original, bounded ARR JSON response."""
+    raw = _read_arr_bytes(path)
+    document = parse_arr_json(raw, locator=str(path.absolute()))
+    decoded = cast("dict[str, object]", json.loads(raw.decode("utf-8-sig")))
+    return compare_ifd_tables(document, factory(decoded))
+
+
+def _audit_patterns(path: Path, kind: PatternKind, parse_csv: Callable[[str], _PatternFrame]) -> dict[str, object]:
+    """Compare the original validated CSV or every validated ZIP increments member."""
+    source = read_pattern_file(path, kind=kind)
+    rows: list[dict[str, object]] = []
+    for csv_text in _pattern_csv_texts(source, zipped=path.suffix.lower() == ".zip"):
+        try:
+            rows.extend(parse_csv(csv_text).to_dict("records"))
+        except (ValueError, TypeError, KeyError, IndexError) as exc:
+            return {
+                "kind": f"{kind}_TP_Increments",
+                "source_sha256": source.source_sha256,
+                "source_member_sha256": [member.sha256 for member in source.members],
+                "status": "upstream_csv_parser_rejected",
+                "reason": f"{type(exc).__name__}: {exc}",
+            }
+    result = compare_pattern_rows(source, rows)
+    if len(source.members) > 1:
+        result["zip_semantics"] = (
+            "Each validated Increments.csv member compared independently; PyTUFLOW URL downloader "
+            "takes only the first matching ZIP member, so URL/ZIP semantics are not established."
+        )
+    return result
 
 
 def main() -> int:
@@ -230,43 +273,14 @@ def main() -> int:
     results: list[dict[str, object]] = []
     try:
         if args.arr_json is not None:
-            raw = _read_arr_bytes(args.arr_json)
-            document = parse_arr_json(raw, locator=str(args.arr_json.absolute()))
-            decoded = cast("dict[str, object]", json.loads(raw.decode("utf-8-sig")))
-            results.append(compare_ifd_tables(document, ifd_factory(decoded)))
+            results.append(_audit_ifd(args.arr_json, ifd_factory))
         sources: tuple[tuple[Path | None, PatternKind, Callable[[str], _PatternFrame]], ...] = (
             (args.point_patterns, "point", point_parser),
             (args.areal_patterns, "areal", areal_parser),
         )
         for path, kind, upstream_parser in sources:
-            if path is None:
-                continue
-            source = read_pattern_file(path, kind=kind)
-            rows: list[dict[str, object]] = []
-            error: str | None = None
-            for csv_text in _pattern_csv_texts(source, zipped=path.suffix.lower() == ".zip"):
-                try:
-                    rows.extend(upstream_parser(csv_text).to_dict("records"))
-                except (ValueError, TypeError, KeyError, IndexError) as exc:
-                    error = f"{type(exc).__name__}: {exc}"
-                    break
-            if error is not None:
-                results.append(
-                    {
-                        "kind": f"{kind}_TP_Increments",
-                        "source_sha256": source.source_sha256,
-                        "status": "upstream_csv_parser_rejected",
-                        "reason": error,
-                    }
-                )
-            else:
-                result = compare_pattern_rows(source, rows)
-                if len(source.members) > 1:
-                    result["zip_semantics"] = (
-                        "Each verified Increments.csv member compared independently; PyTUFLOW URL downloader "
-                        "takes only first matching ZIP member, so URL/ZIP semantics are not established."
-                    )
-                results.append(result)
+            if path is not None:
+                results.append(_audit_patterns(path, kind, upstream_parser))
     except (OSError, UnicodeError, ARRFormatError, ValueError, KeyError, TypeError) as exc:
         print(f"Source comparison failed closed: {exc}", file=sys.stderr)
         return 2

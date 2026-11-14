@@ -110,3 +110,21 @@ def test_uncharacterised_ey_ari_aep_substitution_is_not_implicit() -> None:
             select_arr2019_ensemble(
                 source, catchment_area_km2=Decimal(30), duration_min=60, aep_percent=aep, region="SYNTHETIC"
             )
+
+
+def test_unmodified_numeric_coordinates_compare_equal_without_false_float_mismatch() -> None:
+    raw = b"EventID,Duration,TimeStep,Region,AEP,Increments\n7,60,30,SYNTHETIC,rare,50,50\n"
+    source = parse_pattern_csv(raw, kind="point")
+    rows: list[dict[str, object]] = [
+        {
+            "event_id": 7,
+            "duration": 60,
+            "timestep": 30.0,
+            "region": "SYNTHETIC",
+            "aep_band": "rare",
+            "increments": [50.0, 50.0],
+        }
+    ]
+    report = compare_pattern_rows(source, rows)
+    assert report["difference_count"] == 0
+    assert report["status"] == "source_numeric_and_identity_match"
