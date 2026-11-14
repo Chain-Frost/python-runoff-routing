@@ -1,5 +1,9 @@
 # S6 N1-N3: native coefficient pair and saved-parameter reopen
 
+**Owner correction, 2026-11-14:** there is no three-run limit. The owner has removed the
+handoff's cap; further relevant local experiments may proceed under standing permission.
+Three runs describes this completed batch, not a current restriction.
+
 **Status:** three native calculations completed; strict rainfall/excess equivalence still **FAIL**.
 **Owner:** Local Windows agent. **Updated:** 2026-11-14. **Review:** before selecting another experiment.
 **Branch:** `docs/s6-r0-r1-local-verification-20261114`; starting revision
@@ -12,7 +16,7 @@ The owner confirmed standing permission for local RORBwin and RORB_CMD execution
 authorisation. [PR #65](https://github.com/Chain-Frost/python-runoff-routing/pull/65) passed its
 Windows quality workflow and was merged at **0d6735adc7b60262fbf4444d10f76eb43115fad3**;
 main now records that permission in AGENTS.md. This removes the earlier authority blocker.
-The frozen **three-calculation maximum** remains binding: exactly three were performed, no CMD run,
+This batch performed exactly three calculations, no CMD run,
 and no R2-R7 or routed comparison was repeated.
 
 ## Frozen inputs and actual process control
@@ -115,6 +119,6 @@ the explicitly selected experimental full-increment CL profile remains unaccepte
 **Next:** the most useful additional control would select a coefficient perturbation large enough
 to alter the displayed total, with explicitly verified file loading and a distinct saved/reopen
 path, to separate coefficient parsing from total-depth quantisation. It was **not executed**:
-the N1-N3 three-calculation limit has been reached. A new experiment definition and frozen
-predictions are needed before any further calculation; no new launch permission is required.
+that was the original batch boundary, now superseded by the owner's correction. Define and freeze
+the next experiment's inputs and predictions before calculating; no new launch permission is required.
 S6 #8 remains open. No S2/default loss changes, merge of the numerical drafts, release or issue closure.

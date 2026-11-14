@@ -1,5 +1,8 @@
 # S6 R0/R1: local reauthentication and frozen precision controls
 
+**Owner correction, 2026-11-14:** there is no three-run limit. The cap in the original handoff
+and frozen protocol is superseded; it is not a blocker to further relevant local experiments.
+
 **Native follow-up completed:** [N1-N3 results](2026-11-14-s6-n123-native-precision.md) supersede
 the prospective NOT RUN/reopen status below. Exactly three calculations were performed; all
 repeat the strict failure. This record preserves the offline freeze and its original outcomes.
