@@ -204,9 +204,7 @@ def test_cmd_one_based_report_rejects_truncated_end(tmp_path: Path) -> None:
 
 
 @pytest.mark.parametrize("value", ["NaN", "-1", "not-a-number", "Infinity"])
-def test_invalid_single_column_volume_remains_structured_inspection(
-    tmp_path: Path, value: str
-) -> None:
+def test_invalid_single_column_volume_remains_structured_inspection(tmp_path: Path, value: str) -> None:
     """Optional printed-volume failures must not escape the S1 inspector API."""
     output = (
         "RORBWin Output File\n"
