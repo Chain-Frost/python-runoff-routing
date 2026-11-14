@@ -81,7 +81,13 @@ def _validate_time(rows: tuple[HydrographRow, ...], timestep: Decimal | None) ->
 
 
 def _validate_duration(rows: tuple[HydrographRow, ...], duration: int | None) -> None:
-    if duration is not None and (rows[0].increment != 0 or rows[-1].increment != duration or len(rows) != duration + 1):
+    if duration is None:
+        return
+    # Retained RORB_CMD 6.44 reports number N+1 output rows as increments
+    # 1..N+1 (their first raw time is h); other characterised reports use
+    # 0..N. Never shift the source increments or time tokens to reconcile.
+    first_last = (rows[0].increment, rows[-1].increment)
+    if len(rows) != duration + 1 or first_last not in ((0, duration), (1, duration + 1)):
         message = "Report hydrograph rows do not cover the full calculation duration"
         raise ValueError(message)
 
