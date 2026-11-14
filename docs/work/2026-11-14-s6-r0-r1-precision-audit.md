@@ -1,5 +1,9 @@
 # S6 R0/R1: rainfall quantisation, export clocks and frozen follow-up protocol
 
+**Local follow-up:** [fresh Windows reauthentication and frozen controls](2026-11-14-s6-r0-r1-local-verification.md)
+supersedes this review's unavailable-private-evidence and bounded R0 timing-open gates. R1 remains
+strictly failing; N1-N3 remain unrun. The text below preserves this earlier review's scope and evidence date.
+
 **Status:** documentation/evidence reconciliation only; R1 strict excess FAIL; complete R0 timing acceptance OPEN. No new native calculation, no local-private raw-file rehash in this review, and no numerical implementation change.
 **Date:** 2026-11-14. **Stage:** [S6 #8](https://github.com/Chain-Frost/python-runoff-routing/issues/8).
 **Source implementation:** [PR #50 at b2c89eae](https://github.com/Chain-Frost/python-runoff-routing/commit/b2c89eae7517d1117fd522f24a1897ab7622823d).
