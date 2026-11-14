@@ -94,3 +94,55 @@ historical facts from the earlier wheel. Before acceptance, run exact-head
 Windows/Python 3.14 non-native quality and repeat a read-only private
 65-case replay with independently reviewed print mappings; retain any
 unexpected difference as a failure pending independent explanation.
+
+## Current-head independent Windows offline replay
+
+**Updated:** 2026-11-14. **Owner:** local validation agent.
+**Selected implementation:** `b23f7338f276460b35514ba2f438150044454039` (PR #58 after #66).
+**Delivery branch:** `audit/s5-current-corpus-20261114`; documentation only.
+
+Windows **10.0.19045**, Python **3.14.6**, package **0.0.0.dev0**. Built wheel SHA-256:
+`4e967b7d29d7889f6da5b5afbc7faa08fbbcfa367fb3e3cb4a1600c3d47ac238`.
+A fresh private virtual environment outside the public checkout imported installed
+`env/Lib/site-packages/runoff_routing/__init__.py`, using isolated-mode Python.
+
+All **1,026** indexed original files passed byte-size/SHA-256 verification before and after replay;
+all **65** catalogue manifest/input fingerprints passed the existing independent private audit.
+Every original case ID appears exactly once. The installed-wheel API and CLI returned
+**36 computed/fail, 29 incomplete, zero computed/pass, zero unsupported and zero invalid**.
+CLI exit **1** correctly reports failed/incomplete diagnostics. The 29 incomplete projects retain
+**25 unreviewed GUI profiles, three expected native failures and one incomplete native capture**;
+these are coverage limitations, not passing comparisons or newly invalidated original inputs.
+
+The same wheel's existing private campaign reproduced **36 compared failures** and the same
+29 other dispositions; **all 16,836 predictions and original native discharge/increment/time tokens
+matched exactly** between APIs. Four separately retained linear controls passed. The sole change
+from the earlier S5 replay is one rounded-timestep-header rejection becoming a computed failure
+after #66. No numerical computation, source timestep, frozen allowance or golden was changed.
+The original baseline still matches **11/201**, first failure **11**, maximum absolute error
+**0.22707848694007993 m3/s**. Private reports retain all 65 rows, engine/executable identities,
+effective inputs, source/control order, peak differences and separate volume diagnostics.
+
+Quality on the selected implementation: repository hygiene **108 files/0 errors**;
+**Ruff 0.16.6** lint and format pass (**98 files**); strict **Pyright 1.1.414**
+**0 errors/0 warnings**; source and fresh installed-wheel runs each **393 passed, one skipped**
+with **pytest 9.1.1**. The skip is Windows file-symlink creation unavailable, so that environment
+gate remains unexecuted. **Eight private campaign contract tests passed**. Build frontend
+**1.6.1**, isolated setuptools **84.2.1**. The first default-interpreter test invocation hit six
+collection errors through an older global editable checkout; explicitly selecting this source
+for source tests, then separately testing the clean installed wheel, removed that contamination.
+Existing synthetic negatives passed; an installed-wheel duplicate-case probe also rejected the
+duplicate and retained the incomplete entry. Complete corpus membership was checked independently
+against the catalogue; schema v1 does not itself know an external expected-case registry.
+
+All **36** computed print mappings remain **caller asserted**. Source/native code-7 echo agreement
+does not prove independent physical location or Hyd-column identity. Rainfall-excess and water
+balance remain unassessed without independent source/time semantics. Native numerical equivalence
+remains **unaccepted**. No RORB process was launched or original evidence modified.
+
+**Review recommendation:** ready for software review with these explicit limitations; not ready
+for numerical acceptance. PR #58 currently conflicts with main; its exact head has no hosted check
+attached. #66's successful Windows run is on another commit with the same tree, not exact-head CI.
+Resolve integration separately and repeat affected checks. Independently establish physical print
+mapping, address the 29 coverage gaps and investigate the 36 numerical failures. S2 #4 and S5 #7
+remain open. No merge, release, publication, new automation or native execution is authorised.
