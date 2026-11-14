@@ -32,4 +32,45 @@ The separately verified five-subarea RORB_CMD capture used 201 authentic output 
 5. Run `py -3.14 -m runoff_routing.project_regression <suite.json> <new-results.json> <new-ordinates.csv>` from an installed-wheel environment. Verify 65 output classifications, frozen print budget, complete native sample horizons, unchanged raw CMD times, manifest/output/engine SHA-256 and physical volume differences. Compare with earlier 36 computed failures/29 other or uncomputed cases; any changed distribution requires a separately explained cause.
 6. Retain case-level private hashes and full CSVs in ignored local storage; report only sanitized classifications and quality metadata in the public PR. Never commit private corpus bytes, publish raw native files, run a native engine, or promote a passing diagnostic to S2/S5 numerical acceptance.
 
-**Private 65-case S5 replay status in this record: NOT RUN.**
+## Follow-up: local Windows installed-wheel replay, 2026-11-14
+
+**Diagnostic replay executed; acceptance incomplete.** Public source revision
+`734b665de395aa1afc0890b4f0b7c545d4e84d96` was checked out separately and built into a wheel
+with SHA-256 `a7fd01834cd1f3e1fdbf0b50fd6e165aac7c9455446ff674e91e963d59c78649`.
+Windows 10 / Python **3.14.6** used a fresh virtual environment and isolated-mode Python;
+imports resolved to that environment's installed `site-packages`, outside the public source checkout.
+This local interpreter differs from hosted CI's Python 3.14.10.
+
+The isolated private checkout was `56f1eec`. All **1,026 FILE_INDEX entries** verified before and after
+execution, and all 65 catalogue manifest/input fingerprints were independently rechecked using the
+existing private audit functions. Original corpus, manifests, outputs and tolerances were unchanged.
+Private staged byte copies, the suite, mapping register, full JSON and ordinate CSV remain ignored/local.
+
+The new S5 suite declared all **65** cases and returned **35 computed/fail, 1 invalid, 29 incomplete**;
+there were **zero computed passes**. The 29 incomplete entries have no representable project in this
+adapter and retain their original private dispositions: 25 unreviewed, 3 expected native failures and
+1 incomplete/invalid capture. These are adapter dispositions, not newly invalidated native inputs.
+
+The difference from the historical 36 computed failures is explained: one original storm/effective
+input uses **0.125 hours**, while its native output header prints **0.12 hours**. The new reviewer
+requires exact header/input timestep equality and rejects that case before computation. No timestep,
+tolerance or original native time token was changed to bypass this guard. Review of printed timestep
+precision is a separate follow-up.
+
+Re-executing the existing private campaign API against the **same installed public wheel** reproduced
+**36 compared strict numerical failures, 25 unreviewed, 3 expected failures and 1 invalid/incomplete**.
+All four separately retained narrow linear controls passed their existing precision/balance checks.
+The original baseline remains **11/201**, first mismatch index **11**, maximum absolute error
+**0.22707848694007993 m3/s**.
+
+For the 36 representable projects, source code-7 labels and native code-7 echoes agree. This cross-check
+does **not** independently establish physical print-location identity or the Hyd-column association:
+all mappings remain **caller_asserted**, including blank-label single-site cases. The requested
+independently reviewed physical mapping acceptance gate therefore remains **outstanding**.
+
+No new native process was launched. No numerical acceptance, merge, release, publication, golden
+update or tolerance adjustment occurred. Earlier NOT RUN statements above describe the original PR
+handoff, superseded only by this explicitly limited diagnostic replay.
+
+**Next action:** independently review physical print mappings and assess the rounded native timestep
+header guard, then rerun the affected exact-wheel suite. S2 #4 and S5 #7 remain open.

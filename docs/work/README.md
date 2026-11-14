@@ -1,5 +1,10 @@
 # Work register
 
+S5 offline regression: [2026-11-14 record](2026-11-14-s5-offline-regression.md) now includes the
+Windows/Python 3.14.6 installed-wheel private diagnostic replay of source `734b665`: 35 computed
+failures, 1 rounded-timestep rejection and 29 incomplete cases. Independent physical print mappings
+remain outstanding; numerical acceptance is open. Next review is the mapping/timestep follow-up.
+
 | Work front | Status | Owner | Updated | Next review | Next action |
 | --- | --- | --- | --- | --- | --- |
 | [S5 multi-case offline regression](2026-11-14-s5-offline-regression.md) | Draft; Windows and private replay pending; numerical S2 failed previously | S5 | 2026-11-14 | Draft PR quality review | Run existing Windows CI and isolated private read-only corpus replay; do not accept numerical compatibility. |
