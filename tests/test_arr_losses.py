@@ -320,3 +320,20 @@ def test_ratio_preburst_rejects_nonadjusted_rainfall_and_unreviewed_excess() -> 
     derived = derive_preburst_from_areal_rainfall(clamped, areal)
     assert derived.burst_initial_loss_mm == 0
     assert derived.preburst_above_storm_il_mm > 0
+
+
+def test_preburst_reconstructed_provenance_cannot_double_deduct_losses() -> None:
+    """Typed records reject manual double subtraction and a forged rainfall basis."""
+    selection = _selection()
+    with pytest.raises(ARRFormatError, match="burst initial loss"):
+        replace(selection, burst_initial_loss_mm=Decimal(5))
+    with pytest.raises(ARRFormatError, match="preburst excess"):
+        replace(selection, preburst_above_storm_il_mm=Decimal(1))
+    with pytest.raises(ARRFormatError, match="percentile"):
+        replace(selection, preburst_percentile=cast(Literal[10, 25, 50, 75, 90], 99))
+    with pytest.raises(ARRFormatError, match="rainfall basis"):
+        replace(
+            selection,
+            depth_basis="ratio_x_areal_reduced_design_depth",
+            rainfall_basis_total_mm=Decimal(100),
+        )

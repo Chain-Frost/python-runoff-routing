@@ -58,6 +58,11 @@ The subsequent [R5 default-pattern observation](work/2026-11-14-s6-r5-default-pr
 input-matched precision failures at the same frozen allowance. It does not implement or validate
 Python generation of the native default patterns.
 
+The later [R6/R7 default-boundary investigation](work/2026-11-14-s6-r6-r7-default-boundary.md) records
+one additional strict residual at corrected R7 step 31. The prior six-xfail replay is unchanged;
+the new diagnostic is separate. R6 and the Inland boundary are characterised, Coastal effective settings
+remain unestablished, and Python default-pattern generation remains unimplemented.
+
 Binary32 arithmetic-order hypotheses can reproduce those printed observations, but no one tested
 order reproduces all retained R1–R4 controls. This Decimal semantic candidate deliberately introduces
 no inferred native floating-point mode and does not claim bitwise equivalence.
