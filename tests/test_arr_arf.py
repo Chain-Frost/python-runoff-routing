@@ -54,7 +54,7 @@ def _independent_long(area: float, duration: float, aep_percent: float, region: 
     )
 
 
-def test_published_coefficients_resolve_old_2019_gist_discrepancy() -> None:
+def test_published_coefficients_and_independent_reference_provenance() -> None:
     assert published_coefficients("Inland Arid").values[6] == Decimal("0.129")
     assert published_coefficients("South-West Western Australia").values[4] == Decimal("3.85E-06")
     with pytest.raises(ARRFormatError, match="Unknown ARR2019 ARF region"):
@@ -146,6 +146,8 @@ def test_validity_gates_fail_closed() -> None:
         _arf("NaN", 60)
     with pytest.raises(ARRFormatError, match="duration must be"):
         _arf("10", 10081)
+    with pytest.raises(ARRFormatError, match="duration must be"):
+        _arf("10", True)
 
 
 def test_opt_in_extended_range_and_original_source_not_rounded() -> None:
