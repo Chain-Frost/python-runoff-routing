@@ -1,6 +1,6 @@
 # Work register
 
-- [S6 N4 coefficient sensitivity protocol](2026-11-14-s6-n4-coefficient-sensitivity-protocol.md): independent larger-e ARF prediction and falsifiable native controls; local N4 24-cell freeze and native run NOT RUN.
+- [S6 N4 native result](2026-11-14-s6-n4-native-result.md): one calculation complete; 121.88 mm and 24/24 changed forcing cells confirm coefficient sensitivity. Strict source FAIL 0/24; replay FAIL 22/24 (steps 8/14); N5 not needed/run. [Pre-run protocol](2026-11-14-s6-n4-coefficient-sensitivity-protocol.md) preserved.
 
 - [S6 N1-N3 native precision controls](2026-11-14-s6-n123-native-precision.md): three runs complete;
   coefficient-pair and saved/reopened excess vectors identical; strict 0/24 source and 23/24 replay
