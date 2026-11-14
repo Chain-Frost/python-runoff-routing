@@ -94,3 +94,51 @@ historical facts from the earlier wheel. Before acceptance, run exact-head
 Windows/Python 3.14 non-native quality and repeat a read-only private
 65-case replay with independently reviewed print mappings; retain any
 unexpected difference as a failure pending independent explanation.
+
+## Completed corrected-wheel 65-case replay — final S5 review status
+
+**14 November 2026, updated after independent private validation.**
+The earlier `NOT RUN` and `35 computed/fail + 1 invalid` statements above
+remain **historical observations of earlier installed wheels**; they do not
+describe the final corrected implementation. The separately retained
+independent Windows/Python 3.14.6 campaign used exact source
+`c7de1aba4969344f2e85ef0732aa45dee93201a9` and the installed wheel
+SHA-256
+`6f43d66e7fdb80faa1dc678a35c44dcdff2144eacacdba573d09d86331f94dd0`.
+
+- All **65** original catalogue case IDs and manifest/input fingerprints
+  were checked, as were all **1,026** indexed source files before/after.
+- The S5 suite classified **36 computed/fail, 29 incomplete, 0 pass,
+  0 invalid, 0 unsupported**. The 29 incomplete retain 25 unreviewed,
+  three expected native-failure and one incomplete capture classifications.
+- **1,498/16,836** ordinates were within the unchanged frozen budget.
+  Maximum absolute error: **0.3574415134574167 m³/s**; all native and Python
+  raw ordinate/time tokens and predictions matched the previous API exactly.
+  Four narrow linear controls continued to pass.
+- The one exact-source `0.125 h` / displayed `0.12 h` case transitioned
+  from erroneously invalid to **computed/fail**. The strict S2 discharge
+  budget was neither relaxed nor refitted.
+- The original 201-row baseline remains **11/201** in budget, first
+  failure **11**, maximum error **0.22707848694007993 m³/s**.
+  **All 36** HydNNN associations remain caller asserted despite recorded
+  code-7 labels. Rainfall/excess and native physical water-balance equivalence
+  are not established.
+- Original long-form rows, complete 65-case table and source hashes remain
+  in the **private** investigations branch; no raw model inputs, path-specific
+  evidence or native executables were published or launched.
+
+The later PR #58 reconciliations through
+`4fbfe7541f2154a5e7ade88e823690db0f6c8503`
+modify documentation relative to the exact validated `c7de1aba` code,
+not numerical Python source or the frozen acceptance evaluator.
+[Exact-head public Windows quality #43552194119](https://github.com/Chain-Frost/python-runoff-routing/actions/runs/43552194119)
+passed **692** non-native tests, pinned Ruff, strict Pyright and external
+installed-wheel import. It is a source-quality check, **not** a new native
+replay on that wheel.
+
+**Next action:** independent **software review and owner-approved
+implementation-only disposition** of draft PR #58. Keep S2 #4, S5 #7 and
+S5-P2 #51 open for numerical and source/profile coverage; separately verify
+physical print-site mapping, address 29 unrepresented/incomplete projects and
+investigate the 36 failed hydrographs. No broader numerical acceptance,
+new native execution, release, publication, licence change or tolerance edit.
