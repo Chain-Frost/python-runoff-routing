@@ -23,6 +23,7 @@ This is the current action list; the linked records below are historical, revisi
 
 | Work front | Status | Owner | Updated | Next review | Next action |
 | --- | --- | --- | --- | --- | --- |
+| [S6 R0/R1 timing/ARF precision audit](2026-11-14-s6-r0-r1-precision-audit.md) | Draft #56; predeclared coefficient/timing research only, native R1 numerical acceptance open | S6 | 2026-11-14 | Review recorded native R0/R1 evidence separately | Preserve raw unshifted time tokens, all original strict R1 failures and unmodified ARF precision; no routed parity claim. |
 | [S6 RORBwin controlled loss candidate](2026-11-14-s6-controlled-loss-kernel.md) | Merged #54 at e341cdfb; opt-in implementation only; native numerical acceptance remains open | S6 | 2026-11-14 | Native source/effective-input review | Preserve original R0–R7 evidence, 7 strict residuals and Coastal unverified status; no default method replacement. |
 | [S2 onset-relative diagnostic](2026-11-12-s2-onset-audit.md) | Merged successor #60 from #46, exact-head Windows CI passed; 35/36 historical onset audit retained; numerical S2 unaccepted | S2 | 2026-11-14 | Separate native S2 diagnostics | Preserve unshifted CMD/GUI raw labels and the frozen original print budget; keep #4 open. |
 | [Public PR reconciliation review](2026-11-14-pr-backlog-disposition.md) | Merged #57; historical #14/#18/#21/#34/#46 closed unmerged after source/test/doc preservation | Unassigned | 2026-11-14 | Check remaining active scientific PRs | Keep #54/#56 rainfall and #58 S5 separate; do not infer native acceptance. |
