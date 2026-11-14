@@ -39,6 +39,6 @@ Run the example from the checkout root after installing the package. This checks
 
 ## Navigation and data controls
 
-- [Documentation index](docs/README.md), [implementation roadmap](docs/IMPLEMENTATION_PLAN.md), [development guide](docs/DEVELOPMENT.md), [source register](docs/SOURCES.md).
+- [Documentation index](docs/README.md), [S6 detailed capability and native gates](docs/ARR_S6_INTEGRATION.md), [implementation roadmap](docs/IMPLEMENTATION_PLAN.md), [development guide](docs/DEVELOPMENT.md), [source register](docs/SOURCES.md).
 - Preserve original effective inputs, native clock labels, engine identities and frozen tolerances. Public code uses the strict mathematical reference backend. A separate **private, opt-in experimental CMD-compatible** mode is under investigation and is neither merged here nor numerically accepted.
 - Do not commit private raw captures, local paths, native executables, manuals, client models or unapproved input datasets. Keep unapproved local material in ignored `.local/`. TOML, publication and releases remain deferred and require separate owner decisions. This project is not endorsed by RORB's authors or custodians.

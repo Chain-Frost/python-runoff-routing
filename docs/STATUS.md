@@ -1,6 +1,6 @@
 # Current capability and acceptance status
 
-**Snapshot: 14 November 2026; public `main` `f9ae827f` (including S6-P0–P3 source/method merges).** This is the authoritative **current implementation and stage-status matrix**, not a replacement for [compatibility](COMPATIBILITY.md), [regression](REGRESSION.md), historical [work records](work/README.md), or stage exit criteria in the [roadmap](IMPLEMENTATION_PLAN.md). Recheck PR/issue states after this snapshot. A feature can be implemented and synthetically tested without having passed its native gate. `main` excludes all open draft branches.
+**Snapshot: 14 November 2026; public `main` `4194b3c5` (S6-P0–P3 merged; latest documentation reconciliation included).** This is the authoritative **current implementation and stage-status matrix**, not a replacement for [compatibility](COMPATIBILITY.md), [regression](REGRESSION.md), historical [work records](work/README.md), or stage exit criteria in the [roadmap](IMPLEMENTATION_PLAN.md). Recheck PR/issue states after this snapshot. A feature can be implemented and synthetically tested without having passed its native gate. `main` excludes all open draft branches.
 
 | Stage | Public implementation / merge | Synthetic or offline validation | Native reference acceptance |
 | --- | --- | --- | --- |
