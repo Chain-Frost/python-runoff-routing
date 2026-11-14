@@ -1,6 +1,6 @@
 # Compatibility contract
 
-Source references R1-R6 are defined in [SOURCES.md](SOURCES.md). S0 capture and restricted S1 CMD inspection, typed readers/writers and code-7 repair are implemented on main. S2 routing/integration are unmerged drafts; **no RORB numerical stage is accepted**. A limited CMD 6.44 and GUI 6.52 native baseline was captured ([S0 record](work/2026-11-11-s0-native.md)). This is still an investigation and acceptance contract, not proof of full compatibility.
+Source references R1-R6 are defined in [SOURCES.md](SOURCES.md). S0 capture and restricted S1 CMD inspection, typed readers/writers and code-7 repair are implemented on main. Bounded Python-only S2 reach/single-storm routing and S1/S2 typed integration are implemented on `main` following [PR #23](https://github.com/Chain-Frost/python-runoff-routing/pull/23); **no RORB numerical stage is accepted**. The 36 computed CMD whole-catchment profiles still exceed their frozen printed-precision budgets. A limited CMD 6.44 and GUI 6.52 native baseline was captured ([S0 record](work/2026-11-11-s0-native.md)). This is still an investigation and acceptance contract, not proof of full compatibility.
 
 ## Separate reference identities
 
@@ -35,9 +35,10 @@ Maintain field-level mapping for catchment area, reaches, pluviographs, bursts, 
 
 ## Numerical conventions to characterise
 
-The [experimental RORBwin 6.52 loss profile](EXPERIMENTAL_RORBWIN_652_LOSSES.md) is separately selected
-and has bounded crossing-rule observations. It does not replace the default ARR loss method or
-establish complete native precision/timing acceptance.
+The [experimental RORBwin 6.52 full-increment loss profile](EXPERIMENTAL_RORBWIN_652_LOSSES.md)
+is a separately selected, bounded candidate. It does not replace the legacy ARR loss
+method or establish complete native CSV precision, timing or routed-flow acceptance.
+
 
 Record units at boundaries: rainfall/initial loss in mm, continuing loss in mm/h, areas in km2, reaches in km, flows in m3/s, storage in m3, time increment in hours and other legacy times in increments (R1 Table 5-1).
 

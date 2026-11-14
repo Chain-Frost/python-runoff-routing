@@ -294,3 +294,11 @@ def test_derived_ifd_cannot_be_given_arbitrary_scenario_metadata() -> None:
     with pytest.raises(ARRFormatError, match="Scenario IFDs"):
         replace(table, scenario_ssp="SSP5", scenario_year=2090)
     assert isinstance(table, IFDDataset)
+
+
+def test_arr_source_sha256_mismatch_rejected_on_typed_reconstruction() -> None:
+    """A forged provenance digest must not pass even when the byte length matches."""
+    document = parse_arr_json(_raw())
+    tampered_source = replace(document.source, sha256="0" * 64)
+    with pytest.raises(ARRFormatError, match="SHA-256"):
+        replace(document, source=tampered_source)

@@ -165,3 +165,24 @@ def test_source_region_duration_and_kind_must_match() -> None:
         select_arr2019_ensemble(
             _point(), region=REGION, catchment_area_km2=Decimal(50), duration_min=180, aep_percent=Decimal(1)
         )
+
+
+@pytest.mark.parametrize("override", [0, 1, 9, 11, 20, True])
+def test_expected_count_cannot_override_ten_member_policy(override: int) -> None:
+    """Allowing expected_count=1 would otherwise accept a partial regional ensemble."""
+    with pytest.raises(ARRFormatError, match="exactly ten"):
+        select_arr2019_ensemble(
+            _areal(count=1),
+            catchment_area_km2=Decimal(100),
+            duration_min=720,
+            aep_percent=Decimal(1),
+            region=REGION,
+            expected_count=override,
+        )
+
+
+def test_selection_rejects_out_of_range_duration_even_when_source_is_valid() -> None:
+    with pytest.raises(ARRFormatError, match=r"1\.\.10080"):
+        select_arr2019_ensemble(
+            _point(), catchment_area_km2=Decimal(50), duration_min=10081, aep_percent=Decimal(1), region=REGION
+        )
