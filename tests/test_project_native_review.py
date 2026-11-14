@@ -504,15 +504,11 @@ def test_offline_suite_tampering_unknown_keys_and_unmodified_inputs(tmp_path: Pa
 
 
 @pytest.mark.parametrize("printed_timestep", ["0.12", "0.13"])
-def test_native_rounded_timestep_remains_source_verified(
-    tmp_path: Path, printed_timestep: str
-) -> None:
+def test_native_rounded_timestep_remains_source_verified(tmp_path: Path, printed_timestep: str) -> None:
     """A 0.125-hour source can be displayed to two decimals without losing its identity."""
     root = tmp_path / "case"
     root.mkdir()
-    project, manifest, digest = _synthetic_case(
-        root, effective_timestep="0.125", printed_timestep=printed_timestep
-    )
+    project, manifest, digest = _synthetic_case(root, effective_timestep="0.125", printed_timestep=printed_timestep)
     checked = review_project_native_capture(
         project,
         manifest,
@@ -533,9 +529,7 @@ def test_native_rounded_timestep_remains_source_verified(
 
 
 def test_native_timestep_discrepancy_outside_header_precision_rejected(tmp_path: Path) -> None:
-    project, manifest, digest = _synthetic_case(
-        tmp_path, effective_timestep="0.125", printed_timestep="0.122"
-    )
+    project, manifest, digest = _synthetic_case(tmp_path, effective_timestep="0.125", printed_timestep="0.122")
     with pytest.raises(ProjectError, match="beyond its printed precision"):
         review_project_native_capture(
             project,
@@ -548,9 +542,7 @@ def test_native_timestep_discrepancy_outside_header_precision_rejected(tmp_path:
 
 
 def test_native_raw_clock_must_match_exact_source_timestep(tmp_path: Path) -> None:
-    project, manifest, _ = _synthetic_case(
-        tmp_path, effective_timestep="0.125", printed_timestep="0.12"
-    )
+    project, manifest, _ = _synthetic_case(tmp_path, effective_timestep="0.125", printed_timestep="0.12")
     output = manifest.parent / "historic.out"
     text = output.read_text(encoding="utf-8")
     assert "1 0.12 " in text

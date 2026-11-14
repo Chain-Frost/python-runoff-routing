@@ -260,10 +260,7 @@ def _validate_printed_native_clocks(report: HydrographReport, source_step: Decim
         raise ProjectError(message)
     # For this CMD 6.44 profile, original Inc labels are 1..N+1
     # and raw times print Inc * exact effective h. No time shifting.
-    if any(
-        not _within_reported_print_precision(row.time_hours, source_step * row.increment)
-        for row in report.rows
-    ):
+    if any(not _within_reported_print_precision(row.time_hours, source_step * row.increment) for row in report.rows):
         message = "Native raw time labels differ from exact S1 timestep beyond their printed precision"
         raise ProjectError(message)
 
