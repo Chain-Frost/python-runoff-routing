@@ -41,6 +41,18 @@
 - [CMD scalar timestep storage comparator review](2026-11-15-cmd-scalar-time-storage.md) — bounded original reference binary32/p53 clock binding; distinguish historical concern from later merged #135 comparator review.
 - [Current programme documentation reconciliation](2026-11-15-programme-current-reconciliation.md) — #1/#5 current owner map and evidence separation; original historical receipts remain dated.
 
+## Planning receipts
+
+- [RORB Monte Carlo method compatibility and larger-sample study scopes](2026-11-17-issue9-rorb-statistical-method-scopes.md) — current #150/#189/#190/#191/#148 handoffs; all target draft #151, with existing routing reused and no main merge.
+
+- [Monte Carlo #9 decomposition and statistical research plan](2026-11-15-issue9-scoping.md) — #145–#150 and the initial method note; no MC code, simulation results or native qualification claimed.
+
+- [#145 Monte Carlo statistical method and source review](2026-11-15-issue145-mc-statistical-method.md) — versioned probability, loss, mass, replay and B/C/E handoff; #150 native gaps remain open.
+
+- [#148 independent-seed simulation-budget convergence research](2026-11-15-issue148-convergence.md) — exact synthetic controls, negative and positive 100-seed confirmation, and separately pending real-catchment qualification.
+
+- [#150 finite local Windows RORBwin Monte Carlo evidence handoff](2026-11-16-issue150-local-windows-native-handoff.md) — native 6.52 executable fingerprint and bounded F1–F6 field observations; no unapproved raw outputs and no scientific acceptance implied.
+
 ## Retained diagnostic/reference evidence
 - [Four original CMD profile admission decisions](2026-11-15-four-profile-admission-review.md) — original native IL/RoC and m-boundary profiles; source/wheel printed-Q study, honest pending scalar and physical-site acceptance.
 
@@ -51,3 +63,7 @@
 - [Source-level primary decision record](2026-11-11-computational-reference-guidance.md) and [historical parser/source verification](2026-11-11-s1-code7-serialization.md).
 
 Other retained dated records describe the exact historical source, experiment and constraints they were written for. They **do not** reopen obsolete PRs, replace the single CMD feature matrix or require the private workspace for product use. Unneeded first-agent handoffs, obsolete status snapshots and the former ten-PR backlog matrix were removed from the active tree and remain in ordinary Git history.
+
+- [Monte Carlo weighted peak-frequency result layer](2026-11-15-mc-weighted-frequency.md) — #147 staged statistical software and independent control handoff; not native flood-AEP acceptance.
+
+- [Windows issue #150 native observation and cap-deviation receipt](2026-11-16-issue150-windows-native-receipt.md) - authenticated 6.52; incomplete F1-F6 and stopped native execution, separate from staged software acceptance.

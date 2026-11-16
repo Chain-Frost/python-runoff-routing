@@ -1,0 +1,136 @@
+{
+  "schema_version": "mc150-analytic-reference-v1",
+  "evidence_kind": "independently_authored_exact_rational_synthetic_controls_not_native",
+  "exceedance_convention": "P(Q > threshold)",
+  "interpolation_status": "step-quantile examples only; no production interpolation policy is adopted",
+  "cases": [
+    {
+      "case_id": "Q01-unequal-strata-zero-and-ties",
+      "strata": [
+        {
+          "stratum_id": "dry",
+          "mass": "1/4",
+          "events": [
+            {"sample_id": "dry-a", "status": "valid", "q_m3s": "0"},
+            {"sample_id": "dry-b", "status": "valid", "q_m3s": "0"}
+          ]
+        },
+        {
+          "stratum_id": "wet",
+          "mass": "3/4",
+          "events": [
+            {"sample_id": "wet-x", "status": "valid", "q_m3s": "10"},
+            {"sample_id": "wet-y", "status": "valid", "q_m3s": "20"},
+            {"sample_id": "wet-z", "status": "valid", "q_m3s": "20"}
+          ]
+        }
+      ],
+      "unmodelled_tails": {},
+      "threshold_checks": [
+        {"threshold_m3s": "-1", "gt_lower": "1", "gt_upper": "1", "equal_mass": "0"},
+        {"threshold_m3s": "0", "gt_lower": "3/4", "gt_upper": "3/4", "equal_mass": "1/4"},
+        {"threshold_m3s": "10", "gt_lower": "1/2", "gt_upper": "1/2", "equal_mass": "1/4"},
+        {"threshold_m3s": "20", "gt_lower": "0", "gt_upper": "0", "equal_mass": "1/2"}
+      ],
+      "step_quantiles": [
+        {"upper_tail_probability": "3/4", "quantile_m3s": "0"},
+        {"upper_tail_probability": "1/2", "quantile_m3s": "10"},
+        {"upper_tail_probability": "1/4", "quantile_m3s": "20"}
+      ]
+    },
+    {
+      "case_id": "Q02-failure-missing-are-not-dry",
+      "strata": [
+        {
+          "stratum_id": "west",
+          "mass": "1/2",
+          "events": [
+            {"sample_id": "west-valid", "status": "valid", "q_m3s": "5"},
+            {"sample_id": "west-failure", "status": "failed", "q_m3s": null}
+          ]
+        },
+        {
+          "stratum_id": "east",
+          "mass": "1/2",
+          "events": [
+            {"sample_id": "east-zero", "status": "valid", "q_m3s": "0"},
+            {"sample_id": "east-small", "status": "valid", "q_m3s": "2"},
+            {"sample_id": "east-large", "status": "valid", "q_m3s": "8"},
+            {"sample_id": "east-missing", "status": "missing", "q_m3s": null}
+          ]
+        }
+      ],
+      "unmodelled_tails": {},
+      "threshold_checks": [
+        {"threshold_m3s": "0", "gt_lower": "1/2", "gt_upper": "7/8", "equal_mass": "1/8"},
+        {"threshold_m3s": "4", "gt_lower": "3/8", "gt_upper": "3/4", "equal_mass": "0"},
+        {"threshold_m3s": "8", "gt_lower": "0", "gt_upper": "3/8", "equal_mass": "1/8"}
+      ]
+    },
+    {
+      "case_id": "Q03-unmodelled-probability-tails",
+      "strata": [
+        {
+          "stratum_id": "interior",
+          "mass": "1/2",
+          "events": [
+            {"sample_id": "inside-1", "status": "valid", "q_m3s": "1"},
+            {"sample_id": "inside-2", "status": "valid", "q_m3s": "3"}
+          ]
+        }
+      ],
+      "unmodelled_tails": {"frequent": "1/5", "rare": "3/10"},
+      "threshold_checks": [
+        {"threshold_m3s": "0", "gt_lower": "1/2", "gt_upper": "1", "equal_mass": "0"},
+        {"threshold_m3s": "2", "gt_lower": "1/4", "gt_upper": "3/4", "equal_mass": "0"},
+        {"threshold_m3s": "3", "gt_lower": "0", "gt_upper": "1/2", "equal_mass": "1/4"}
+      ]
+    }
+  ],
+  "plan_extension": {
+    "original_revision": "synthetic-plan-v1",
+    "extended_revision": "synthetic-plan-v2",
+    "original_strata": [
+      {"stratum_id": "a", "mass": "1/5", "events": [
+        {"sample_id": "a0", "status": "valid", "q_m3s": "2"},
+        {"sample_id": "a1", "status": "valid", "q_m3s": "8"}
+      ]},
+      {"stratum_id": "b", "mass": "4/5", "events": [
+        {"sample_id": "b0", "status": "valid", "q_m3s": "4"},
+        {"sample_id": "b1", "status": "valid", "q_m3s": "10"}
+      ]}
+    ],
+    "extended_strata": [
+      {"stratum_id": "a", "mass": "1/5", "events": [
+        {"sample_id": "a0", "status": "valid", "q_m3s": "2"},
+        {"sample_id": "a1", "status": "valid", "q_m3s": "8"},
+        {"sample_id": "a2", "status": "valid", "q_m3s": "0"},
+        {"sample_id": "a3", "status": "valid", "q_m3s": "0"}
+      ]},
+      {"stratum_id": "b", "mass": "4/5", "events": [
+        {"sample_id": "b0", "status": "valid", "q_m3s": "4"},
+        {"sample_id": "b1", "status": "valid", "q_m3s": "10"}
+      ]}
+    ],
+    "threshold_m3s": "6",
+    "original_exceedance": "1/2",
+    "extended_exceedance": "9/20",
+    "original_a1_weight": "1/10",
+    "extended_a1_weight": "1/20"
+  },
+  "duration_envelope": {
+    "input_type": "precomputed_exact_step_flood_quantiles_not_event_sample_population",
+    "durations": [
+      {"site_id": "upstream", "duration_minutes": 60, "at_aep": {"1/20": "40", "1/100": "50"}},
+      {"site_id": "upstream", "duration_minutes": 120, "at_aep": {"1/20": "35", "1/100": "70"}},
+      {"site_id": "downstream", "duration_minutes": 60, "at_aep": {"1/20": "60", "1/100": "90"}},
+      {"site_id": "downstream", "duration_minutes": 120, "at_aep": {"1/20": "80", "1/100": "85"}}
+    ],
+    "expected": [
+      {"site_id": "upstream", "aep": "1/20", "max_q_m3s": "40", "critical_duration_minutes": 60},
+      {"site_id": "upstream", "aep": "1/100", "max_q_m3s": "70", "critical_duration_minutes": 120},
+      {"site_id": "downstream", "aep": "1/20", "max_q_m3s": "80", "critical_duration_minutes": 120},
+      {"site_id": "downstream", "aep": "1/100", "max_q_m3s": "90", "critical_duration_minutes": 60}
+    ]
+  }
+}

@@ -49,6 +49,11 @@ jobs:
           $publicDesignTests = (Resolve-Path 'tests/test_arr_design_batch.py').Path
           $publicSummaryTests = (Resolve-Path 'tests/test_arr_result_summary.py').Path
           $s5AcceptanceTests = (Resolve-Path 'tests/test_s5_workflow_acceptance.py').Path
+          $publicFrequencyTests = (Resolve-Path 'tests/test_monte_carlo_frequency.py').Path
+          $publicMCExecutionTests = (Resolve-Path 'tests/test_monte_carlo_execution.py').Path
+          $publicMCBridgeTests = (Resolve-Path 'tests/test_monte_carlo_bridge.py').Path
+          $publicMCIntegrationTests = (Resolve-Path 'tests/test_monte_carlo_integration.py').Path
+          $publicMCScientificTests = (Resolve-Path 'tests/test_monte_carlo_interval_contribution.py').Path
           $env:RUNOFF_ENGINE_EXAMPLE = (Resolve-Path 'examples/synthetic-run.json').Path
           $env:RUNOFF_ENGINE_WHEEL = $wheel
           Write-Host ("Wheel SHA-256: " + (Get-FileHash $wheel -Algorithm SHA256).Hash.ToLowerInvariant())
@@ -77,7 +82,11 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             python -m runoff_routing.regression_dataset preflight "$publicRegister" --set cmd-eligible --full-index
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-            python -m pytest "$publicNativeTests" "$publicDatasetTests" "$publicScalarTests" "$publicBatchTests" "$publicDesignTests" "$publicSummaryTests" "$s5AcceptanceTests" -q
+            python -m pytest "$publicNativeTests" "$publicDatasetTests" "$publicScalarTests" "$publicBatchTests" "$publicDesignTests" "$publicSummaryTests" "$s5AcceptanceTests" "$publicFrequencyTests" -q
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            # Source fixtures remain read-only; the package under test is this
+            # exact wheel installed in $target outside the source checkout.
+            python -m pytest "$publicMCExecutionTests" "$publicMCBridgeTests" "$publicMCIntegrationTests" "$publicMCScientificTests" -q
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             python -c "from decimal import Decimal; from runoff_routing.rorbwin_losses import calculate_rorbwin_652_excess; r=calculate_rorbwin_652_excess((Decimal(10),), timestep_min=60, initial_loss_mm=Decimal(0), continuing_loss_mm_per_hour=Decimal(0)); assert r.excess_increments_mm == (Decimal(10),); print('S6 experimental installed-wheel smoke OK')"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

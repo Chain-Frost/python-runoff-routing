@@ -1,0 +1,181 @@
+{
+  "examples": [
+    {
+      "aep": 0.2,
+      "duration": "short",
+      "exact_complete_population_quantile": 1.1107963839346797,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 1.1071963839346797,
+      "possible_quantile_upper": 1.1112891579234505,
+      "site": "steady_site",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    },
+    {
+      "aep": 0.1,
+      "duration": "short",
+      "exact_complete_population_quantile": 1.133687537158158,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 1.130087537158158,
+      "possible_quantile_upper": 1.1358866329270443,
+      "site": "steady_site",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    },
+    {
+      "aep": 0.05,
+      "duration": "short",
+      "exact_complete_population_quantile": 1.1498795105889403,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 1.1462795105889403,
+      "possible_quantile_upper": 1.1553221296109633,
+      "site": "steady_site",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    },
+    {
+      "aep": 0.02,
+      "duration": "short",
+      "exact_complete_population_quantile": 1.1648300910366078,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 1.1612300910366078,
+      "possible_quantile_upper": null,
+      "site": "steady_site",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    },
+    {
+      "aep": 0.2,
+      "duration": "long",
+      "exact_complete_population_quantile": 1.1039065219683941,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 1.100706521968394,
+      "possible_quantile_upper": 1.1044622972358473,
+      "site": "steady_site",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    },
+    {
+      "aep": 0.1,
+      "duration": "long",
+      "exact_complete_population_quantile": 1.125150225677542,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 1.121950225677542,
+      "possible_quantile_upper": 1.1273815353709744,
+      "site": "steady_site",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    },
+    {
+      "aep": 0.05,
+      "duration": "long",
+      "exact_complete_population_quantile": 1.1402868900845804,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 1.1370868900845803,
+      "possible_quantile_upper": 1.1454751068378237,
+      "site": "steady_site",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    },
+    {
+      "aep": 0.02,
+      "duration": "long",
+      "exact_complete_population_quantile": 1.154095455039633,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 1.1508954550396333,
+      "possible_quantile_upper": null,
+      "site": "steady_site",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    },
+    {
+      "aep": 0.2,
+      "duration": "short",
+      "exact_complete_population_quantile": 0.9901430032137082,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 0.987343003213708,
+      "possible_quantile_upper": 0.9906267320916271,
+      "site": "second_site",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    },
+    {
+      "aep": 0.1,
+      "duration": "short",
+      "exact_complete_population_quantile": 1.0086190696853397,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 1.0058190696853395,
+      "possible_quantile_upper": 1.010418080567156,
+      "site": "second_site",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    },
+    {
+      "aep": 0.05,
+      "duration": "short",
+      "exact_complete_population_quantile": 1.021591507183937,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 1.0187915071839369,
+      "possible_quantile_upper": 1.0263901665763995,
+      "site": "second_site",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    },
+    {
+      "aep": 0.02,
+      "duration": "short",
+      "exact_complete_population_quantile": 1.0345674828436224,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 1.0317674828436223,
+      "possible_quantile_upper": null,
+      "site": "second_site",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    },
+    {
+      "aep": 0.2,
+      "duration": "long",
+      "exact_complete_population_quantile": 0.9849285957074905,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 0.9813285957074904,
+      "possible_quantile_upper": 0.985523838296652,
+      "site": "second_site",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    },
+    {
+      "aep": 0.1,
+      "duration": "long",
+      "exact_complete_population_quantile": 1.0087416672838594,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 1.0051416672838593,
+      "possible_quantile_upper": 1.0112302880215562,
+      "site": "second_site",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    },
+    {
+      "aep": 0.05,
+      "duration": "long",
+      "exact_complete_population_quantile": 1.0256935119859327,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 1.0220935119859331,
+      "possible_quantile_upper": 1.0314500417362562,
+      "site": "second_site",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    },
+    {
+      "aep": 0.02,
+      "duration": "long",
+      "exact_complete_population_quantile": 1.0410625815928283,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 1.0374625815928282,
+      "possible_quantile_upper": null,
+      "site": "second_site",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    }
+  ],
+  "note": "Bounds assume unknown missing mass, not that the actual tail has zero flow."
+}

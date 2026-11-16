@@ -18,6 +18,7 @@ dependencies = [
 catg = ["pyromb @ git+https://github.com/phantom-branch/pyromb.git@8653babdb544d400775d754b409c1571e773f7bb"]
 
 dev = ["build", "pytest", "pyright", "ruff==0.16.6", "pyromb @ git+https://github.com/phantom-branch/pyromb.git@8653babdb544d400775d754b409c1571e773f7bb"]
+research = ["scipy>=1.15"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

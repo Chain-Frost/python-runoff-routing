@@ -1,0 +1,181 @@
+{
+  "examples": [
+    {
+      "aep": 0.2,
+      "duration": "short",
+      "exact_complete_population_quantile": 0.0,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 0.0,
+      "possible_quantile_upper": 0.0,
+      "site": "zero_atom",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    },
+    {
+      "aep": 0.1,
+      "duration": "short",
+      "exact_complete_population_quantile": 0.0,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 0.0,
+      "possible_quantile_upper": 0.0,
+      "site": "zero_atom",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    },
+    {
+      "aep": 0.05,
+      "duration": "short",
+      "exact_complete_population_quantile": 0.061308067479414585,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 0.04130806747941457,
+      "possible_quantile_upper": 0.09593104814470793,
+      "site": "zero_atom",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    },
+    {
+      "aep": 0.02,
+      "duration": "short",
+      "exact_complete_population_quantile": 0.151075560105502,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 0.13107556010550198,
+      "possible_quantile_upper": null,
+      "site": "zero_atom",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    },
+    {
+      "aep": 0.2,
+      "duration": "long",
+      "exact_complete_population_quantile": 0.0,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 0.0,
+      "possible_quantile_upper": 0.0,
+      "site": "zero_atom",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    },
+    {
+      "aep": 0.1,
+      "duration": "long",
+      "exact_complete_population_quantile": 0.0,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 0.0,
+      "possible_quantile_upper": 0.0,
+      "site": "zero_atom",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    },
+    {
+      "aep": 0.05,
+      "duration": "long",
+      "exact_complete_population_quantile": 0.06676847157204807,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 0.048768471572048055,
+      "possible_quantile_upper": 0.10019172682387728,
+      "site": "zero_atom",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    },
+    {
+      "aep": 0.02,
+      "duration": "long",
+      "exact_complete_population_quantile": 0.1511157216100411,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 0.1331157216100411,
+      "possible_quantile_upper": null,
+      "site": "zero_atom",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    },
+    {
+      "aep": 0.2,
+      "duration": "short",
+      "exact_complete_population_quantile": 0.5325,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 0.5085,
+      "possible_quantile_upper": 0.532540099596309,
+      "site": "near_tie",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    },
+    {
+      "aep": 0.1,
+      "duration": "short",
+      "exact_complete_population_quantile": 0.6651219754113837,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 0.6411219754113837,
+      "possible_quantile_upper": 0.6741257118460258,
+      "site": "near_tie",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    },
+    {
+      "aep": 0.05,
+      "duration": "short",
+      "exact_complete_population_quantile": 0.7569048933764961,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 0.7329048933764961,
+      "possible_quantile_upper": 0.7833296334084106,
+      "site": "near_tie",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    },
+    {
+      "aep": 0.02,
+      "duration": "short",
+      "exact_complete_population_quantile": 0.8395291385302779,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 0.8155291385302779,
+      "possible_quantile_upper": null,
+      "site": "near_tie",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    },
+    {
+      "aep": 0.2,
+      "duration": "long",
+      "exact_complete_population_quantile": 0.5359999999999998,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 0.5125999999999997,
+      "possible_quantile_upper": 0.536199832926386,
+      "site": "near_tie",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    },
+    {
+      "aep": 0.1,
+      "duration": "long",
+      "exact_complete_population_quantile": 0.6671386455818438,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 0.6437386455818437,
+      "possible_quantile_upper": 0.6764056255211814,
+      "site": "near_tie",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    },
+    {
+      "aep": 0.05,
+      "duration": "long",
+      "exact_complete_population_quantile": 0.7580448160577336,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 0.7346448160577335,
+      "possible_quantile_upper": 0.7847204151228451,
+      "site": "near_tie",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    },
+    {
+      "aep": 0.02,
+      "duration": "long",
+      "exact_complete_population_quantile": 0.8402117108518645,
+      "known_probability_mass": 0.98,
+      "possible_quantile_lower": 0.8168117108518644,
+      "possible_quantile_upper": null,
+      "site": "near_tie",
+      "status": "unresolved_missing_tail",
+      "unmodelled_upper_probability_mass": 0.02
+    }
+  ],
+  "note": "Bounds assume unknown missing mass, not that the actual tail has zero flow."
+}

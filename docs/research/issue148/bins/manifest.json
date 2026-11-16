@@ -1,0 +1,85 @@
+{
+  "absolute_tolerance": 0.002,
+  "bin_boundaries": "equal standard-normal coordinate -3.5 to +3.5; outer bins extended to U=0 and U=1",
+  "distinct_replicates_across_stages": true,
+  "events_per_duration_and_scenario": [
+    1000,
+    1000,
+    1000
+  ],
+  "failed_mass": 0.0,
+  "interpolation": "weighted nearest rank except linear sensitivity",
+  "missing_mass": 0.0,
+  "modelled_mass": 1.0,
+  "note": "Synthetic dimensionless study only; not RORB or a rainfall AEP-to-flow mapping acceptance",
+  "one_sided_confidence_study_setting": 0.95,
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "policy": "synthetic-response-v1/weighted-nearest-rank-v1",
+  "python": "3.13.5",
+  "relative_bands": [
+    0.01,
+    0.02,
+    0.05
+  ],
+  "replications_per_variant": 30,
+  "required_pass_probability_study_setting": 0.95,
+  "response_parameters": {
+    "near_tie": {
+      "long": {
+        "base": -0.225,
+        "loss_width": 0.4,
+        "slope": 1.17,
+        "tp_bump": 0.1
+      },
+      "short": {
+        "base": -0.25,
+        "loss_width": 0.4,
+        "slope": 1.2,
+        "tp_bump": 0.09
+      }
+    },
+    "zero_atom": {
+      "long": {
+        "base": -0.64,
+        "loss_width": 0.55,
+        "slope": 0.9,
+        "tp_bump": 0.1
+      },
+      "short": {
+        "base": -0.74,
+        "loss_width": 0.55,
+        "slope": 1.0,
+        "tp_bump": 0.12
+      }
+    }
+  },
+  "root_seed": 1482026,
+  "script_sha256": "e0d72e1d18aab896c6828636b1b66a37fa9dfa3fe012fb297d602ea683bc5e55",
+  "stage": "bins",
+  "stream_derivation": "SHA256(policy|root|stage|rep|duration|strata|n|tp_method|h) first 128 bits; MT19937 Python random.Random",
+  "total_evaluations": 180000,
+  "traced_peak_mib": 1.3819751739501953,
+  "variants": [
+    [
+      25,
+      40,
+      "random_tp",
+      "rank"
+    ],
+    [
+      50,
+      20,
+      "random_tp",
+      "rank"
+    ],
+    [
+      100,
+      10,
+      "random_tp",
+      "rank"
+    ]
+  ],
+  "wall_seconds": 2.6936532770000667,
+  "whole_result_outputs": "all 2 sites x 4 AEPs x (2 durations + duration envelope) = 24 estimates",
+  "zero_runoff": "retained"
+}

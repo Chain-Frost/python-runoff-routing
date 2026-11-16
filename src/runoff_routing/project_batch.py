@@ -389,15 +389,23 @@ def iter_project_events(
     selection_source: SelectionSource = "api_override",
     native_config: NativeConfiguration | None = None,
     wheel_artifact: Path | None = None,
+    _loaded_project: LoadedProject | None = None,
 ) -> Iterator[EngineOutcome]:
     """Execute requested events in order, with one result per input and no file-per-event.
 
     Source hashes and package/wheel attribution are verified once. The typed
     project source is unchanged; every event has an independent immutable model
     and numerical calculation. No solver or native engine is substituted.
+
+    _loaded_project is an internal-only trusted source snapshot for E's sealed
+    MC requests; it must be validated and identified before entering this
+    iterator, so routing cannot independently reopen a changed model.
     """
-    loaded = load_project(project_path)
+    loaded = load_project(project_path) if _loaded_project is None else _loaded_project
     effective = loaded.project.engine if selection is None else selection
+    if _loaded_project is not None and effective.engine == "rorb-cmd":
+        message = "An in-memory prepared project snapshot cannot be used for native rorb-cmd source files"
+        raise BatchConfigError(message)
     if selection_source not in ("api_override", "cli_override"):
         message = "selection_source must be api_override or cli_override"
         raise BatchConfigError(message)
@@ -600,6 +608,7 @@ def run_project_events(
     selection_source: SelectionSource = "api_override",
     native_config: NativeConfiguration | None = None,
     wheel_artifact: Path | None = None,
+    _loaded_project: LoadedProject | None = None,
 ) -> ProjectBatchReport:
     """Materialise the streaming results; never hide failed/unsupported events."""
     outcomes = tuple(
@@ -610,6 +619,7 @@ def run_project_events(
             selection_source=selection_source,
             native_config=native_config,
             wheel_artifact=wheel_artifact,
+            _loaded_project=_loaded_project,
         )
     )
     if not outcomes:

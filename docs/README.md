@@ -25,5 +25,7 @@
 
 ## Planning and historical evidence
 
+- [Monte Carlo statistical basis and work scopes](MONTE_CARLO.md) — #9; initial method/research plan, not an implemented or native-qualified capability.
+
 - [Implementation sequence](IMPLEMENTATION_PLAN.md), [work-record index](work/README.md), [reviewable PR template](../.github/pull_request_template.md).
 - Dated work records are **revision-specific history**, not current handoff instructions. Superseded handoffs and old status snapshots live in ordinary Git history instead of this navigation index. Original source hashes, clocks, accounting policies, analytical oracles and curated regression data are preserved separately from prose.
