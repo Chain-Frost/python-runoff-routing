@@ -200,6 +200,29 @@ def route_reach(
     h = store(hours) if hours is not None else 0.0
     peak = max(incoming[1:], default=0.0)
     budget = max(store(1e-8), safe64(peak * store(0.001)))
+    if geometry.length_km == 0.0:
+        if k != 0.0 or geometry.coefficient_seconds != 0.0:
+            message = "zero-length copy reach has nonzero routing coefficient"
+            raise UnsupportedNumericPath(message)
+        # Only terminal code 5 is admitted by the typed model. Native CMD
+        # evidence establishes exact full-horizon Q copy, including wet flow.
+        states = tuple(State(q, 0.0, 0.0) for q in incoming)
+        return ReachResult(
+            geometry.reach_id,
+            k,
+            geometry.coefficient_seconds,
+            seconds,
+            m,
+            membership,
+            incoming,
+            peak,
+            budget,
+            incoming,
+            (0.0,) * len(incoming),
+            states,
+            (),
+            False,
+        )
     if m == 1.0:
         states = _linear_states(incoming, k, h)
         return ReachResult(

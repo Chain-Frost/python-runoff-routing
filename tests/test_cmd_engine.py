@@ -30,6 +30,7 @@ from runoff_routing.rorb_model import (
     RunModel,
     SubArea,
     from_json,
+    to_json,
 )
 
 EXAMPLE = Path(__file__).parents[1] / "examples" / "synthetic-run.json"
@@ -128,6 +129,69 @@ def test_mode_two_equality_zero_and_coefficient_boundaries(
     outcome = run_engine_project(source)
     assert outcome.status == "computed_unvalidated"
     assert len(outcome.hydrographs[0].discharge_m3_s) == 6
+
+
+@pytest.mark.parametrize("exponent", ["1", "0.8"])
+def test_zero_length_terminal_code5_copies_positive_flow_at_two_physical_prints(tmp_path: Path, exponent: str) -> None:
+    """Python source/installed-wheel smoke, not a new native acceptance case."""
+    original = _model()
+    catchment = original.catchment
+    terminal = Reach("reach_2", Decimal(0), "terminal zero-length code 5")
+    model = replace(
+        original,
+        parameters=replace(
+            original.parameters,
+            routing=(replace(original.parameters.routing[0], m=Decimal(exponent)),),
+        ),
+        catchment=replace(
+            catchment,
+            reaches=(*catchment.reaches, terminal),
+            controls=(
+                catchment.controls[0],
+                catchment.controls[-1],
+                ControlStep(5, reach_id=terminal.identifier),
+                ControlStep(7, print_id="print_2"),
+            ),
+            print_locations=(*catchment.print_locations, PrintLocation("print_2", "terminal output")),
+        ),
+    )
+    assert from_json(to_json(model)) == model
+    path = _project(tmp_path, model, cmd_stored=True)
+    for engine in ("python-cmd", "python"):
+        result = run_engine_project(path, selection=EngineSelection.for_engine(engine))
+        assert result.status == "computed_unvalidated", result.diagnostics
+        assert result.requested_print_ids == ("print_1", "print_2")
+        assert len(result.hydrographs) == 2
+        first, terminal_print = (record.discharge_m3_s for record in result.hydrographs)
+        assert first == terminal_print
+        assert any(value > 0 for value in terminal_print)
+        assert result.native_parity_status == "not_assessed"
+        if engine == "python-cmd":
+            assert result.python_diagnostics is not None
+            reaches = cast("list[dict[str, object]]", result.python_diagnostics["reaches"])
+            assert len(reaches) == 2
+            assert reaches[-1]["zero_length_terminal_copy"] is True
+            assert reaches[-1]["coefficient_hours_stored"] == 0.0
+            assert reaches[-1]["S_m3_stored"] == (0.0,) * len(terminal_print)
+            assert reaches[-1]["Q_m3_s_stored"] == first
+
+
+def test_typed_model_rejects_nonterminal_zero_length_reach() -> None:
+    original = _model()
+    catchment = original.catchment
+    terminal = Reach("reach_2", Decimal(0))
+    with pytest.raises(ValueError, match="terminal code 5"):
+        replace(
+            catchment,
+            reaches=(*catchment.reaches, terminal),
+            controls=(
+                catchment.controls[0],
+                ControlStep(5, reach_id=terminal.identifier),
+                catchment.controls[-1],
+                ControlStep(7, print_id="print_2"),
+            ),
+            print_locations=(*catchment.print_locations, PrintLocation("print_2")),
+        )
 
 
 def test_mode_two_dry_event_and_no_crossing(tmp_path: Path) -> None:

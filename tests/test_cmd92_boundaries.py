@@ -95,10 +95,9 @@ def test_positive_exponents_execute_complete_events_on_both_selected_engines(tmp
             assert reaches[0]["linear_routing"] is (exponent == "1")
 
 
-@pytest.mark.parametrize("length", [Decimal(0), Decimal(-1)])
-def test_nonpositive_reaches_rejected_by_s1_without_guessing_native_outcome(length: Decimal) -> None:
-    with pytest.raises(ValueError, match="positive"):
-        Reach("bad", length)
+def test_negative_reaches_still_rejected_by_s1_without_guessing_native_outcome() -> None:
+    with pytest.raises(ValueError, match="nonnegative"):
+        Reach("bad", Decimal(-1))
 
 
 def test_zero_m_is_rejected_at_typed_domain_not_silently_routed() -> None:

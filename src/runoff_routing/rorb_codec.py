@@ -452,8 +452,8 @@ def parse_catg(data: bytes) -> ParsedDocument[CatchmentModel]:  # noqa: C901 -- 
                 length_token = parts[1]
                 label = parts[3] if len(parts) == 4 else ""
             length = _number(length_token, line_no)
-            if length <= 0:
-                message = "Natural reach length must be positive"
+            if length < 0:
+                message = "Natural reach length must be nonnegative"
                 raise _problem(message, line_no)
             reach_id = f"reach_{len(reaches) + 1}"
             reaches.append(Reach(reach_id, length, label))

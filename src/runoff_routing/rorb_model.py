@@ -241,7 +241,8 @@ class Reach:
 
     def __post_init__(self) -> None:
         _identity(self.identifier, "Reach")
-        _finite(self.length_km, "natural reach length", positive=True)
+        # A zero-length reach is valid only in the terminal code-5 copy form.
+        _finite(self.length_km, "natural reach length")
 
 
 @dataclass(frozen=True, slots=True)
@@ -313,6 +314,16 @@ def validate_catchment(model: CatchmentModel) -> None:  # noqa: C901 -- explicit
         raise ValueError(message)
     if any(step.code == 2 for step in model.controls) and model.reach_mode != "explicit_reach_types":
         message = "Source control code 2 requires an explicitly characterised reach encoding"
+        raise ValueError(message)
+    zero_reaches = {reach.identifier for reach in model.reaches if reach.length_km == 0}
+    if zero_reaches and (
+        len(zero_reaches) != 1
+        or len(model.controls) < 2
+        or model.controls[-2].code != 5
+        or model.controls[-2].reach_id != model.reaches[-1].identifier
+        or zero_reaches != {model.reaches[-1].identifier}
+    ):
+        message = "Zero-length natural reach is supported only as terminal code 5 before the final code-7 print"
         raise ValueError(message)
     _distinct(tuple(area.identifier for area in model.subareas), "subarea")
     _distinct(tuple(reach.identifier for reach in model.reaches), "reach")

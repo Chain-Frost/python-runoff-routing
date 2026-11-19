@@ -208,8 +208,13 @@ def _validated_solver_inputs(model: RunModel) -> tuple[Catchment, Storm, Losses,
         raise error from exc
     for index, value in enumerate(payload.areas_km2, start=1):
         _checked_positive(value, f"Subarea {index} area", "catchment")
-    for command in payload.controls:
+    for index, command in enumerate(payload.controls):
         if command[0] in (1, 2, 5):
+            if index == len(payload.controls) - 2 and command[0] == 5 and command[1] == 0.0:
+                # The typed model admits only this terminal zero-length copy.
+                # Never promote a positive Decimal rounded to zero: to_s2_payload
+                # rejects such underflow before this boundary.
+                continue
             _checked_positive(command[1], "Natural reach length", "catchment")
     _checked_positive(payload.timestep_hours, "Storm timestep", "storm")
     _checked_positive(payload.kc, "Routing kc", "parameters")

@@ -240,6 +240,7 @@ def run_cmd_model(
                 "historical_model_targets_and_separate_native_views": target_views,
                 "iteration_counts": tuple(len(step.candidates) for step in reach.steps),
                 "linear_routing": reach.is_linear,
+                "zero_length_terminal_copy": loaded.run.catchment.reaches[len(per_reach)].length_km == 0,
             }
         )
     source_ids = tuple(item.identifier for item in loaded.run.catchment.subareas)
