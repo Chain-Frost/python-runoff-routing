@@ -110,6 +110,80 @@ def test_invalid_source_rejected(needle: str, replacement: str, message: str) ->
         parse_bom_ifd_csv(_csv().replace(needle.encode(), replacement.encode()))
 
 
+_METADATA_RECORDS = (
+    b"Issued:,12 November 2026",
+    b"Location Label:,SYNTHETIC EXAMPLE ONLY",
+    b"Requested coordinate:,Latitude,-33.5,Longitude,115.25",
+    b"Nearest grid cell:,Latitude,33.5125 (S),Longitude,115.2375 (E)",
+)
+
+
+@pytest.mark.parametrize("record", _METADATA_RECORDS)
+@pytest.mark.parametrize("padding", [b",", b",,", b",  ,\t"])
+def test_metadata_padding_accepts_only_empty_trailing_cells(record: bytes, padding: bytes) -> None:
+    raw = _csv()
+    assert raw.count(record + b"\r\n") == 1
+    padded = raw.replace(record + b"\r\n", record + padding + b"\r\n", 1)
+    original = parse_bom_ifd_csv(raw)
+    parsed = parse_bom_ifd_csv(padded)
+
+    assert parsed.raw_bytes == padded
+    assert parsed.sha256 == hashlib.sha256(padded).hexdigest()
+    assert tuple((record + padding).decode().split(",")) in parsed.raw_preamble
+    assert replace(parsed, raw_bytes=raw, sha256=original.sha256, raw_preamble=original.raw_preamble) == original
+
+
+@pytest.mark.parametrize("record", _METADATA_RECORDS)
+def test_metadata_padding_rejects_nonempty_extra_fields(record: bytes) -> None:
+    raw = _csv()
+    padded = raw.replace(record + b"\r\n", record + b",,UNEXPECTED\r\n", 1)
+    with pytest.raises(ARRFormatError, match="Malformed BoM"):
+        parse_bom_ifd_csv(padded)
+
+
+@pytest.mark.parametrize(
+    ("record", "replacement", "message"),
+    [
+        (
+            b"Requested coordinate:,Latitude,-33.5,Longitude,115.25",
+            b"Requested coordinate:,Lat,-33.5,Longitude,115.25,,",
+            "Malformed BoM requested coordinate",
+        ),
+        (
+            b"Requested coordinate:,Latitude,-33.5,Longitude,115.25",
+            b"Requested coordinate:,Latitude,-33.5,Longitude,,,",
+            "Invalid signed coordinate",
+        ),
+        (
+            b"Nearest grid cell:,Latitude,33.5125 (S),Longitude,115.2375 (E)",
+            b"Nearest grid cell:,Latitude,33.5125 (S),Lon,115.2375 (E),,",
+            "Malformed BoM nearest grid cell",
+        ),
+        (
+            b"Nearest grid cell:,Latitude,33.5125 (S),Longitude,115.2375 (E)",
+            b"Nearest grid cell:,Latitude,33.5125 (S),Longitude,115.2375 (S),,",
+            "hemisphere",
+        ),
+    ],
+)
+def test_padded_coordinates_still_validate_fields(record: bytes, replacement: bytes, message: str) -> None:
+    raw = _csv()
+    with pytest.raises(ARRFormatError, match=message):
+        parse_bom_ifd_csv(raw.replace(record, replacement, 1))
+
+
+def test_preamble_padding_does_not_relax_probability_or_matrix_width() -> None:
+    raw = _csv().replace(
+        b"Requested coordinate:,Latitude,-33.5,Longitude,115.25\r\n",
+        b"Requested coordinate:,Latitude,-33.5,Longitude,115.25,,\r\n",
+        1,
+    )
+    with pytest.raises(ARRFormatError, match="Blank BoM probability column label"):
+        parse_bom_ifd_csv(raw.replace(b"63.2%,50%,1%\r\n", b"63.2%,50%,1%,\r\n", 1))
+    with pytest.raises(ARRFormatError, match="Ragged BoM matrix"):
+        parse_bom_ifd_csv(raw.replace(b"1 min,1,5.0,6.0,11.5\r\n", b"1 min,1,5.0,6.0,11.5,\r\n", 1))
+
+
 def test_extended_duplicate_probability_rejected() -> None:
     raw = _csv(all_design=True).replace(b"0.5EY", b"12EY")
     with pytest.raises(ARRFormatError, match="Duplicate"):

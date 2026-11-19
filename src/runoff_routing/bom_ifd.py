@@ -265,28 +265,30 @@ def _metadata(
         if not row:
             continue
         key = row[0].strip().lower().rstrip(":")
-        if key == "issued" and len(row) == 2:
-            issued = row[1].strip()
-        elif key == "location label" and len(row) == 2:
-            label = row[1].strip()
-        elif (
-            key == "requested coordinate"
-            and len(row) == 5
-            and row[1].strip().lower() == "latitude"
-            and row[3].strip().lower() == "longitude"
-        ):
-            latitude = _signed_decimal(row[2], "latitude")
-            longitude = _signed_decimal(row[4], "longitude")
-        elif (
-            key == "nearest grid cell"
-            and len(row) == 5
-            and row[1].strip().lower() == "latitude"
-            and row[3].strip().lower() == "longitude"
-        ):
-            nearest_latitude = _coordinate(row[2], longitude=False)
-            nearest_longitude = _coordinate(row[4], longitude=True)
-        elif key in {"requested coordinate", "nearest grid cell"}:
+        if key not in {"issued", "location label", "requested coordinate", "nearest grid cell"}:
+            continue
+
+        # BoM CSV exports may pad preamble records to the rainfall table width.
+        # Ignore only empty trailing cells, retaining the complete raw source.
+        expected = 5 if key in {"requested coordinate", "nearest grid cell"} else 2
+        if len(row) < expected or any(cell.strip() for cell in row[expected:]):
             _invalid(f"Malformed BoM {key} metadata row")
+        fields = row[:expected]
+
+        if key in {"requested coordinate", "nearest grid cell"} and (
+            fields[1].strip().lower() != "latitude" or fields[3].strip().lower() != "longitude"
+        ):
+            _invalid(f"Malformed BoM {key} metadata row")
+        if key == "issued":
+            issued = fields[1].strip()
+        elif key == "location label":
+            label = fields[1].strip()
+        elif key == "requested coordinate":
+            latitude = _signed_decimal(fields[2], "latitude")
+            longitude = _signed_decimal(fields[4], "longitude")
+        else:
+            nearest_latitude = _coordinate(fields[2], longitude=False)
+            nearest_longitude = _coordinate(fields[4], longitude=True)
     return issued, label, latitude, longitude, nearest_latitude, nearest_longitude
 
 
