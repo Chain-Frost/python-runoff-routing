@@ -246,8 +246,8 @@ _GRAPHICAL_645_SECTIONS = (
 def _validate_graphical_645(header: tuple[str, ...]) -> None:
     """Recognise the original 6.45 *header only*; no numerical source inference."""
     markers = tuple(line.strip()[2:] for line in header if line.strip().startswith("C #"))
-    if len(markers) != len(_GRAPHICAL_645_SECTIONS) or set(markers) != set(_GRAPHICAL_645_SECTIONS):
-        message = "Unknown, missing or repeated RORB_GE 6.45 graphical section"
+    if markers != _GRAPHICAL_645_SECTIONS:
+        message = "Unknown, reordered, missing or repeated RORB_GE 6.45 graphical section"
         raise _problem(message, unsupported=True)
     for section in _GRAPHICAL_645_SECTIONS[:3]:
         indices = [index for index, line in enumerate(header) if line.strip() == f"C {section}"]
@@ -323,6 +323,7 @@ def _graphic_entity_rows(
         len(header) - 1,
     )
     rows: list[tuple[int, tuple[str, ...]]] = []
+    reach_coordinate_components = 0
     for i in range(marker + 2, end):
         line = header[i].strip()
         if not line or line == "C":
@@ -331,13 +332,24 @@ def _graphic_entity_rows(
         # Reach geometry has separate single-coordinate continuation lines;
         # these are retained raw but do not represent another reach.
         if section == "#REACHES" and len(tokens) == 2 and tokens[0] == "C":
+            if not rows:
+                message = "Graphical reach coordinate precedes its reach record"
+                raise _problem(message, i + 1)
             _number(tokens[1], i + 1)
+            reach_coordinate_components += 1
             continue
         if len(tokens) < columns or tokens[0] != "C":
             message = f"Uncharacterised {section} graphical record"
             raise _problem(message, i + 1, unsupported=True)
+        if section == "#REACHES" and reach_coordinate_components % 2:
+            message = "Graphical reach coordinate continuations need complete x/y pairs"
+            raise _problem(message, i + 1)
         _integer(tokens[1], i + 1, minimum=1)
         rows.append((i + 1, tokens))
+        reach_coordinate_components = 0
+    if section == "#REACHES" and reach_coordinate_components % 2:
+        message = "Graphical reach coordinate continuations need complete x/y pairs"
+        raise _problem(message, end)
     if len(rows) != count or tuple(_integer(tokens[1], line, minimum=1) for line, tokens in rows) != tuple(
         range(1, count + 1)
     ):

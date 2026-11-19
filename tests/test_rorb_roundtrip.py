@@ -468,6 +468,67 @@ def test_graphical_645_background_asset_payload_is_not_assumed_harmless(payload:
     assert caught.value.status == "unsupported"
 
 
+
+def test_graphical_645_characterised_section_order_is_not_interchangeable() -> None:
+    """Two empty comment sections still cannot masquerade as swapped native layout."""
+    original, _register = _registered_pyromb_originals()
+    source = original.decode("utf-8").replace("\r\n", "\n")
+    assert "C #FILE COMMENTS" in source
+    assert "C #SUB-AREA AREA COMMENTS" in source
+    changed = source.replace("C #FILE COMMENTS", "C #TEMP COMMENT", 1)
+    changed = changed.replace("C #SUB-AREA AREA COMMENTS", "C #FILE COMMENTS", 1)
+    changed = changed.replace("C #TEMP COMMENT", "C #SUB-AREA AREA COMMENTS", 1)
+    assert changed != source
+    with pytest.raises(FormatProblem, match="reordered") as caught:
+        parse_catg(changed.encode())
+    assert caught.value.status == "unsupported"
+
+
+def test_graphical_645_extended_reach_coordinates_preserve_computational_order() -> None:
+    """Four x/y coordinate components after one reach are still display-only."""
+    original, _register = _registered_pyromb_originals()
+    source = original.decode("utf-8").replace("\r\n", "\n")
+    before = "C          20.500\nC          13.750\n"
+    assert before in source
+    changed = source.replace(before, before + "C 30.0\nC 40.0\n", 1).encode()
+    parsed = parse_catg(changed)
+    assert parsed.model == parse_catg(original).model
+    assert parsed.source.data == changed
+    assert parsed.source.sha256 == hashlib.sha256(changed).hexdigest()
+    assert parse_bytes(changed, ".cat").model == parsed.model
+
+
+@pytest.mark.parametrize(
+    ("where", "reason"),
+    [
+        ("precedes", "precedes its reach record"),
+        ("odd_at_next_reach", "complete x/y pairs"),
+        ("odd_at_end", "complete x/y pairs"),
+    ],
+)
+def test_graphical_645_dangling_reach_coordinates_reject_without_guessing(
+    where: str, reason: str
+) -> None:
+    original, _register = _registered_pyromb_originals()
+    source = original.decode("utf-8").replace("\r\n", "\n")
+    if where == "precedes":
+        before = "C #REACHES\nC      7\n"
+        assert before in source
+        changed = source.replace(before, before + "C 999.0\n", 1)
+    elif where == "odd_at_next_reach":
+        before = "C          20.500\nC          13.750\n"
+        assert before in source
+        changed = source.replace(before, before + "C 30.0\n", 1)
+    else:
+        before = "C          83.500\nC          47.500\n"
+        assert before in source
+        changed = source.replace(before, before + "C 30.0\n", 1)
+    assert changed != source
+    with pytest.raises(FormatProblem, match=reason) as caught:
+        parse_catg(changed.encode())
+    assert caught.value.status == "invalid"
+
+
 @pytest.mark.parametrize(
     ("before", "after", "status"),
     [
