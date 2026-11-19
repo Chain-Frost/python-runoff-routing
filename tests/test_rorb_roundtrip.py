@@ -468,7 +468,6 @@ def test_graphical_645_background_asset_payload_is_not_assumed_harmless(payload:
     assert caught.value.status == "unsupported"
 
 
-
 def test_graphical_645_characterised_section_order_is_not_interchangeable() -> None:
     """Two empty comment sections still cannot masquerade as swapped native layout."""
     original, _register = _registered_pyromb_originals()
@@ -506,9 +505,7 @@ def test_graphical_645_extended_reach_coordinates_preserve_computational_order()
         ("odd_at_end", "complete x/y pairs"),
     ],
 )
-def test_graphical_645_dangling_reach_coordinates_reject_without_guessing(
-    where: str, reason: str
-) -> None:
+def test_graphical_645_dangling_reach_coordinates_reject_without_guessing(where: str, reason: str) -> None:
     original, _register = _registered_pyromb_originals()
     source = original.decode("utf-8").replace("\r\n", "\n")
     if where == "precedes":
