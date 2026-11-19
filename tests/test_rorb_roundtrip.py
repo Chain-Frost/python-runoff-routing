@@ -439,6 +439,35 @@ def test_graphical_645_padded_section_marker_is_accepted_without_traceback(secti
     assert parse_bytes(changed, ".catg").model == parsed.model
 
 
+def test_graphical_645_background_image_flag_is_noncomputational_without_asset_payload() -> None:
+    """Admit only the image-section flag, retaining the exact source."""
+    original, _register = _registered_pyromb_originals()
+    source = original.decode("utf-8").replace("\r\n", "\n")
+    altered = source.replace("C #BACKGROUND IMAGE\nC  T  F", "C #BACKGROUND IMAGE\nC  T  T")
+    assert altered != source
+    raw = altered.encode("utf-8")
+    parsed = parse_catg(raw)
+    assert parsed.model == parse_catg(original).model
+    assert original_bytes(parsed) == raw
+    assert parsed.source.sha256 == hashlib.sha256(raw).hexdigest()
+    assert any(item == "C  T  T" for item in parsed.graphical_metadata)
+    assert parse_bytes(raw, ".cat").model == parsed.model
+
+
+@pytest.mark.parametrize("payload", ["C image-file.png", "C T F", "unrecognised image bytes"])
+def test_graphical_645_background_asset_payload_is_not_assumed_harmless(payload: str) -> None:
+    original, _register = _registered_pyromb_originals()
+    source = original.decode("utf-8").replace("\r\n", "\n")
+    edited = source.replace(
+        "C #BACKGROUND IMAGE\nC  T  F\nC\n",
+        f"C #BACKGROUND IMAGE\nC  T  T\n{payload}\nC\n",
+    )
+    assert edited != source
+    with pytest.raises(FormatProblem) as caught:
+        parse_catg(edited.encode())
+    assert caught.value.status == "unsupported"
+
+
 @pytest.mark.parametrize(
     ("before", "after", "status"),
     [
@@ -448,7 +477,7 @@ def test_graphical_645_padded_section_marker_is_accepted_without_traceback(secti
         ("C #FILE COMMENTS", "C #FILE COMMENTS\\nC 0\\nC #FILE COMMENTS", "unsupported"),
         ("C #STORAGES\\nC      0", "C #STORAGES\\nC      1", "unsupported"),
         ("C #INFLOW/OUTFLOW\\nC      0", "C #INFLOW/OUTFLOW\\nC      1", "unsupported"),
-        ("C #BACKGROUND IMAGE\\nC  T  F", "C #BACKGROUND IMAGE\\nC  T  T", "unsupported"),
+        ("C #BACKGROUND IMAGE\\nC  T  F", "C #BACKGROUND IMAGE\\nC  T  X", "unsupported"),
         ("C END RORB_GE", "C END RORB_GE\\nC END RORB_GE", "invalid"),
     ],
 )
