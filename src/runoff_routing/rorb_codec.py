@@ -288,7 +288,9 @@ def _graphical(lines: tuple[str, ...]) -> tuple[int, tuple[str, ...]]:
         # A separate read-only structural profiler can collect anonymous
         # evidence; never reinterpret a 6.52 source as a 6.45 computation.
         message = "RORB_GE 6.52 recognised but unqualified; use --ge-profile to inspect its source structure"
-        raise RorbFormatError("unsupported", "ge_652_unqualified", message, versions[0][0] + 1)
+        status: Status = "unsupported"
+        code = "ge_652_unqualified"
+        raise RorbFormatError(status, code, message, versions[0][0] + 1)
     if len(versions) != 1 or versions[0][1] not in ("C RORB_GE 002", "C RORB_GE 6.45"):
         message = "Only one RORB_GE 002 or original 6.45 graphical header is characterised"
         raise _problem(message, unsupported=True)

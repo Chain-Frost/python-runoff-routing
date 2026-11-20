@@ -52,7 +52,7 @@ def test_ge_652_profile_is_structure_only_and_parser_remains_fail_closed() -> No
     assert all(record.section != "other_section" for record in shape.sections)
     assert shape.diagnostics == ()
 
-    with pytest.raises(FormatProblem, match="6.52 recognised but unqualified") as caught:
+    with pytest.raises(FormatProblem, match=r"6\.52 recognised but unqualified") as caught:
         parse_catg(source)
     assert caught.value.status == "unsupported"
     assert caught.value.code == "ge_652_unqualified"
