@@ -87,6 +87,21 @@ python -m pytest tests/test_regression_dataset.py tests/test_regression_scalars.
 
 The `--snapshot` path authenticates a historical candidate snapshot, *not* a fresh execution of `python` or `python-cmd`. The **all-case scalar cached comparison is intentionally non-success** because two all-zero peak times are unavailable; do not suppress its exit code or claim full success. Ordinary `--csv` submission of `computed_unvalidated` legacy output is deliberately rejected. All original hashes, clocks, horizons, status labels and frozen budgets must remain intact. Use [the maintained regression dataset contract](REGRESSION_DATASET.md) for full/subset/wheel commands and the expected status of each case.
 
+## RORB_GE 6.52 graphical source profiling
+
+For a **private** CATG that is not yet admitted, run the read-only, redacted
+structural profiler to identify its graphical version, known section counts
+and record shapes without copying or modifying the model:
+
+```sh
+python repo-scripts/rorb_inspect.py "path/to/catchment.catg" --ge-profile
+```
+
+A successful profile **does not** imply typed 6.52 import, executable
+support or numerical equivalence. The default JSON excludes model names,
+paths, coordinates, operands, raw lines and the source SHA. See
+[the exact qualification boundary](GE_652_SOURCE_PROFILE.md).
+
 ## 6. Installed wheel and acceptance
 
 ```sh
