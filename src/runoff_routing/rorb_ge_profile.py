@@ -125,11 +125,15 @@ def profile_graphical_catg(data: bytes, *, include_sha256: bool = False) -> GeCa
     )
     if any(s.section == "other_section" for s in sections):
         diagnostics.append("unknown_graphical_sections_present")
-    tail = [
-        line.strip()
-        for line in lines[end + 1 :]
-        if line.strip() and not line.lstrip().startswith(("C ", "C\t")) and line.strip() != "C"
-    ] if len(endings) == 1 else []
+    tail = (
+        [
+            line.strip()
+            for line in lines[end + 1 :]
+            if line.strip() and not line.lstrip().startswith(("C ", "C\t")) and line.strip() != "C"
+        ]
+        if len(endings) == 1
+        else []
+    )
     first = tail[0] if tail else ""
     tail_kind: Literal["0", "1", "other", "missing"] = (
         "0" if first == "0" else "1" if first == "1" else "other" if first else "missing"

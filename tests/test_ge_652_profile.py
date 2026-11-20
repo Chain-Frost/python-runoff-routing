@@ -83,8 +83,14 @@ def test_ge_652_profile_does_not_emit_custom_headings_paths_or_coordinates() -> 
 @pytest.mark.parametrize(
     ("edit", "expected"),
     [
-        (lambda raw: raw.replace(b"C END RORB_GE", b"C END RORB_GE\nC END RORB_GE", 1), "missing_or_multiple_end_markers"),
-        (lambda raw: raw.replace(b"C RORB_GE 6.52", b"C RORB_GE 6.52\nC RORB_GE 6.52", 1), "missing_or_multiple_version_markers"),
+        (
+            lambda raw: raw.replace(b"C END RORB_GE", b"C END RORB_GE\nC END RORB_GE", 1),
+            "missing_or_multiple_end_markers",
+        ),
+        (
+            lambda raw: raw.replace(b"C RORB_GE 6.52", b"C RORB_GE 6.52\nC RORB_GE 6.52", 1),
+            "missing_or_multiple_version_markers",
+        ),
         (lambda raw: raw.replace(b"C END RORB_GE", b"C END GRAPHICAL", 1), "missing_or_multiple_end_markers"),
     ],
 )
