@@ -5,7 +5,6 @@ from __future__ import annotations
 import hashlib
 import json
 import runpy
-from collections.abc import Callable
 from pathlib import Path
 from typing import cast
 
@@ -81,23 +80,25 @@ def test_ge_652_profile_does_not_emit_custom_headings_paths_or_coordinates() -> 
 
 
 @pytest.mark.parametrize(
-    ("edit", "expected"),
+    ("needle", "replacement", "expected"),
     [
         (
-            lambda raw: raw.replace(b"C END RORB_GE", b"C END RORB_GE\nC END RORB_GE", 1),
+            b"C END RORB_GE",
+            b"C END RORB_GE\nC END RORB_GE",
             "missing_or_multiple_end_markers",
         ),
         (
-            lambda raw: raw.replace(b"C RORB_GE 6.52", b"C RORB_GE 6.52\nC RORB_GE 6.52", 1),
+            b"C RORB_GE 6.52",
+            b"C RORB_GE 6.52\nC RORB_GE 6.52",
             "missing_or_multiple_version_markers",
         ),
-        (lambda raw: raw.replace(b"C END RORB_GE", b"C END GRAPHICAL", 1), "missing_or_multiple_end_markers"),
+        (b"C END RORB_GE", b"C END GRAPHICAL", "missing_or_multiple_end_markers"),
     ],
 )
 def test_ge_652_profile_reports_envelope_gaps_without_claiming_input_acceptance(
-    edit: Callable[[bytes], bytes], expected: str
+    needle: bytes, replacement: bytes, expected: str
 ) -> None:
-    source = edit(_synthetic_652())
+    source = _synthetic_652().replace(needle, replacement, 1)
     shape = profile_graphical_catg(source)
     assert shape.envelope == "incomplete"
     assert expected in shape.diagnostics
