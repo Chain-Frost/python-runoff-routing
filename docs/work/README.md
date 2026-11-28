@@ -1,5 +1,7 @@
 # Current work and evidence index
 
+- [Proposed selected software release policy (#213)](2026-11-29-issue213-selected-release-policy.md) — inert manual workflow preparation; no activation or publication.
+
 - [RORB-to-TUFLOW rainfall boundary export (#249)](2026-11-28-issue249-tuflow-rainfall.md) — explicit printed-depth selection, interval-end mapping, paginated and catchment-only tables, and native validation boundary.
 
 - [Uniform direct-depth DESIGN STM (#250)](2026-11-28-issue250-direct-depth-stm.md) — explicit format-only codec for #118; native and downstream released-wheel acceptance pending.
