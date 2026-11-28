@@ -15,6 +15,17 @@ python repo-scripts/check_local.py
 
 The package includes the canonical RORB reader directly; no ryan-tools or separate reader distribution is required. Edited CATG writing uses the separately installed pinned PyRomb PR; see [CATG authoring](RORB_GE_AUTHORING.md). A core checkout install (`python -m pip install -e .`) does not install the writer. The local checker runs repository/link hygiene, pinned Ruff lint and formatting, strict Pyright and non-native/non-benchmark pytest. It does not launch CMD, require private data or perform a numerical acceptance campaign. [Development details](DEVELOPMENT.md).
 
+## Export a printed RORB rainfall boundary for TUFLOW
+
+Use [the rainfall export guide](TUFLOW_RAINFALL_EXPORT.md) to select gross or excess rainfall
+and named subareas from one supported report and write a new metric STEPPED boundary data CSV.
+
+```sh
+python -m runoff_routing.tuflow_rainfall report.out rainfall.csv --kind gross --column Subarea_A_mm
+```
+
+This exports printed interval depths, not hydrograph discharge or unrounded storm inputs.
+
 ## 2. An explicit, single-storm Python calculation
 
 From the checkout root, run this Python code; `examples/synthetic-run.json` is a **typed S1 RunModel**, not a schema-2 project file:

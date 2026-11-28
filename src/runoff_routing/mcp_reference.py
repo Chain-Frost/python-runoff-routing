@@ -72,6 +72,13 @@ API_AREAS: dict[ApiArea, tuple[ApiEntry, ...]] = {
     ),
     "interoperability": (
         ApiEntry(
+            "runoff_routing.tuflow_rainfall.export_tuflow_rainfall",
+            "docs/TUFLOW_RAINFALL_EXPORT.md",
+            "tests/test_tuflow_rainfall.py",
+            "Convert selected printed RORB rainfall intervals to a metric TUFLOW boundary CSV.",
+            "Python/CLI only; no TUFLOW execution or unrounded depth reconstruction.",
+        ),
+        ApiEntry(
             "runoff_routing.project_json.import_rorb_project",
             "docs/PAR_PROJECTS.md",
             "tests/test_par_project_import.py",

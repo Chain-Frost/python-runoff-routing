@@ -1,5 +1,7 @@
 # Current work and evidence index
 
+- [RORB-to-TUFLOW rainfall boundary export (#249)](2026-11-28-issue249-tuflow-rainfall.md) — explicit printed-depth selection, interval-end mapping, paginated and catchment-only tables, and native validation boundary.
+
 - [Uniform direct-depth DESIGN STM (#250)](2026-11-28-issue250-direct-depth-stm.md) — explicit format-only codec for #118; native and downstream released-wheel acceptance pending.
 
 - [Canonical printed MC adapter and comparison I/O (#191 Phase 2)](2026-11-28-issue191-canonical-adapter.md) — dependent on #247, source-bound raw observations, caller-scoped identities and unchanged scientific unavailable/readiness gates.

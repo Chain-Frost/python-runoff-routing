@@ -81,6 +81,7 @@ jobs:
           $canonicalReaderTests = (Resolve-Path 'tests/test_canonical_rorb_reader.py').Path
           $reader645Tests = (Resolve-Path 'tests/test_original_645_readers.py').Path
           $reader652Tests = (Resolve-Path 'tests/test_original_652_readers.py').Path
+          $rainfallExportTests = (Resolve-Path 'tests/test_tuflow_rainfall.py').Path
           $publicMCExecutionTests = (Resolve-Path 'tests/test_monte_carlo_execution.py').Path
           $publicMCBridgeTests = (Resolve-Path 'tests/test_monte_carlo_bridge.py').Path
           $publicMCIntegrationTests = (Resolve-Path 'tests/test_monte_carlo_integration.py').Path
@@ -119,7 +120,7 @@ jobs:
             # exact wheel installed in $target outside the source checkout.
             python -m pytest "$publicMCExecutionTests" "$publicMCBridgeTests" "$publicMCIntegrationTests" "$publicMCScientificTests" -q
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          python -m pytest "$readerContractTests" "$canonicalReaderTests" "$reader645Tests" "$reader652Tests" -q
+          python -m pytest "$readerContractTests" "$canonicalReaderTests" "$reader645Tests" "$reader652Tests" "$rainfallExportTests" -q
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             python -c "from decimal import Decimal; from runoff_routing.rorbwin_losses import calculate_rorbwin_652_excess; r=calculate_rorbwin_652_excess((Decimal(10),), timestep_min=60, initial_loss_mm=Decimal(0), continuing_loss_mm_per_hour=Decimal(0)); assert r.excess_increments_mm == (Decimal(10),); print('S6 experimental installed-wheel smoke OK')"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
