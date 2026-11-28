@@ -9,7 +9,12 @@ import pytest
 
 from runoff_routing.rorb_readers.associations import associate_batch_csvs, batch_event_key, compare_output_csv
 from runoff_routing.rorb_readers.output_reader import bind_output_site_columns
-from runoff_routing.rorb_readers.readers import read_rorb_bytes, read_rorb_file, read_rorb_table_bytes
+from runoff_routing.rorb_readers.readers import (
+    read_rorb_bytes,
+    read_rorb_file,
+    read_rorb_table_bytes,
+    read_rorb_table_file,
+)
 
 
 def batch_text(row: str = "1 24 hour 20% 2 100 0.9 12") -> str:
@@ -619,6 +624,98 @@ def test_explicit_bare_table_rejects_incomplete_and_invalid_rows() -> None:
     assert any(d.code == "output_record" for d in malformed.diagnostics)
     rejected = read_rorb_table_bytes(b"not a characterised report\n")
     assert rejected.status == "unsupported"
+
+
+def test_calibration_bare_lowercase_end_preserves_original_positive_case(tmp_path: Path) -> None:
+    raw = b"junk\n Inc    Time    Hyd001   Hyd002\n 1  0.0  12.0  11.0\n 2  1.0  15.0  14.0\nend\n"
+    path = tmp_path / "sample.out"
+    path.write_bytes(raw)
+    assert read_rorb_bytes(raw).status == "unsupported"
+    for document in (read_rorb_table_bytes(raw), read_rorb_table_file(path)):
+        assert document.kind == "isolated_hydrograph_table"
+        assert document.status == "partial"
+        assert document.original_bytes == raw
+        assert any(d.code == "unverified_table_source" for d in document.diagnostics)
+        assert any(d.code == "completion_unverified" for d in document.diagnostics)
+        assert not any(d.code == "table_boundary" for d in document.diagnostics)
+        table = document.section("hydrographs_1")
+        assert table.valid
+        assert table.completeness == "terminated"
+        assert table.columns == ["line", "Inc", "Time", "Hyd001", "Hyd002"]
+        assert [(r["Inc"], r["Time"], r["Hyd001"], r["Hyd002"]) for r in table.rows] == [
+            (1, 0.0, 12.0, 11.0),
+            (2, 1.0, 15.0, 14.0),
+        ]
+        assert table.source_tokens[1] == {"Inc": "2", "Time": "1.0", "Hyd001": "15.0", "Hyd002": "14.0"}
+    assert path.read_bytes() == raw
+
+
+@pytest.mark.parametrize("footer", [b"end of hydrograph", b"ending", b"end extra", b"END", b"unknown"])
+def test_calibration_bare_lowercase_end_does_not_admit_other_boundaries(footer: bytes) -> None:
+    document = read_rorb_table_bytes(b"Inc Time Hyd001\n1 0 1\n2 1 2\n" + footer + b"\n")
+    assert document.status == "invalid"
+    assert not document.section("hydrographs_1").valid
+    assert any(d.code == "table_boundary" for d in document.diagnostics)
+
+
+@pytest.mark.parametrize(
+    ("body", "diagnostic"),
+    [
+        (b"Inc Time Hyd001 Hyd002\n1 0 1 1\n2 1 ******** 5\n3 2 3 4\n", "output_record"),
+        (b"Inc Time Hyd001 Hyd002\n1 0 1 1\n2 1 3\n3 2 3 4\n", "output_record"),
+        (b"Inc Time Hyd001 Hyd002\n1 0 1 1\n2 1 3 4 extra\n3 2 3 4\n", "output_record"),
+        (b"Inc Time Hyd001 Hyd002\n1 0 1 1\n2 1 3 nan\n3 2 3 4\n", "output_record"),
+        (b"Inc Time Hyd001 Hyd002\n1 0 invalid 2\n2 1 3 4\n", "output_record"),
+        (b"Inc Time Hyd001\n1 0 1\n3 2 3\n", "invalid_sequence"),
+        (b"Inc Time Hyd001\n1 0 1\n2 0 2\n", "invalid_sequence"),
+        (b"Inc Time Hyd001 Hyd0001\n1 0 1 2\n", "hydrograph_column_ambiguous"),
+        (b"Inc Time Hyd001 Hyd001\n1 0 1 2\n", "output_header"),
+        (b"Inc Time Hyd001\n1 0 1\nEnd\nInc Time Hyd001\n1 0 1\n", "multiple_summaries"),
+        (b"Inc Time Hyd001\n", "empty_table"),
+    ],
+)
+def test_calibration_bare_lowercase_end_retains_invalid_diagnostics(body: bytes, diagnostic: str) -> None:
+    document = read_rorb_table_bytes(body + b"end\n")
+    assert document.status == "invalid"
+    assert any(d.code == diagnostic and d.severity == "error" for d in document.diagnostics)
+
+
+def test_calibration_signed_report_keeps_existing_boundary_and_clock_contract() -> None:
+    raw = (output_text() + "End of hydrograph\n").encode()
+    normal = read_rorb_bytes(raw)
+    opted_in = read_rorb_table_bytes(raw)
+    for document in (normal, opted_in):
+        assert document.kind == "standard_output"
+        assert document.status == "partial"
+        table = document.section("hydrographs_1")
+        assert table.valid
+        assert table.completeness == "reported_increment_count"
+        assert [r["Inc"] for r in table.rows] == [0, 1, 2]
+        assert [r["Time"] for r in table.rows] == [0.0, 1.0, 2.0]
+    invalid = read_rorb_table_bytes((output_text() + "end\n").encode())
+    assert invalid.kind == "standard_output"
+    assert invalid.status == "invalid"
+    assert not invalid.section("hydrographs_1").valid
+    assert any(d.code == "table_boundary" for d in invalid.diagnostics)
+
+
+@pytest.mark.parametrize("bare", [False, True])
+def test_calibration_reader_bounds_apply_to_both_entry_points(tmp_path: Path, bare: bool) -> None:
+    raw = b"Inc Time Hyd001\n1 0 1\n2 1 2\nend\n" if bare else output_text().encode()
+    path = tmp_path / "bounded.out"
+    path.write_bytes(raw)
+    read_bytes = read_rorb_table_bytes if bare else read_rorb_bytes
+    read_file = read_rorb_table_file if bare else read_rorb_file
+    assert read_bytes(raw, max_bytes=len(raw)).section("hydrographs_1").valid
+    assert read_file(path, max_bytes=len(raw)).section("hydrographs_1").valid
+    with pytest.raises(ValueError, match="exceeds"):
+        read_bytes(raw, max_bytes=len(raw) - 1)
+    with pytest.raises(ValueError, match="exceeds"):
+        read_file(path, max_bytes=len(raw) - 1)
+    with pytest.raises(ValueError, match="positive"):
+        read_bytes(raw, max_bytes=0)
+    with pytest.raises(ValueError, match="positive"):
+        read_file(path, max_bytes=0)
 
 
 def test_explicit_companion_overrides_resolve_only_selected_event(tmp_path: Path) -> None:

@@ -280,6 +280,10 @@ def _numeric_table(doc: RorbDocument, start: int, columns: list[str], name: str)
             if table.rows:
                 break
             continue
+        # The calibration fragment contract admits only the exact lowercase footer.
+        if doc.kind == "isolated_hydrograph_table" and name.startswith("hydrographs_") and line.strip() == "end":
+            table.completeness = "terminated"
+            break
         if tokens[0] in {"Tot.", "Total", "End"} or tokens[0].startswith("Tot.") or line.strip().startswith("End of "):
             table.completeness = "terminated"
             break
