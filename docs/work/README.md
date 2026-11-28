@@ -1,5 +1,7 @@
 # Current work and evidence index
 
+- [Normal manual software release policy (#213)](2026-11-29-issue213-selected-release-policy.md) — reuse existing publisher and calendar versioning; review before activation.
+
 - [Synthetic statistical qualification and latent-ledger amendment (#148)](2026-11-28-issue148-synthetic-qualification.md) — fixed finite-law experiment, conservative confidence/decision limitations and bounded analytical review recorded; no physical/native admission.
 
 - [RORB-to-TUFLOW rainfall boundary export (#249)](2026-11-28-issue249-tuflow-rainfall.md) — explicit printed-depth selection, interval-end mapping, paginated and catchment-only tables, and native validation boundary.
