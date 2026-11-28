@@ -1,0 +1,956 @@
+{
+  "format": "pyrorb-mc148-python-only-study-design-draft/1",
+  "status": "technically_prepared_awaiting_rights_and_explicit_freeze",
+  "simulation_authorised": false,
+  "owner_direction": "Adopt the specified one-population numerical law, finite peak window, reliability settings and costs for preparation. Separate explicit authority is required for freeze and execution.",
+  "repository_base": "ef5c985a607545aee9f58d2a0f4f5712c410e46d",
+  "historical_packet": "../../work/2026-11-25-issue148-physical-source-protocol.md",
+  "amendment": "../../work/2026-11-28-issue148-python-only-conditional-study.md",
+  "historical_protocol": "physical_study_protocol_draft.json",
+  "unchanged_preflight_declaration": "physical_study_draft_declaration.json",
+  "retained_preflight_result": "physical_study_draft_preflight_result.json",
+  "scope": {
+    "study": "single fixed physically derived computational response population, conditional numerical reliability only",
+    "candidate_alias": "M04",
+    "candidate_revision": "owner-selected immutable 19 November archived capture; original and unique derivative SHA/size verified in attributed local receipt",
+    "source_admission": "pending",
+    "physical_site_aliases": [
+      "P01",
+      "P02"
+    ],
+    "actual_site_ids": null,
+    "source_manifest_sha256": null,
+    "physical_calibration": "Specific observed-flood calibration records unavailable. Historical models have adopted whole-storm loss inputs. Applicability and statistical interpretation for the proposed study remain unestablished.",
+    "uncalibrated_case_route": "Chosen for preparation; restricted research on the preserved computational projection. Physical source admission remains separate.",
+    "engine_profile": "python-cmd/cmd-6.44",
+    "sampling_policy": "monte-carlo-statistics/1",
+    "frequency_profile": "monte-carlo-statistics/1:weighted-step-inverse-v1",
+    "scenario_id": null,
+    "duration_minutes_proposed": 1440,
+    "durations_admitted": [],
+    "scenario_count": 1,
+    "duration_count": 1,
+    "engine_count": 1,
+    "site_count": 2,
+    "native": "excluded; zero allocation and #150 stop unchanged",
+    "annual_flood_interpretation": "unqualified",
+    "duration_expansion": "excluded"
+  },
+  "sources": {
+    "archived_ifd": "authenticated raw BoM parent and climate-adjusted IFD derivative; anchor PAR binds derivative, 174/174 anchor products verified in B continuation, not raw parent; 24h six anchors",
+    "archived_tp": "authenticated areal file, recovered AllStats metadata per D; 10 distinct structurally complete members at 24h, common contributing area/category per A, geographical borrowing/applicability and weights/joint law pending",
+    "areal_tp_weights_proposed": "Ten source-bound areal members, equal declared weights throughout the approved preparation domain.",
+    "median_storm_il_mm": null,
+    "continuing_loss_mm_per_h": null,
+    "loss_source_sha256": null,
+    "loss_basis": "The owner confirms adopted historical model storm losses, with whole-storm IL effective from storm onset including preburst. The two reviewed documents establish neither a statistical median nor historical preburst/climate implementation. The accepted external dimensional pair is a separate constructed choice. Study admission values remain null.",
+    "loss_factor_table": "Reviewed ARR Book 5 v4.2 Table 5.3.13: eleven reversed IL factors with median one. The source also describes a CL distribution; constant CL is a stipulated simplification.",
+    "dependence": "Independent rainfall, IL and TP coordinates for the constructed law.",
+    "preburst_proposal": "Explicit PB=0 at the adopted one-hour timestep. Complete-storm IL is available at burst onset.",
+    "arf": "applicable pinned ARR2019 region/area formula once on gross point depth, no extensions; #238 qualified bounded method, not candidate physical/source admission",
+    "permissions": null,
+    "calibration_or_limited_scope_decision": null,
+    "feature_site_review": "Static checks passed for the private typed projection and two ordered print outputs; direct import of the complete original graphical model remains unsupported.",
+    "baseline_ifd_proposal": "Authenticated 24 h raw parent, six in-domain anchors; uniform forcing, common-area ARF once, no uplift.",
+    "baseline_ifd_selection": null,
+    "source_qualification_continuation": {
+      "receipt": "B148-SOURCE-SCENARIO-20261128",
+      "simulation_authorised": false,
+      "source_admission": "blocked",
+      "document_status": "Historical unavailable-on-E-PC disposition retained in dated work record; superseded for the two exact recovered documents by recovered_document_review. No further search for those documents required.",
+      "calibration_basis": "unestablished",
+      "historical_loss_climate_application": "unestablished; source multipliers do not recover unknown losses",
+      "independent_review": "Separate-agent actual-source scientific desk review completed; conceptual parameter-unassigned scenario acceptable for owner discussion only; not professional certification or source-owner signoff.",
+      "private_review_bindings": "Exact actual source/PDF/page/proposal/evidence bindings retained privately; original loss/site/rainfall admission unchanged.",
+      "other_pc_custody_issue": "https://github.com/Chain-Frost/pyrorb/issues/245"
+    },
+    "recovered_document_review": {
+      "receipt": "https://github.com/Chain-Frost/pyrorb/issues/245#issuecomment-7232555597",
+      "status": "completed_bounded_desk_review_negative_loss_and_calibration_disposition",
+      "verified_hashes": 10,
+      "original_model_identity": "matched",
+      "reporting_aliases": "matched",
+      "document_date_version_applicability": "unestablished",
+      "hydrological_admission": false,
+      "loss_values_adopted": false,
+      "permissions_adopted": false,
+      "limitation": "No applicable calibration/IL/CL basis or site/region/rights evidence from these two documents; no conclusion about records elsewhere."
+    },
+    "constructed_dimensional_candidate": {
+      "status": "owner_approved_for_preparation_not_admitted",
+      "basis": "External published RORB Monte Carlo/flood-frequency reconciliation study; dimensional anchor for a constructed law only, not a catchment-specific calibrated transfer.",
+      "owner_direction": "Accepted constructed pair for preparation of the specified joint law. Exact values retained privately. Source rights, freeze and execution remain separate.",
+      "source_review": "Original authority-hosted report independently retrieved and rendered. Sections 5.1, 5.6.3, 6.7.1, 6.8.1 and Table 6-4 confirm a dimensioned storm IL and CL rate from another catchment with gauge frequency reconciliation, variable preburst and a local exception. The report does not identify the storm IL as an empirical event median. ARR Book 5 v4.2 factor knots and timestep/routing qualifications independently checked.",
+      "private_record": "Owner decision B148-CONSTRUCTED-LOSS-OWNER-20261128 and independent original-page receipt B245-LITERATURE-INDEPENDENT-20261128; exact values and donor identity held privately.",
+      "planning_screen": "Independent rational recheck on six actual raw 24 h anchors corroborates the IL moments, CL capacity, full-domain conservative ARF envelope and strictly positive lower bounds for both zero and positive rainfall excess under the proposed continuous independent law. Finite sampled and routed outcomes remain unverified.",
+      "adopted": false
+    },
+    "raw_parent_custody": {
+      "status": "verified_original_in_local_private_custody",
+      "receipt": "B245-RAW-PARENT-INDEPENDENT-20261128",
+      "issue": "https://github.com/Chain-Frost/pyrorb/issues/245#issuecomment-7233144404",
+      "verified": "Raw and historical adjusted objects matched recorded size, CRC, SHA-256 and Git blob; six 24-hour anchors matched exact uplift; archived PAR selects adjusted dependency. Raw bytes are retained locally.",
+      "source_admitted": false
+    },
+    "private_only_direction": {
+      "status": "owner_selected_private_only_preparation_source_authority_pending",
+      "private_receipt": "B148-PRIVATE-ONLY-DIRECTION-20261128",
+      "use": "Private internal numerical research only, subject to source-owner/custodian confirmation for retained sources, parameter-only derivative, outputs and audit retention.",
+      "disclosure": "No public/external disclosure of private inputs, identifiers, actual outputs or source-derived results. Source-neutral public code, authored controls and redacted readiness metadata remain distinct.",
+      "no_wider_transfer": true,
+      "source_owner_authority_confirmed": false,
+      "public_results_disclosure": false,
+      "execution_permission": false
+    }
+  },
+  "probability": {
+    "rainfall_aep_bounds": [
+      "0.01",
+      "0.50"
+    ],
+    "domain_mass": "0.49",
+    "outside_rare": "0.01",
+    "outside_frequent": "0.50",
+    "conditional_response_exceedance_targets": [
+      "0.01",
+      "0.02",
+      "0.05"
+    ],
+    "conditional_cdf_denominator": "fixed 0.49 of planned rainfall-coordinate mass; all failed/unstarted weights retained",
+    "target_preflight_field": "legacy target_flood_aep_fractions interpreted only as conditional response targets in research sidecar",
+    "production_full_domain_quantiles": "incomplete; no production renormalisation or frequency change",
+    "no_extrapolation": true
+  },
+  "estimands": {
+    "primary": "latent numerical whole-1000-run reliability for frozen conditional population and margin rule; conditional on independent screening result",
+    "secondary": "operational complete result counts/status and observed run spread, not latent reliability or mean uncertainty",
+    "components": [
+      "six conditional peak quantiles at 2 sites x 3 targets",
+      "exact-zero mass at each site",
+      "conditional CDF at three pilot-frozen median thresholds per site, exact deduplication"
+    ],
+    "max_components": 14,
+    "margin_relative_proposed": "0.02",
+    "margin_relative_sensitivity_descriptive": [
+      "0.01",
+      "0.02",
+      "0.05"
+    ],
+    "margin_abs_m3s_by_site": null,
+    "margin_abs_basis_proposed": "Two positive site-specific numerical resolutions are evidenced in the private floor receipt. The 1 m3/s values in the earlier section 14 candidate were proposed pragmatic tolerances. Owner chooses the interpretation and exact values at freeze; do not combine the two criteria.",
+    "margin_cdf_abs_proposed": "0.01",
+    "margin_zero_abs_proposed": "0.01",
+    "required_pass_probability_proposed": "0.95",
+    "joint_confidence_proposed": "0.95",
+    "owner_margin_approval": "Owner selected existing relative and probability margins for preparation. Private independently evidenced absolute floors and the earlier pragmatic alternative await explicit disposition at freeze."
+  },
+  "design": {
+    "status": "owner_selected_design_private_manifests_audited_unfrozen",
+    "strata_count": 50,
+    "stratification": "existing v1 equal normal-coordinate widths, unequal exact probability masses; reverse to ascending p and persist canonical edges/weights",
+    "stratum_edges_and_weights": null,
+    "root_manifest": null,
+    "reference_manifest_sha256": null,
+    "confirmation_manifest_sha256": null,
+    "root_rule": "independent uniform uint64 roots with replacement preassigned to all planned cohorts; any duplicate/identity overlap abort unresolved, do not condition inference on collision-free selection or redraw; HMAC purpose/domain separation plus computational independence assumption",
+    "phase_order": [
+      "source-owner permission and explicit protocol freeze",
+      "separate authority for root generation, cohort identity and bounded resource controls",
+      "separately authorised intake and complete independent screening",
+      "freeze derived scales/grid and verify reference precision feasibility",
+      "separately authorised fixed reference and confirmation per protocol"
+    ],
+    "stages": [
+      {
+        "id": "intake_future_only",
+        "events_per_cohort": 250,
+        "cohorts": 1,
+        "draws_per_stratum": 5,
+        "max_events": 250,
+        "cohort_timeout_including_cleanup_seconds": 60,
+        "max_stage_elapsed_seconds": 120
+      },
+      {
+        "id": "screen",
+        "events_per_cohort": 1000,
+        "cohorts": 30,
+        "draws_per_stratum": 20,
+        "max_events": 30000,
+        "cohort_timeout_including_cleanup_seconds": 300,
+        "max_stage_elapsed_seconds": 10800
+      },
+      {
+        "id": "reference",
+        "events_per_cohort": 50000,
+        "cohorts": 10,
+        "draws_per_stratum": 1000,
+        "max_events": 500000,
+        "cohort_timeout_including_cleanup_seconds": 3600,
+        "max_stage_elapsed_seconds": 43200
+      },
+      {
+        "id": "confirmation",
+        "events_per_cohort": 1000,
+        "cohorts": 300,
+        "draws_per_stratum": 20,
+        "max_events": 300000,
+        "cohort_timeout_including_cleanup_seconds": 300,
+        "max_stage_elapsed_seconds": 93600
+      }
+    ],
+    "max_attempted_events": 830250,
+    "max_elapsed_seconds": 151200,
+    "max_memory_mib_per_process": 4096,
+    "max_storage_mib_total": 8192,
+    "max_concurrent_cohorts": 1,
+    "max_retries": 0,
+    "larger_screens": "5k/10k screens, alternative budget confirmation, extra duration and native/replay excluded; separately approved new protocol only",
+    "stop": "pre-launch worst-case cohort incl cleanup fits remaining caps, actual complete planned allocations and identity verified; stop on budget, law/identity or unsupported state; keep all preassigned unstarted/aborted slots unknown; no outcome-dependent replacement or optional CI stopping",
+    "candidate_stratum_geometry": {
+      "status": "deterministic_candidate_not_frozen_or_admitted",
+      "generation": "CPython 3.13.5 statistics.NormalDist, zmax=inv_cdf(.99), z_i=zmax*i/50; reverse and Decimal(str(1-cdf(z))); explicitly pin external endpoints .01 and .50; preserve strings rather than regenerate",
+      "raw_rare_endpoint": "0.010000000000000009",
+      "zmax": "2.3263478740408408",
+      "mass_total": "0.49",
+      "strata": [
+        {
+          "id": "h0000",
+          "aep_lower": "0.01",
+          "aep_upper": "0.011309155967932916",
+          "probability_mass": "0.001309155967932916"
+        },
+        {
+          "id": "h0001",
+          "aep_lower": "0.011309155967932916",
+          "aep_upper": "0.012764782815436027",
+          "probability_mass": "0.001455626847503111"
+        },
+        {
+          "id": "h0002",
+          "aep_lower": "0.012764782815436027",
+          "aep_upper": "0.014379768776775714",
+          "probability_mass": "0.001614985961339687"
+        },
+        {
+          "id": "h0003",
+          "aep_lower": "0.014379768776775714",
+          "aep_upper": "0.016167686267521963",
+          "probability_mass": "0.001787917490746249"
+        },
+        {
+          "id": "h0004",
+          "aep_lower": "0.016167686267521963",
+          "aep_upper": "0.01814277322737956",
+          "probability_mass": "0.001975086959857597"
+        },
+        {
+          "id": "h0005",
+          "aep_lower": "0.01814277322737956",
+          "aep_upper": "0.020319906411787714",
+          "probability_mass": "0.002177133184408154"
+        },
+        {
+          "id": "h0006",
+          "aep_lower": "0.020319906411787714",
+          "aep_upper": "0.02271456608407907",
+          "probability_mass": "0.002394659672291356"
+        },
+        {
+          "id": "h0007",
+          "aep_lower": "0.02271456608407907",
+          "aep_upper": "0.02534279161980768",
+          "probability_mass": "0.00262822553572861"
+        },
+        {
+          "id": "h0008",
+          "aep_lower": "0.02534279161980768",
+          "aep_upper": "0.028221127608604846",
+          "probability_mass": "0.002878335988797166"
+        },
+        {
+          "id": "h0009",
+          "aep_lower": "0.028221127608604846",
+          "aep_upper": "0.03136656012670347",
+          "probability_mass": "0.003145432518098624"
+        },
+        {
+          "id": "h0010",
+          "aep_lower": "0.03136656012670347",
+          "aep_upper": "0.03479644295487838",
+          "probability_mass": "0.00342988282817491"
+        },
+        {
+          "id": "h0011",
+          "aep_lower": "0.03479644295487838",
+          "aep_upper": "0.038528413631500946",
+          "probability_mass": "0.003731970676622566"
+        },
+        {
+          "id": "h0012",
+          "aep_lower": "0.038528413631500946",
+          "aep_upper": "0.04258029935789365",
+          "probability_mass": "0.004051885726392704"
+        },
+        {
+          "id": "h0013",
+          "aep_lower": "0.04258029935789365",
+          "aep_upper": "0.04697001291204139",
+          "probability_mass": "0.00438971355414774"
+        },
+        {
+          "id": "h0014",
+          "aep_lower": "0.04697001291204139",
+          "aep_upper": "0.05171543887551533",
+          "probability_mass": "0.00474542596347394"
+        },
+        {
+          "id": "h0015",
+          "aep_lower": "0.05171543887551533",
+          "aep_upper": "0.056834310635362706",
+          "probability_mass": "0.005118871759847376"
+        },
+        {
+          "id": "h0016",
+          "aep_lower": "0.056834310635362706",
+          "aep_upper": "0.06234407878560555",
+          "probability_mass": "0.005509768150242844"
+        },
+        {
+          "id": "h0017",
+          "aep_lower": "0.06234407878560555",
+          "aep_upper": "0.06826177171942271",
+          "probability_mass": "0.00591769293381716"
+        },
+        {
+          "id": "h0018",
+          "aep_lower": "0.06826177171942271",
+          "aep_upper": "0.07460384937037823",
+          "probability_mass": "0.00634207765095552"
+        },
+        {
+          "id": "h0019",
+          "aep_lower": "0.07460384937037823",
+          "aep_upper": "0.08138605122626552",
+          "probability_mass": "0.00678220185588729"
+        },
+        {
+          "id": "h0020",
+          "aep_lower": "0.08138605122626552",
+          "aep_upper": "0.088623239899142",
+          "probability_mass": "0.00723718867287648"
+        },
+        {
+          "id": "h0021",
+          "aep_lower": "0.088623239899142",
+          "aep_upper": "0.09632924168668688",
+          "probability_mass": "0.00770600178754488"
+        },
+        {
+          "id": "h0022",
+          "aep_lower": "0.09632924168668688",
+          "aep_upper": "0.10451668569981742",
+          "probability_mass": "0.00818744401313054"
+        },
+        {
+          "id": "h0023",
+          "aep_lower": "0.10451668569981742",
+          "aep_upper": "0.11319684325622315",
+          "probability_mass": "0.00868015755640573"
+        },
+        {
+          "id": "h0024",
+          "aep_lower": "0.11319684325622315",
+          "aep_upper": "0.1223794693459026",
+          "probability_mass": "0.00918262608967945"
+        },
+        {
+          "id": "h0025",
+          "aep_lower": "0.1223794693459026",
+          "aep_upper": "0.13207264805982533",
+          "probability_mass": "0.00969317871392273"
+        },
+        {
+          "id": "h0026",
+          "aep_lower": "0.13207264805982533",
+          "aep_upper": "0.14228264393364576",
+          "probability_mass": "0.01020999587382043"
+        },
+        {
+          "id": "h0027",
+          "aep_lower": "0.14228264393364576",
+          "aep_upper": "0.15301376119243337",
+          "probability_mass": "0.01073111725878761"
+        },
+        {
+          "id": "h0028",
+          "aep_lower": "0.15301376119243337",
+          "aep_upper": "0.16426821288750004",
+          "probability_mass": "0.01125445169506667"
+        },
+        {
+          "id": "h0029",
+          "aep_lower": "0.16426821288750004",
+          "aep_upper": "0.17604600189090025",
+          "probability_mass": "0.01177778900340021"
+        },
+        {
+          "id": "h0030",
+          "aep_lower": "0.17604600189090025",
+          "aep_upper": "0.18834481565588868",
+          "probability_mass": "0.01229881376498843"
+        },
+        {
+          "id": "h0031",
+          "aep_lower": "0.18834481565588868",
+          "aep_upper": "0.20115993656191344",
+          "probability_mass": "0.01281512090602476"
+        },
+        {
+          "id": "h0032",
+          "aep_lower": "0.20115993656191344",
+          "aep_upper": "0.21448416954063765",
+          "probability_mass": "0.01332423297872421"
+        },
+        {
+          "id": "h0033",
+          "aep_lower": "0.21448416954063765",
+          "aep_upper": "0.2283077885256437",
+          "probability_mass": "0.01382361898500605"
+        },
+        {
+          "id": "h0034",
+          "aep_lower": "0.2283077885256437",
+          "aep_upper": "0.24261850308420785",
+          "probability_mass": "0.01431071455856415"
+        },
+        {
+          "id": "h0035",
+          "aep_lower": "0.24261850308420785",
+          "aep_upper": "0.2574014463768147",
+          "probability_mass": "0.01478294329260685"
+        },
+        {
+          "id": "h0036",
+          "aep_lower": "0.2574014463768147",
+          "aep_upper": "0.27263918535150933",
+          "probability_mass": "0.01523773897469463"
+        },
+        {
+          "id": "h0037",
+          "aep_lower": "0.27263918535150933",
+          "aep_upper": "0.288311753819003",
+          "probability_mass": "0.01567256846749367"
+        },
+        {
+          "id": "h0038",
+          "aep_lower": "0.288311753819003",
+          "aep_upper": "0.30439670877444147",
+          "probability_mass": "0.01608495495543847"
+        },
+        {
+          "id": "h0039",
+          "aep_lower": "0.30439670877444147",
+          "aep_upper": "0.3208692100372077",
+          "probability_mass": "0.01647250126276623"
+        },
+        {
+          "id": "h0040",
+          "aep_lower": "0.3208692100372077",
+          "aep_upper": "0.33770212297577085",
+          "probability_mass": "0.01683291293856315"
+        },
+        {
+          "id": "h0041",
+          "aep_lower": "0.33770212297577085",
+          "aep_upper": "0.35486614377547687",
+          "probability_mass": "0.01716402079970602"
+        },
+        {
+          "id": "h0042",
+          "aep_lower": "0.35486614377547687",
+          "aep_upper": "0.37232994639856043",
+          "probability_mass": "0.01746380262308356"
+        },
+        {
+          "id": "h0043",
+          "aep_lower": "0.37232994639856043",
+          "aep_upper": "0.3900603500829688",
+          "probability_mass": "0.01773040368440837"
+        },
+        {
+          "id": "h0044",
+          "aep_lower": "0.3900603500829688",
+          "aep_upper": "0.4080225059352207",
+          "probability_mass": "0.0179621558522519"
+        },
+        {
+          "id": "h0045",
+          "aep_lower": "0.4080225059352207",
+          "aep_upper": "0.4261801008977857",
+          "probability_mass": "0.018157594962565"
+        },
+        {
+          "id": "h0046",
+          "aep_lower": "0.4261801008977857",
+          "aep_upper": "0.44449557711843624",
+          "probability_mass": "0.01831547622065054"
+        },
+        {
+          "id": "h0047",
+          "aep_lower": "0.44449557711843624",
+          "aep_upper": "0.462930364522426",
+          "probability_mass": "0.01843478740398976"
+        },
+        {
+          "id": "h0048",
+          "aep_lower": "0.462930364522426",
+          "aep_upper": "0.48144512419246066",
+          "probability_mass": "0.01851475967003466"
+        },
+        {
+          "id": "h0049",
+          "aep_lower": "0.48144512419246066",
+          "aep_upper": "0.50",
+          "probability_mass": "0.01855487580753934"
+        }
+      ],
+      "allocation_counts_per_stratum": {
+        "intake": 5,
+        "screen": 20,
+        "reference_per_cohort": 1000,
+        "confirmation": 20,
+        "pooled_reference": 10000
+      },
+      "exact_reference_S": "1638836485430008758823903048897131/600250000000000000000000000000000000000",
+      "exact_max_individual_weight": "927743790376967/245000000000000000000",
+      "effective_count_approx": 366265.9486388616,
+      "hoeffding_radius_K256_alpha002_approx": 0.0037224355572404388,
+      "split_hoeffding_radius_approx": 0.0038474356768761317,
+      "split_KL_limit_approx": 4.106116317108456e-05,
+      "roots_planned": 341,
+      "root_collision_union_upper_approx": 3.1425599969492346e-15,
+      "roots_generated": 0,
+      "conditional_midpoint_tp_counts_if_equal_weights": [
+        900719925474099,
+        900719925474099,
+        900719925474100,
+        900719925474099,
+        900719925474099,
+        900719925474099,
+        900719925474099,
+        900719925474100,
+        900719925474099,
+        900719925474099
+      ],
+      "midpoint_tp_law_note": "Exact counts out of 2^53 for cumulative cutpoints k/10 under idealised uniform 53-bit midpoint law; actual source membership/weights and computational HMAC independence remain to review. Not empirical TP occurrence probabilities.",
+      "limits": "Deterministic planning arithmetic only; no admitted weights, plan hash, roots, sampler or physical execution. Review actual law before freeze."
+    }
+  },
+  "inference": {
+    "status": "latest_split_reference_candidate_and_earlier_full_alpha_baseline_reviewed_separately_pending_final_freeze",
+    "alpha_total": "0.05",
+    "alpha_reference": "0.02",
+    "alpha_reliability_lower": "0.015",
+    "alpha_reliability_upper": "0.015",
+    "reference_grid": "per site 0 + pooled complete independent 30-screen conditional step quantiles at 0.01..1.00 nonexceedance + max(0,m_j+k*Delta_j) for k=-2,-1,-0.5,-0.25,0,0.25,0.5,1,2 for three target medians; dedup; max 128/site, K<=256 latent CDF points",
+    "reference_rule": "latent independent complete planned indicators I(Q<=x); weighted range v_h/n_h, v_h=w_h/0.49; Hoeffding epsilon=sqrt(sum(v_h^2/n_h)*log(2*K/alpha_reference)/2); enclose latent weighted empirical CDF by pointwise observed interval sums, unknown [0,+inf]; do not require independent observed censoring; monotone tighten, conservatively invert with U(x)<t for lower and L(x)>=t for upper; no extrapolation",
+    "latent_law_requirement": "total defined nonnegative Q per site and preassigned independent draws under frozen implemented midpoint law; genuine undefined response or unverifiable law -> unresolved, not imputed",
+    "single_run": "latent empirical complete output vector; definite pass if all admissible vector/reference pairs meet every margin; definite fail if no admissible pair meets them; otherwise unknown; include unstarted/aborted cohorts",
+    "reliability_rule": "on simultaneous reference coverage, D <= latent iid successful cohort count <= P; CP monotone lower(D,n) upper(P,n), n=300 planned; adequacy lower>=.95, inadequacy upper<.95, else unresolved; do not apply iid CP directly to observed classifications; condition on independent frozen screen, not cap or selection",
+    "no_scope_expansion": "no native equivalence or annual flood inference; no extra inferential sensitivity claims",
+    "reference_design_illustration": {
+      "equal_z_50_approx_conditional_weight_min": 0.0026717469,
+      "conditional_weight_max": 0.0378670935,
+      "reference_n_h": 10000,
+      "S_approx": 2.73025654e-06,
+      "effective_n_approx": 366265.95,
+      "K_max": 256,
+      "epsilon_approx": 0.00372244,
+      "equal_weight_epsilon_approx": 0.00318596,
+      "actual_plan_check_required": true
+    },
+    "ideal_binomial_planning": {
+      "n": 300,
+      "definite_pass_min": 294,
+      "possible_pass_max": 275,
+      "power_if_latent_p_0_98": 0.60630825,
+      "power_if_latent_p_0_99": 0.96724905,
+      "power_for_inadequacy_if_latent_p_0_90": 0.85608398,
+      "power_objectives_proposed": {
+        "adequacy_at_0_99": 0.9,
+        "inadequacy_at_0_90": 0.8
+      },
+      "not_achieved_physical_power": true
+    },
+    "rare_tail_candidate": {
+      "status": "implemented_and_bounded_development_qualified_in_PR246_independent_scientific_adoption_pending",
+      "source_pr": "https://github.com/Chain-Frost/pyrorb/pull/243",
+      "method": "split reference alpha between latent weighted Hoeffding and max-individual-weight Bernoulli-KL confidence regions; intersect pathwise after enclosure; no increased total alpha or changed tolerance",
+      "illustration_at_Fhat_0_99": {
+        "original_width": "0.00744487112",
+        "candidate_width": "0.00180370456",
+        "width_reduction_percent": "75.77"
+      },
+      "limitation": "mid-CDF split may widen interval; exact CDF step-boundary quantile remains unresolved; needs independent proof/numerical review and separate fixed qualification",
+      "source_independent_implementation": "https://github.com/Chain-Frost/pyrorb/pull/246"
+    },
+    "rectangle_guard": {
+      "status": "proposed_clarification_pending_independent_review",
+      "valid_inputs": "nonempty ordered enclosures of well-defined latent components; finite nonnegative frozen margin; conservative endpoint arithmetic; invalid/undefined -> unresolved",
+      "definite_component_pass": "u-L<=Delta and U-l<=Delta; entire run enclosure contained in [U-Delta,L+Delta]",
+      "definite_component_failure": "u<L-Delta or l>U+Delta; strict beyond margin",
+      "whole_run": "all component passes -> definite pass; any component definite failure -> definite failure; else indeterminate; Cartesian outer rectangle, not assumed component independence",
+      "unbounded": "use set relations; do not subtract infinities; unbounded peak or reference upper endpoint cannot establish definite pass for finite margin",
+      "reference_feasibility": "on final tightened reference intervals, each finite U-L<=2*Delta necessary for any definite pass; if wider or unbounded, report adequacy structurally unavailable, not inadequacy; predeclared unresolved stop only or retain separately authorised fixed confirmation for inadequacy/descriptive spread",
+      "cdf_illustration": {
+        "epsilon": 0.00372244,
+        "margin": 0.01,
+        "remaining_point_margin": 0.00627756,
+        "raw_unclipped_untightened_endpoint_gap_max": 0.01255512,
+        "not_missing_mass_cap": true
+      },
+      "confirmation_accounting": {
+        "planned": 300,
+        "definite_pass_min": 294,
+        "possible_pass_max": 275,
+        "non_definite_pass_count_precludes_adequacy": 7,
+        "definite_failure_count_implies_possible_pass_max": 25,
+        "no_new_sequential_stopping": true,
+        "exact_binomial_tail_checks_at_p_0_95": {
+          "upper_293": 0.015968000797,
+          "upper_294": 0.0065793744,
+          "lower_275": 0.009348804278,
+          "lower_276": 0.016844074417,
+          "alpha": "3/200"
+        },
+        "deterministic_rectangle_examples_checked": 8,
+        "all_expected": true
+      },
+      "execution": "deterministic desk arithmetic only; no routed, sampled or synthetic MC events; no scientific sign-off"
+    },
+    "conditional_ledger_contract": {
+      "status": "research_implementation_paired_pool_and_fixed_decision_added_final_review_pending",
+      "source_revision": "e80e56dbd1089874b527b98f9d1606532474c733",
+      "verified_reader": "runoff_routing.monte_carlo_execution.iter_verified_mc_results; exhaust iterator on pinned immutable inputs; do not invoke run/replay",
+      "allocation": "original MCAllocation Decimal masses and positive planned integer counts; derive exact rational mass per slot; keep original .49 denominator and .01/.50 tails; unknown/unstarted slots remain in preassigned plan",
+      "peak_identity": "unique verified print_id with accepted status; finite nonnegative ledger-represented peak; no printed precision rounding; identity corruption/undefined law unresolved",
+      "finite_ledger_cdf": "C_L/M and C_U/M from exact weighted I(u<=q) and I(l<=q); strict survival [1-C_U/M,1-C_L/M]; quantile first endpoint reaching exact absolute M*(1-a), upper unbounded if not reached; logical bounds not confidence",
+      "float_boundary": "production bridge converts Decimal allocations to floats and frequency API exact rank uses shortest-roundtrip decimal strings. Preserve original Decimal plan for research; no production change",
+      "controls": {
+        "complete": {
+          "absolute_masses": [
+            "0.20",
+            "0.29"
+          ],
+          "planned_counts": [
+            2,
+            2
+          ],
+          "peak_pairs": [
+            [
+              0,
+              20
+            ],
+            [
+              10,
+              10
+            ]
+          ],
+          "cdf_zero": "100/490",
+          "cdf_10": "390/490",
+          "median": 10,
+          "q99": 20
+        },
+        "missing": {
+          "unknown_mass": "0.145",
+          "cdf_zero": [
+            "100/490",
+            "245/490"
+          ],
+          "cdf_10": [
+            "245/490",
+            "390/490"
+          ],
+          "median_bounds": [
+            0,
+            10
+          ],
+          "q99_bounds": [
+            20,
+            null
+          ],
+          "null_upper": "unbounded"
+        },
+        "decimal_boundary": {
+          "masses": [
+            "0.48509999999999999999",
+            "0.00490000000000000001"
+          ],
+          "peaks": [
+            0,
+            1
+          ],
+          "absolute_target": "0.4851",
+          "exact_q99": 1,
+          "float_rounded_counterexample_q99": 0
+        }
+      },
+      "checks": "three deterministic arithmetic controls checked; actual reader integration and independent oracle review outstanding; no product execution"
+    }
+  },
+  "synthetic_qualification": {
+    "status": "two_engine_prior_replayed; bounded_one_engine_candidate_development_executed; scientific_acceptance_pending",
+    "control_count": 8,
+    "studies_per_control": 1000,
+    "planned_studies": 8000,
+    "engines": 1,
+    "strata": 50,
+    "cohorts_per_study": 340,
+    "max_joint_count_vectors": 136000000,
+    "max_exact_two_state_oracle_count_evaluations": 8008000,
+    "max_elapsed_seconds": 14400,
+    "max_memory_mib": 2048,
+    "max_storage_mib": 1024,
+    "max_concurrent_processes": 1,
+    "max_retries": 0,
+    "coverage_metrics": "up to six predeclared metrics/control; two one-sided exact intervals allocated .05/(2*8*6); deterministic enclosure invariants must hold; uncertainty on empirical coverage, false decisions and power, no proof of nominal coverage",
+    "requires_independent_truth_oracle": true,
+    "acceptance_power_thresholds_pending_owner": true,
+    "prior_evidence": {
+      "issue_receipt": "https://github.com/Chain-Frost/pyrorb/issues/148#issuecomment-7224502800",
+      "pr": "https://github.com/Chain-Frost/pyrorb/pull/243",
+      "studies": 8000,
+      "reference_coverage_count": 7998,
+      "inverse_coverage_count": 8000,
+      "observed_false_equivalence": 0,
+      "observed_enclosure_violations": 0,
+      "limitations": "Different two-engine error family/controls; unchanged exact-source replay completed, independent exact-oracle/scientific acceptance and remaining one-engine qualification pending.",
+      "local_replay_receipt": "local_replay_receipt.json"
+    },
+    "reuse_rule": "Reuse the original two-engine results/replay and #246's completed fixed smaller one-engine development study; no unchanged repetition. Any additional qualification needs a specific gap, independently agreed fixed design and cap. No automatic scientific acceptance.",
+    "one_engine_development_evidence": {
+      "pr": "https://github.com/Chain-Frost/pyrorb/pull/246",
+      "receipt": "https://github.com/Chain-Frost/pyrorb/issues/148#issuecomment-7232469660",
+      "executed_kernel_commit": "af5028181c5784116ea3df938f6c87bace0dc798",
+      "evidence_commit": "d721da39e80479fd836a2eb561113f5a6dbbb731",
+      "studies_per_control": 200,
+      "studies": 1600,
+      "reference_coverage_count": 1600,
+      "inverse_atom_coverage_count": 1600,
+      "exact_oracle_joint_reliability_coverage_count": 1200,
+      "exact_oracle_studies": 1200,
+      "adequate": 600,
+      "inadequate": 798,
+      "unresolved": 202,
+      "observed_false_verdicts": 0,
+      "observed_enclosure_violations": 0,
+      "empirical_simultaneous_lower_200_of_200": "0.9629051153",
+      "empirical_simultaneous_upper_zero_of_200": "0.0370948847",
+      "candidate_adopted": false,
+      "limitation": "Separate fixed smaller author-run study; historical exact kernel and upper-bound-only cases 3/4 retained. Not full scientific acceptance or replacement of any larger reviewer-required campaign."
+    }
+  },
+  "gates": {
+    "candidate_scope": "Scoped source permission and disclosure disposition outstanding. Computational-only uncalibrated scope selected.",
+    "policy": "Private-only constructed law selected for preparation. Scoped rights/retention and explicit freeze remain unsigned. No public or external source or result disclosure.",
+    "analytic": "Latest section 14 recommends internally split Hoeffding/KL reference alpha. The original full-alpha reference was audited separately. Preselect one method before freeze and observations.",
+    "manifests": "All seven private preparation manifests audited. Reserved root slots are distinct from future realised entropy/plan identities; pilot grid requires a complete authorised screen.",
+    "owner": "Signed source-owner declaration, separate explicit owner freeze of exact reviewed packet, separate execution authority and resource verification.",
+    "preflight": "existing checker on local admitted declaration only; previous exit 1 unchanged; five lanes distinct; no execution approval even if external review required"
+  },
+  "execution": {
+    "native_launches": 0,
+    "physical_events": 0,
+    "synthetic_events": 0,
+    "timing_pilots": 0,
+    "new_preflight_runs": 0,
+    "scope": "Initial preparation had zero execution; subsequent local archived replay is separately recorded below. Zero physical/native events and preflight reruns.",
+    "local_archived_replay": {
+      "studies": 8000,
+      "source": "unchanged #243 archived experiment",
+      "complete_case_reports_equal": true,
+      "physical_events": 0,
+      "native_launches": 0,
+      "receipt": "local_replay_receipt.json"
+    }
+  },
+  "owner_execution_permission": false,
+  "physical_population_admitted": false,
+  "simulation_authorised_field_scope": "Current Prompt B explicitly excludes execution; physical-source preflight remains blocked and false. Historical section8 permission/replay is not authority for this continuation.",
+  "historical_owner_execution_permission": true,
+  "uncalibrated_numerical_proposal": {
+    "status": "owner_selected_for_preparation_awaiting_permission_and_freeze",
+    "simulation_authorised": false,
+    "model": "Immutable archived graph, exact CL-only private derivative, preserved original kc/m, two ordered computational prints.",
+    "duration_minutes": 1440,
+    "baseline": "distinct authenticated unadjusted IFD parent, no uplift; adjusted local ifd-original.csv alias excluded as raw input",
+    "median_storm_il_mm": null,
+    "fixed_cl_mm_per_h": null,
+    "loss_source_sha256": null,
+    "dimensional_parameter_basis": null,
+    "factor_law": "Reverse the corrected standardised IL table to nonexceedance, interpolate the inverse piecewise linearly and scale once by the owner-accepted candidate median. Fixed candidate CL applies at the proposed one-hour timestep.",
+    "TP_law": "Ten source-bound members at equal declared weights in one full-domain bin.",
+    "dependence": "Three independent coordinates in the constructed computational law.",
+    "transformations": "uniform forcing; applicable ARR2019 region/common-area ARF once on gross raw point depth; PB0 as constructed boundary; no climate scaling, clamp/redraw or source substitution",
+    "interpretation": "conditional numerical response reliability only, fixed mass0.49 and outside0.51 unresolved; not annual/physical/design/native/calibrated accuracy",
+    "owner_structural_scope_approval": "Owner directed uncalibrated numerical-study preparation only; original physical criteria not admitted.",
+    "owner_dimensional_values_and_basis": "Specific dimensional pair accepted for preparation only, subject to independent scientific/source verification; exact private receipt B148-CONSTRUCTED-LOSS-OWNER-20261128. Actual admitted loss fields remain null.",
+    "owner_law_and_boundary_approval": "Approved for preparation, including one fixed 200-hour window with two paired maxima. Study source rights and freeze are outstanding.",
+    "eligibility_guard": "No original physical gate cleared. Any narrower lawful numerical criterion requires explicit owner/independent review; no checker weakening.",
+    "record": "../../work/2026-11-28-issue148-python-only-conditional-study.md#15-independent-technical-preparation-for-protocol-freeze",
+    "independent_scientific_review": {
+      "receipt": "E245-CONDITIONAL-LAW-DESK-20261128",
+      "scope": "Conditional numerical reliability of one fixed case under the stated law; scientific desk assessment only.",
+      "rainfall_and_loss": "Actual raw-parent anchors, nominal continuous-law IL moments, CL capacity, full-domain ARF envelope and two positive-probability rainfall-excess witnesses checked analytically.",
+      "required_model_binding": "Bind the archived routing tokens and new CL-only derivative to the selected engine, preserve sampled IL override and source order, both paired print IDs, units, pervious feature support, clock and initial state.",
+      "horizon": "Positive terminal archived flows. Select a finite-window peak (candidate 200 h) or justify complete-event capture independently.",
+      "owner_permissions": [
+        "internal use of named sources",
+        "creation and retention of model derivative and outputs",
+        "record private-only or specify audiences and permitted redacted disclosures; permission for external disclosure is required only if disclosure is proposed"
+      ],
+      "scientific_decisions": [
+        "constructed spatial, loss, temporal-pattern and dependence law",
+        "paired observables and finite-window or complete-event definition",
+        "site-specific absolute floors, statistical criteria and cost/stop limits",
+        "independent audit of the seven actual manifests"
+      ],
+      "protocol_frozen": false,
+      "simulation_authorised": false,
+      "source_weight_manifest_receipt": "B245-DESK-MANIFESTS-20261128",
+      "owner_clarification": "https://github.com/Chain-Frost/pyrorb/pull/244#issuecomment-7233198601"
+    },
+    "protocol_freeze_candidate": {
+      "status": "section14_historical_recommendation_with_current_disposition_in_section15",
+      "source_review": "Reuse B245-RAW-PARENT-INDEPENDENT-20261128, B245-LITERATURE-INDEPENDENT-20261128, E245-CONDITIONAL-LAW-DESK-20261128 and B245-DESK-MANIFESTS-20261128. Do not repeat custody or dimensional choice.",
+      "private_direction_receipt": "B148-PRIVATE-ONLY-DIRECTION-20261128",
+      "scope": "One fixed constructed conditional response law, one archived computational graph, two paired print identities and one 24 h duration; no observed-calibration, physical design, native equivalence or annual flood claim.",
+      "law": {
+        "raw_parent": "Verified raw unadjusted point-depth parent, no additional uplift; bind six source knots and exact existing z-linear depth method.",
+        "domain": [
+          "0.01",
+          "0.50"
+        ],
+        "spatial": "Uniform forcing; one applicable common-area ARR2019 reduction; bind actual area and coefficient/region evidence.",
+        "sampling": "Use the existing deterministic 50-stratum geometry, exact .49 mass, original counts; 53-bit midpoint coordinates under stipulated idealised independence and explicit HMAC computational model. Ten source-bound eligible areal members at nominal equal .1 weights; independent rainfall/loss/TP draws by construction, not empirical hydrological independence.",
+        "loss": "Reuse privately recorded approved constructed dimensional pair and reviewed inverse factor table. PB=0 is a proposed explicit boundary; whole-storm IL becomes effective burst IL only under that boundary. Fixed CL-only parameter derivative, preserve graph/control order and routing settings. Review actual finite law and sampled IL override."
+      },
+      "output": {
+        "engine": "python-cmd/cmd-6.44 exact source and installed wheel to bind",
+        "peak_window_hours": [
+          "0",
+          "200"
+        ],
+        "samples": 201,
+        "timestep_hours": "1",
+        "rain_hours": 24,
+        "dry_hours": 176,
+        "definition": "Maximum of the 201 inclusive hourly ordinates, not a complete-recession peak claim. Verify exact full window, paired print IDs, units, initial state, source features and status semantics. Existing peak-ledger row alone does not independently prove full window completeness."
+      },
+      "numerical": {
+        "proposed_absolute_floor_m3s_by_site": {
+          "P01": "1",
+          "P02": "1"
+        },
+        "relative_peak": "0.02",
+        "peak_margin": "max(site floor, .02 * exact median of 30 complete independently screened cohort quantiles). For 30, average the two central values. Floors are explicit proposed numerical research choices: 2% of 50 m3/s; not engineering acceptance or derived from observed flows. No outcome-based tuning.",
+        "cdf_absolute": "0.01",
+        "zero_mass_absolute": "0.01",
+        "relative_sensitivities_descriptive": [
+          "0.01",
+          "0.02",
+          "0.05"
+        ],
+        "targets": [
+          "0.01",
+          "0.02",
+          "0.05"
+        ],
+        "confidence_method": "Recommend one pre-frozen weighted Hoeffding/KL split-alpha reference construction from #243/#246, alpha_ref .02 split internally; no post-outcome method selection. Independent adoption pending.",
+        "reliability_target": "0.95",
+        "joint_alpha": "0.05",
+        "cp_tail_alpha": "0.015",
+        "confirmations": 300,
+        "adequate_definite_min": 294,
+        "inadequate_possible_max": 275,
+        "screen": "Require all 30 complete paired screening cohorts; stop unresolved for incomplete scale/grid; freeze existing grid recipe before reference.",
+        "reference": "Use all 10 planned equal-allocation cohorts; full mass retained, no conditioning on surviving cohorts. Monotone-tighten and apply feasibility guard before separately authorised confirmation.",
+        "component_count_max": 14
+      },
+      "resources": {
+        "attempts": 830250,
+        "wall_seconds": 151200,
+        "memory_mib_per_process": 4096,
+        "storage_mib": 8192,
+        "concurrency": 1,
+        "retries": 0,
+        "stage_caps": "Unchanged from design; owner confirmation and actual bounded cost/termination/storage review required. Intake is future separately authorised after freeze."
+      },
+      "research_implementation": {
+        "pr": "https://github.com/Chain-Frost/pyrorb/pull/246",
+        "head": "1a2f02a37e3638a646bc3ff5fbe07a5ab2c76e58",
+        "paired_pool": "Existing verified reader used for both sites on identical externally pinned project/request/ledger/wheel; exact pooled allocation and all planned absences; reject duplicate/unplanned/scope mismatches. Plan membership/law/roots require separate manifest audit.",
+        "classifier": "Exact Fraction component rectangles, inclusive margins, full frozen component family and fixed 300-cohort denominator. Independent exact CP count thresholds corroborated.",
+        "offline_tests": 24,
+        "new_tests": 9,
+        "exhaustive_rectangle_controls": 900,
+        "limitations": "Authored doubles for paired adapter wiring; real installed-wheel paired-path integration, full Ruff/Pyright/CI and independent review pending. No study execution or automatic adoption."
+      },
+      "remaining": [
+        "Source-owner/custodian authority for private use, derivative, output and retention scope; no external disclosure.",
+        "Owner and independent scientific decision on full constructed law, finite-window estimand, margins, fixed confidence method and caps.",
+        "Hash/diff actual CL-only derivative and pin installed wheel, model features, paired prints and clock/window; verify exact finite law and actual plan/source manifests.",
+        "Audit all seven actual manifests and freeze protocol before any separately authorised stage. Do not generate roots, run preflight or route now."
+      ],
+      "simulation_authorised": false,
+      "physical_population_admitted": false
+    }
+  },
+  "freeze_preparation": {
+    "receipt": "F148-SEVEN-MANIFEST-AUDIT-20261128",
+    "permission_status": "unsigned",
+    "source_use_authorised": null,
+    "protocol_frozen": false,
+    "simulation_authorised": false,
+    "product_revision": "08c1681a63f2ce2b6632777c38762a129e66e811",
+    "engine": "python-cmd/cmd-6.44",
+    "interpreter": "CPython 3.14.6 Windows 10 x64",
+    "wheel_sha256": "33a5862e88a60a4ad722be6e9856f72e2b891be8ccae8a97b995856d63c3415e",
+    "package_code_v1_sha256": "2e65e27036199ba4482d37afa65d0f7e6115fa586472ceecdaee8f61e1fa94c3",
+    "research_adapter_revision": "23344c84a04ee5767d923a21172f8cecd68ac062",
+    "clock": {
+      "rain_h": 24,
+      "dry_h": 176,
+      "hourly_increments": 200,
+      "inclusive_ordinates": 201,
+      "paired_site_count": 2
+    },
+    "manifests_reviewed": [
+      "source",
+      "weights",
+      "roots",
+      "reference",
+      "confirmation",
+      "confidence_allocation",
+      "synthetic_qualification"
+    ],
+    "reserved_cohorts": 341,
+    "actual_roots_generated": 0,
+    "actual_grid_and_scales": null,
+    "margins_evidence": "F148-PEAK-FLOORS-20261128",
+    "custody": "Exact private source, model, plan and review hashes are held with the unsigned source-owner declaration and packet audit. Public physical-admission hash fields remain unpopulated.",
+    "read_only_analysis": {
+      "owner_scope": "Private exact-arithmetic postprocessing on authenticated paired curves. No stage control or sampling.",
+      "independent_review": "F148-INDEPENDENT-ANALYSIS-20261128",
+      "reference_rule": "Latest preferred split candidate and original full-alpha alternate; exact separate bindings privately, select one before freeze.",
+      "required_external_checks": [
+        "authenticate slot, paired print and full ledger identity before ingestion",
+        "verify enforceable host resource and retention controls before separately authorised stages"
+      ],
+      "preferred_receipt": "E148-SPLIT-REFERENCE-PREPARATION-20261128"
+    },
+    "latest_paired_adapter_revision": "1a2f02a37e3638a646bc3ff5fbe07a5ab2c76e58",
+    "public_floor_disposition": "Private per-site evidence and proposed settings held for owner signature. No source-derived precision or peak tokens disclosed.",
+    "paired_reader_check": "Authored nonphysical request and sealed ledger verified with real installed wheel and exact paired adapter. Per-event window guarantee depends on authenticated preparation and pinned producer completeness checks."
+  }
+}

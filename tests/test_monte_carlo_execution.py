@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import hashlib
+import importlib.util
 import json
 import time
 import tracemalloc
 from dataclasses import replace
 from decimal import ROUND_DOWN, ROUND_HALF_EVEN, ROUND_UP, Decimal, Inexact, localcontext
+from fractions import Fraction
 from pathlib import Path
 from typing import cast
 
@@ -541,3 +543,51 @@ def test_bounded_64_event_streaming_memory_receipt(tmp_path: Path, capsys: pytes
     assert len(_rows(ledger)) == 65
     assert peak < 64 * 1024 * 1024
     assert ledger.stat().st_size < 512 * 1024
+
+
+def test_conditional_research_uses_verified_ledger(tmp_path: Path) -> None:
+    """Use two authored deterministic events, not the stochastic sampler or a physical model."""
+    project, template, events = _input(tmp_path)
+    request = tmp_path / "conditional-request.jsonl"
+    header = replace(
+        read_header(template),
+        policy_id="monte-carlo-statistics/1",
+        populations=(MCPopulation("base", 60, Decimal("0.49"), Decimal("0.01"), Decimal("0.50")),),
+        strata=(MCAllocation("base", 60, "h1", Decimal("0.49"), 2),),
+    )
+    write_effective_request(
+        request,
+        header,
+        (replace(event, stratum_mass=Decimal("0.49"), probability_weight=Decimal("0.245")) for event in events),
+    )
+    ledger = tmp_path / "conditional-ledger.jsonl"
+    assert execute_mc_request(project, request, ledger).complete
+    spec = importlib.util.spec_from_file_location(
+        "mc_conditional_research", ROOT / "repo-scripts" / "mc_conditional_research.py"
+    )
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    records = _rows(ledger)[1:]
+    first = cast("list[dict[str, object]]", records[0]["sites"])[0]
+    site_id = cast("str", first["print_id"])
+    peaks = [
+        Fraction(cast("int | float", cast("list[dict[str, object]]", row["sites"])[0]["peak_m3_s"])) for row in records
+    ]
+    project_pin = module.Artifact(project, hashlib.sha256(project.read_bytes()).hexdigest())
+    request_pin = module.Artifact(request, hashlib.sha256(request.read_bytes()).hexdigest())
+    ledger_bytes = ledger.read_bytes()
+    ledger_pin = module.Artifact(ledger, hashlib.sha256(ledger_bytes).hexdigest())
+    curve = module.read_verified_cohort(project_pin, request_pin, ledger_pin, site_id=site_id)
+    assert curve.quantile(Fraction(1, 100)) == (max(peaks), max(peaks))
+    assert curve.unknown_mass == 0
+    prefix = tmp_path / "conditional-prefix.jsonl"
+    prefix.write_bytes(b"".join(ledger_bytes.splitlines(keepends=True)[:2]))
+    prefix_pin = module.Artifact(prefix, hashlib.sha256(prefix.read_bytes()).hexdigest())
+    partial = module.read_verified_cohort(project_pin, request_pin, prefix_pin, site_id=site_id)
+    assert partial.unknown_mass == Fraction(49, 200)
+    assert partial.quantile(Fraction(1, 100)) == (peaks[0], None)
+    with pytest.raises(ValueError, match="digest mismatch"):
+        module.read_verified_cohort(project_pin, request_pin, module.Artifact(ledger, "0" * 64), site_id=site_id)
+    assert ledger.read_bytes() == ledger_bytes

@@ -145,6 +145,16 @@ CATALOG: tuple[Capability, ...] = (
         "Requires allow_write=true; generates and routes ten TPs/cell, but native parity remains unassessed.",
     ),
     Capability(
+        "export_tuflow_rainfall",
+        "python_or_cli",
+        "interoperability",
+        "runoff_routing.tuflow_rainfall.export_tuflow_rainfall",
+        "python -m runoff_routing.tuflow_rainfall",
+        "docs/TUFLOW_RAINFALL_EXPORT.md",
+        "Export selected printed gross or excess interval depths as a metric rainfall boundary CSV.",
+        "Explicit selection and new file only; printed precision and native TUFLOW verification limits apply.",
+    ),
+    Capability(
         "export_cmd_package",
         "python_or_cli",
         "interoperability",

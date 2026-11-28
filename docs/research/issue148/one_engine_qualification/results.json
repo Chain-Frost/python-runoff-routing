@@ -1,0 +1,487 @@
+{
+  "format": "pyrorb-mc148-one-engine-candidate-qualification/1",
+  "seed": [
+    148,
+    246,
+    20261128,
+    1
+  ],
+  "studies_per_control": 200,
+  "controls": 8,
+  "confirmations": 300,
+  "source_sha256": "2e624c048af01b731da36c28df4a20639b6dc3d7315884280358b187517e5e01",
+  "confidence_kernel_sha256": "a6d22b55edf1e3717dab21073895bbb8474fe8770f19e084ec51ea166d663b7d",
+  "python": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+  "numpy": "2.3.5",
+  "scipy": "1.17.0",
+  "elapsed_seconds": 28.22902384400004,
+  "max_rss_kib": 146948,
+  "count_vectors": 3833800,
+  "cache_info": "CacheInfo(hits=38193, misses=2407, maxsize=50000, currsize=2407)",
+  "cases": {
+    "1": {
+      "metrics": {
+        "reference_coverage": {
+          "count": 200,
+          "interval": [
+            0.9629051153339367,
+            1.0
+          ]
+        },
+        "inverse_atom_coverage": {
+          "count": 200,
+          "interval": [
+            0.9629051153339367,
+            1.0
+          ]
+        },
+        "joint_reliability_coverage": {
+          "count": 200,
+          "interval": [
+            0.9629051153339367,
+            1.0
+          ]
+        },
+        "false_verdict": {
+          "count": 0,
+          "interval": [
+            0.0,
+            0.03709488466606355
+          ]
+        },
+        "correct_decisive": {
+          "count": 200,
+          "interval": [
+            0.9629051153339367,
+            1.0
+          ]
+        },
+        "unresolved": {
+          "count": 0,
+          "interval": [
+            0.0,
+            0.03709488466606355
+          ]
+        }
+      },
+      "verdicts": {
+        "adequate": 200
+      },
+      "definite_range": [
+        300,
+        300
+      ],
+      "possible_range": [
+        300,
+        300
+      ],
+      "reliability_oracle": 1.0,
+      "oracle_kind": "exact"
+    },
+    "2": {
+      "metrics": {
+        "reference_coverage": {
+          "count": 200,
+          "interval": [
+            0.9629051153339367,
+            1.0
+          ]
+        },
+        "inverse_atom_coverage": {
+          "count": 200,
+          "interval": [
+            0.9629051153339367,
+            1.0
+          ]
+        },
+        "joint_reliability_coverage": {
+          "count": 200,
+          "interval": [
+            0.9629051153339367,
+            1.0
+          ]
+        },
+        "false_verdict": {
+          "count": 0,
+          "interval": [
+            0.0,
+            0.03709488466606355
+          ]
+        },
+        "correct_decisive": {
+          "count": 200,
+          "interval": [
+            0.9629051153339367,
+            1.0
+          ]
+        },
+        "unresolved": {
+          "count": 0,
+          "interval": [
+            0.0,
+            0.03709488466606355
+          ]
+        }
+      },
+      "verdicts": {
+        "inadequate": 200
+      },
+      "definite_range": [
+        85,
+        125
+      ],
+      "possible_range": [
+        148,
+        202
+      ],
+      "reliability_oracle": 0.49333995737554703,
+      "oracle_kind": "exact"
+    },
+    "3": {
+      "metrics": {
+        "reference_coverage": {
+          "count": 200,
+          "interval": [
+            0.9629051153339367,
+            1.0
+          ]
+        },
+        "inverse_atom_coverage": {
+          "count": 200,
+          "interval": [
+            0.9629051153339367,
+            1.0
+          ]
+        },
+        "joint_reliability_coverage": null,
+        "false_verdict": {
+          "count": 0,
+          "interval": [
+            0.0,
+            0.03709488466606355
+          ]
+        },
+        "correct_decisive": {
+          "count": 198,
+          "interval": [
+            0.9414634579116634,
+            0.9998364674513276
+          ]
+        },
+        "unresolved": {
+          "count": 2,
+          "interval": [
+            0.00016353254867236793,
+            0.058536542088336925
+          ]
+        }
+      },
+      "verdicts": {
+        "inadequate": 198,
+        "unresolved": 2
+      },
+      "definite_range": [
+        0,
+        0
+      ],
+      "possible_range": [
+        246,
+        279
+      ],
+      "reliability_oracle": 0.8731226023147888,
+      "oracle_kind": "upper_bound"
+    },
+    "4": {
+      "metrics": {
+        "reference_coverage": {
+          "count": 200,
+          "interval": [
+            0.9629051153339367,
+            1.0
+          ]
+        },
+        "inverse_atom_coverage": {
+          "count": 200,
+          "interval": [
+            0.9629051153339367,
+            1.0
+          ]
+        },
+        "joint_reliability_coverage": null,
+        "false_verdict": {
+          "count": 0,
+          "interval": [
+            0.0,
+            0.03709488466606355
+          ]
+        },
+        "correct_decisive": {
+          "count": 200,
+          "interval": [
+            0.9629051153339367,
+            1.0
+          ]
+        },
+        "unresolved": {
+          "count": 0,
+          "interval": [
+            0.0,
+            0.03709488466606355
+          ]
+        }
+      },
+      "verdicts": {
+        "inadequate": 200
+      },
+      "definite_range": [
+        53,
+        89
+      ],
+      "possible_range": [
+        134,
+        178
+      ],
+      "reliability_oracle": 0.44826146655429855,
+      "oracle_kind": "upper_bound"
+    },
+    "5": {
+      "metrics": {
+        "reference_coverage": {
+          "count": 200,
+          "interval": [
+            0.9629051153339367,
+            1.0
+          ]
+        },
+        "inverse_atom_coverage": {
+          "count": 200,
+          "interval": [
+            0.9629051153339367,
+            1.0
+          ]
+        },
+        "joint_reliability_coverage": {
+          "count": 200,
+          "interval": [
+            0.9629051153339367,
+            1.0
+          ]
+        },
+        "false_verdict": {
+          "count": 0,
+          "interval": [
+            0.0,
+            0.03709488466606355
+          ]
+        },
+        "correct_decisive": {
+          "count": 200,
+          "interval": [
+            0.9629051153339367,
+            1.0
+          ]
+        },
+        "unresolved": {
+          "count": 0,
+          "interval": [
+            0.0,
+            0.03709488466606355
+          ]
+        }
+      },
+      "verdicts": {
+        "adequate": 200
+      },
+      "definite_range": [
+        300,
+        300
+      ],
+      "possible_range": [
+        300,
+        300
+      ],
+      "reliability_oracle": 1.0,
+      "oracle_kind": "exact"
+    },
+    "6": {
+      "metrics": {
+        "reference_coverage": {
+          "count": 200,
+          "interval": [
+            0.9629051153339367,
+            1.0
+          ]
+        },
+        "inverse_atom_coverage": {
+          "count": 200,
+          "interval": [
+            0.9629051153339367,
+            1.0
+          ]
+        },
+        "joint_reliability_coverage": {
+          "count": 200,
+          "interval": [
+            0.9629051153339367,
+            1.0
+          ]
+        },
+        "false_verdict": {
+          "count": 0,
+          "interval": [
+            0.0,
+            0.03709488466606355
+          ]
+        },
+        "correct_decisive": {
+          "count": 200,
+          "interval": [
+            0.9629051153339367,
+            1.0
+          ]
+        },
+        "unresolved": {
+          "count": 0,
+          "interval": [
+            0.0,
+            0.03709488466606355
+          ]
+        }
+      },
+      "verdicts": {
+        "adequate": 200
+      },
+      "definite_range": [
+        298,
+        300
+      ],
+      "possible_range": [
+        299,
+        300
+      ],
+      "reliability_oracle": 0.9999348441796799,
+      "oracle_kind": "exact"
+    },
+    "7": {
+      "metrics": {
+        "reference_coverage": {
+          "count": 200,
+          "interval": [
+            0.9629051153339367,
+            1.0
+          ]
+        },
+        "inverse_atom_coverage": {
+          "count": 200,
+          "interval": [
+            0.9629051153339367,
+            1.0
+          ]
+        },
+        "joint_reliability_coverage": {
+          "count": 200,
+          "interval": [
+            0.9629051153339367,
+            1.0
+          ]
+        },
+        "false_verdict": {
+          "count": 0,
+          "interval": [
+            0.0,
+            0.03709488466606355
+          ]
+        },
+        "correct_decisive": {
+          "count": 0,
+          "interval": [
+            0.0,
+            0.03709488466606355
+          ]
+        },
+        "unresolved": {
+          "count": 200,
+          "interval": [
+            0.9629051153339367,
+            1.0
+          ]
+        }
+      },
+      "verdicts": {
+        "unresolved": 200
+      },
+      "definite_range": [
+        0,
+        0
+      ],
+      "possible_range": [
+        300,
+        300
+      ],
+      "reliability_oracle": 0.49333995737554703,
+      "oracle_kind": "exact"
+    },
+    "8": {
+      "metrics": {
+        "reference_coverage": {
+          "count": 200,
+          "interval": [
+            0.9629051153339367,
+            1.0
+          ]
+        },
+        "inverse_atom_coverage": {
+          "count": 200,
+          "interval": [
+            0.9629051153339367,
+            1.0
+          ]
+        },
+        "joint_reliability_coverage": {
+          "count": 200,
+          "interval": [
+            0.9629051153339367,
+            1.0
+          ]
+        },
+        "false_verdict": {
+          "count": 0,
+          "interval": [
+            0.0,
+            0.03709488466606355
+          ]
+        },
+        "correct_decisive": {
+          "count": 200,
+          "interval": [
+            0.9629051153339367,
+            1.0
+          ]
+        },
+        "unresolved": {
+          "count": 0,
+          "interval": [
+            0.0,
+            0.03709488466606355
+          ]
+        }
+      },
+      "verdicts": {
+        "inadequate": 200
+      },
+      "definite_range": [
+        83,
+        126
+      ],
+      "possible_range": [
+        154,
+        196
+      ],
+      "reliability_oracle": 0.4933612098819122,
+      "oracle_kind": "exact"
+    }
+  },
+  "observed_enclosure_violations": 0,
+  "simulation_authorised": false,
+  "physical_events": 0
+}
