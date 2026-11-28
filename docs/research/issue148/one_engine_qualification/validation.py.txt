@@ -1,0 +1,310 @@
+"""Bounded author-run #148 research qualification of the candidate confidence kernel.
+No product sampler, routing, native process, physical data, or method adoption.
+"""
+from __future__ import annotations
+import hashlib
+import importlib.util
+import json
+import math
+import resource
+import sys
+import time
+from collections import defaultdict
+from fractions import Fraction as F
+from functools import lru_cache
+from pathlib import Path
+import numpy as np
+import scipy
+from scipy.stats import beta
+
+N_STUDIES = 200
+N_CONFIRM = 300
+SEED = (148, 246, 20261128, 1)
+MAX_SECONDS = 300
+MAX_VECTORS = 27_200_000
+TARGETS = (99, 98, 95)
+INF = 10**9  # Sentinel, never an actual finite flow in these controls.
+METRICS = ('reference_coverage', 'inverse_atom_coverage', 'joint_reliability_coverage',
+           'false_verdict', 'correct_decisive', 'unresolved')
+ALPHA_MC = .05/(2*8*len(METRICS))
+CP_ALPHA = .015
+
+# Only the actual candidate confidence implementation is used for interval and grid inversion.
+KERNEL = Path(__file__).resolve().parents[1]/'repo-scripts'/'mc_conditional_confidence.py'
+spec = importlib.util.spec_from_file_location('mc_conditional_confidence', KERNEL)
+mc = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(mc)
+
+
+def law(case):
+    # Integer ticks: 100 ticks = one dimensionless flow unit. Exact rational law.
+    if case in (1, 5):
+        q = np.array([[100, 200 if case == 1 else 10000]], dtype=np.int64)
+        return q, [[F(1)]], [1]
+    if case in (3, 4):
+        q = np.array([[0, 0], [100, 200], [200, 100], [10000, 10000]], dtype=np.int64)
+        p = [F(95,100), F(3,100), F(1,100), F(1,100)]
+        if case == 3:
+            return q, [p], [1]
+        p_other = [F(20,100), F(50,100), F(25,100), F(5,100)]
+        p_rows = [[(1-F(h-1,49))*x+F(h-1,49)*y for x,y in zip(p,p_other,strict=True)]
+                  for h in range(1,51)]
+        return q, p_rows, list(range(1,51))
+    p = F(1,200) if case == 6 else F(101,200) if case == 8 else F(1,2)
+    return np.array([[0,0],[100,200]], dtype=np.int64), [[p,1-p]], [1]
+
+
+def draw_counts(rng, probabilities, weights, n, cohorts):
+    p = np.asarray([[float(x) for x in row] for row in probabilities])
+    if len(weights) == 1:
+        return rng.multinomial(n,p[0],size=cohorts), n, cohorts
+    # Independent, heterogeneous draws and exact integer weighted sums.
+    raw = rng.multinomial(n//50,p,size=(cohorts,50))
+    return (raw*np.array(weights)[None,:,None]).sum(axis=1), n//50*sum(weights), cohorts*50
+
+
+def quantiles(counts, q, denominator, targets=TARGETS):
+    result = []
+    for site in range(2):
+        order = np.argsort(q[:,site],kind='stable')
+        cumulative = np.cumsum(counts[...,order],axis=-1)
+        meets = cumulative[...,None,:]*100 >= denominator*np.asarray(targets)[...,None]
+        if not np.all(meets.any(axis=-1)):
+            raise ValueError('complete planned allocation not exhausted')
+        result.append(q[order,site][np.argmax(meets,axis=-1)])
+    return np.stack(result,axis=-2)
+
+
+def make_pilot(pilot,q,den):
+    peaks = quantiles(pilot,q,den)
+    sorted_peaks = np.sort(peaks,axis=0)
+    # Even-count median is exact, including half-tick scales.
+    medians = [[F(int(sorted_peaks[14,s,j])+int(sorted_peaks[15,s,j]),2) for j in range(3)] for s in range(2)]
+    margins = [[max(F(2),m/50) for m in row] for row in medians]
+    pooled = quantiles(pilot.sum(axis=0),q,den*30,tuple(range(1,101)))
+    factors = (F(-2),F(-1),F(-1,2),F(-1,4),F(0),F(1,4),F(1,2),F(1),F(2))
+    grids = [sorted(set([F(0),*(F(int(v)) for v in pooled[s]),
+                *(max(F(0),m+k*d) for m,d in zip(medians[s],margins[s],strict=True) for k in factors)]))
+             for s in range(2)]
+    primary = [[F(0),*row] for row in medians]
+    return grids,primary,margins
+
+
+def true_distributions(q,probabilities,weights):
+    # Separate exact oracle: construct each site's true marginal law directly.
+    marginals=[]
+    for site in range(2):
+        atoms=defaultdict(F)
+        for stratum,w in enumerate(weights):
+            for state,p in enumerate(probabilities[stratum]):
+                atoms[int(q[state,site])] += F(w,sum(weights))*p
+        assert sum(atoms.values()) == 1
+        marginals.append(sorted(atoms.items()))
+    return marginals
+
+
+def true_cdf(marginal, threshold):
+    return sum((p for x,p in marginal if x<=threshold),F(0))
+
+
+def true_quantile(marginal, target):
+    cumulative=F(0)
+    for x,p in marginal:
+        cumulative+=p
+        if cumulative>=F(target,100):
+            return F(x)
+    raise ValueError('oracle mass')
+
+
+def truth_vector(marginals,primary):
+    return [[*[true_quantile(marginals[s],t) for t in TARGETS],
+             *[true_cdf(marginals[s],x) for x in primary[s]]] for s in range(2)]
+
+
+def cdf_num(counts,q_column,threshold):
+    # Integer numerator, exact threshold membership; no float roundtrip.
+    include = np.array([int(int(x)!=INF and int(x)<=threshold) for x in q_column],dtype=np.int64)
+    return counts @ include
+
+
+@lru_cache(maxsize=50_000)
+def interval(design,lo,hi):
+    return mc.reference_interval(design,lo,hi)
+
+
+def tighten(rows):
+    lower=F(0); ls=[]
+    for _,lo,_ in rows:
+        lower=max(lower,lo); ls.append(lower)
+    upper=F(1); us=[]
+    for _,_,hi in reversed(rows):
+        upper=min(upper,hi); us.append(upper)
+    result=tuple((row[0],lo,hi) for row,lo,hi in zip(rows,ls,reversed(us),strict=True))
+    if any(lo>hi for _,lo,hi in result):
+        raise ValueError('inconsistent reference bounds')
+    return result
+
+
+def reference_region(design,ref,den,ql,qu,grids,primary,marginals):
+    regions=[]; cdf_cover=True; inverse_cover=True
+    for s in range(2):
+        rows=[]
+        for x in grids[s]:
+            lo=F(int(cdf_num(ref,qu[:,s],x)),den)
+            hi=F(int(cdf_num(ref,ql[:,s],x)),den)
+            rows.append((x,*interval(design,lo,hi)))
+        rows=tighten(rows)
+        for x,lo,hi in rows:
+            cdf_cover &= lo<=true_cdf(marginals[s],x)<=hi
+        quant=[mc.reference_quantile(rows,F(100-t,100)) for t in TARGETS]
+        for t,(lo,hi) in zip(TARGETS,quant,strict=True):
+            truth=true_quantile(marginals[s],t)
+            inverse_cover &= lo<=truth and (hi is None or truth<=hi)
+        by_x={x:(lo,hi) for x,lo,hi in rows}
+        cdfs=[by_x[x] for x in primary[s]]
+        inverse_cover &= cdfs[0][0]<=true_cdf(marginals[s],F(0))<=cdfs[0][1]
+        regions.append([*quant,*cdfs])
+    return regions,bool(cdf_cover),bool(inverse_cover)
+
+
+def empirical_vectors(counts,den,ql,qu,primary):
+    loq=quantiles(counts,ql,den); hiq=quantiles(counts,qu,den)
+    # Each component: integer observed lower/upper arrays and scale denominator.
+    return [[*[(loq[:,s,j],hiq[:,s,j],1) for j in range(3)],
+        *[(cdf_num(counts,qu[:,s],x),cdf_num(counts,ql[:,s],x),den) for x in primary[s]]]
+        for s in range(2)]
+
+
+def flags(vectors,reference,margins):
+    definite=np.ones(N_CONFIRM,dtype=bool); possible=definite.copy()
+    for s in range(2):
+        for (lo,hi,scale),(rlo,rhi),delta in zip(vectors[s],reference[s],[*margins[s],*[F(1,100)]*4],strict=True):
+            # For bounded finite endpoints, integer floor/ceil implement exact rational comparisons.
+            finite_hi=hi!=INF
+            if rhi is None:
+                definite[:]=False
+            else:
+                definite &= finite_hi & (hi<=math.floor((rlo+delta)*scale)) & (lo>=math.ceil((rhi-delta)*scale))
+                possible &= lo<=math.floor((rhi+delta)*scale)
+            possible &= (~finite_hi) | (hi>=math.ceil((rlo-delta)*scale))
+    return definite,possible
+
+
+def check_enclosure(observed,latent):
+    for s in range(2):
+        for (lo,hi,den),(ll,lu,dd) in zip(observed[s],latent[s],strict=True):
+            if den!=dd or np.any(lo>ll) or np.any(hi<lu):
+                raise ValueError('latent observed component enclosure violated')
+
+
+def censored_counts(rrng,crng):
+    # Equal laws: exact independent pooled counts by two stratum groups and stages.
+    # Reference: first 8/10 observed, all positives from group 1 censored.
+    r0=rrng.multinomial(200000,[.5,.5]); r1=rrng.multinomial(200000,[.5,.5])
+    rmiss=rrng.multinomial(100000,[.5,.5])  # latent only
+    ref=np.array([r0[0]+r1[0],r1[1],r0[1]+100000],dtype=np.int64)
+    rlatent=r0+r1+rmiss
+    c0=crng.multinomial(500,[.5,.5],size=N_CONFIRM)
+    c1=crng.multinomial(500,[.5,.5],size=N_CONFIRM)
+    complete=c0+c1
+    observed=np.column_stack([c0[:,0]+c1[:,0],c1[:,1],c0[:,1]])
+    observed[240:]=[0,0,1000]
+    ql=np.array([[0,0],[100,200],[0,0]],dtype=np.int64)
+    qu=np.array([[0,0],[100,200],[INF,INF]],dtype=np.int64)
+    assert ref.sum()==rlatent.sum()==500000
+    assert ref[0]<=rlatent[0]<=ref[0]+ref[2]
+    return ref,500000,observed,complete,1000,ql,qu,3+2*N_CONFIRM
+
+
+@lru_cache(maxsize=8)
+def exact_two_state_reliability(p):
+    # The zero component is necessary and sufficient for these low-zero-mass controls:
+    # within .01 of p, all 95/98/99th quantiles equal the true positive state;
+    # all other CDF components are either the same zero mass or exactly 1.
+    lo=max(0,math.ceil(1000*(p-F(1,100)))); hi=min(1000,math.floor(1000*(p+F(1,100))))
+    a,b=p.numerator,p.denominator
+    return F(sum(math.comb(1000,k)*a**k*(b-a)**(1000-k) for k in range(lo,hi+1)),b**1000)
+
+
+def reliability_oracle(case):
+    if case in (1,5): return F(1),True
+    if case==3: return F('0.873122602314788753356550'),False
+    if case==4: return F('0.448261466554298574681428'),False
+    return exact_two_state_reliability(F(1,200) if case==6 else F(101,200) if case==8 else F(1,2)),True
+
+
+def cp_interval(d,p):
+    # SciPy numerical CP endpoints for diagnostic coverage; exact critical-count decisions below.
+    return (0. if d==0 else float(beta.ppf(CP_ALPHA,d,N_CONFIRM-d+1)),
+            1. if p==N_CONFIRM else float(beta.ppf(1-CP_ALPHA,p+1,N_CONFIRM-p)))
+
+
+def experiment(case,seed):
+    rngs=[np.random.Generator(np.random.PCG64(x)) for x in seed.spawn(3)]
+    q,probabilities,weights=law(case)
+    pilot,pd,vectors=draw_counts(rngs[0],probabilities,weights,1000,30)
+    grids,primary,margins=make_pilot(pilot,q,pd)
+    design=mc.reference_design([(F(1,50),10000)]*50 if len(weights)==1 else [(F(w,sum(weights)),10000) for w in weights],
+                    grid_points=sum(map(len,grids)),alpha=F(1,50))
+    if case==7:
+        ref,rd,obs,complete,cd,ql,qu,v=censored_counts(rngs[1],rngs[2]); vectors+=v
+    else:
+        ref,rd,v=draw_counts(rngs[1],probabilities,weights,500000,1); ref=ref[0]; vectors+=v
+        complete,cd,v=draw_counts(rngs[2],probabilities,weights,1000,N_CONFIRM); vectors+=v
+        obs=complete; ql=qu=q
+    marginals=true_distributions(q,probabilities,weights)
+    truth=truth_vector(marginals,primary)
+    region,coverage,inverse=reference_region(design,ref,rd,ql,qu,grids,primary,marginals)
+    observed=empirical_vectors(obs,cd,ql,qu,primary)
+    latent=empirical_vectors(complete,cd,q,q,primary)
+    check_enclosure(observed,latent)
+    definite,possible=flags(observed,region,margins)
+    latent_pass,latent_possible=flags(latent,[[(x,x) for x in row] for row in truth],margins)
+    if not np.array_equal(latent_pass,latent_possible): raise ValueError('exact truth classification inconsistent')
+    if np.any(definite & ~possible): raise ValueError('definite exceeds possible')
+    if coverage and inverse and (np.any(definite & ~latent_pass) or np.any(latent_pass & ~possible)):
+        raise ValueError('latent success classification enclosure violated')
+    d,p=int(definite.sum()),int(possible.sum())
+    # Exact CP critical-count rule, independently established for n=300 and alpha=.015 per tail.
+    verdict='adequate' if d>=294 else 'inadequate' if p<=275 else 'unresolved'
+    r,is_exact=reliability_oracle(case)
+    correct=((verdict=='adequate' and r>=F(95,100)) or (verdict=='inadequate' and r<F(95,100)))
+    false=verdict!='unresolved' and not correct
+    joint=None
+    if is_exact:
+        low,high=cp_interval(d,p)
+        joint=bool(coverage and inverse and low<=float(r)<=high)
+    return (coverage,inverse,joint,false,correct,verdict=='unresolved'), verdict, d,p,vectors
+
+
+def mc_limits(k,n):
+    return [0. if k==0 else float(beta.ppf(ALPHA_MC,k,n-k+1)),1. if k==n else float(beta.ppf(1-ALPHA_MC,k+1,n-k))]
+
+
+def main():
+    start=time.monotonic(); results={}; total_vectors=0
+    seeds=np.random.SeedSequence(SEED).spawn(8*N_STUDIES)
+    for case in range(1,9):
+        rows=[]; verdicts=defaultdict(int); ds=[]; ps=[]
+        for i in range(N_STUDIES):
+            if time.monotonic()-start>=MAX_SECONDS or total_vectors+50*(30+10+N_CONFIRM)>MAX_VECTORS:
+                raise TimeoutError('prespecified cap; no replacement')
+            metrics,verdict,d,p,v=experiment(case,seeds[(case-1)*N_STUDIES+i])
+            rows.append(metrics); verdicts[verdict]+=1; ds.append(d); ps.append(p); total_vectors+=v
+        metrics={}
+        for j,name in enumerate(METRICS):
+            count=None if rows[0][j] is None else sum(r[j] for r in rows)
+            metrics[name]=None if count is None else {'count':int(count),'interval':mc_limits(count,N_STUDIES)}
+        oracle,exact=reliability_oracle(case)
+        results[str(case)]={'metrics':metrics,'verdicts':dict(verdicts),'definite_range':[min(ds),max(ds)],
+                          'possible_range':[min(ps),max(ps)],'reliability_oracle':float(oracle),'oracle_kind':'exact' if exact else 'upper_bound'}
+        print(f'case {case}: {results[str(case)]}',flush=True)
+    output={'format':'pyrorb-mc148-one-engine-candidate-qualification/1','seed':list(SEED),'studies_per_control':N_STUDIES,
+            'controls':8,'confirmations':N_CONFIRM,'source_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+            'confidence_kernel_sha256':hashlib.sha256(KERNEL.read_bytes()).hexdigest(),'python':sys.version,'numpy':np.__version__,
+            'scipy':scipy.__version__,'elapsed_seconds':time.monotonic()-start,'max_rss_kib':resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
+            'count_vectors':total_vectors,'cache_info':str(interval.cache_info()),'cases':results,'observed_enclosure_violations':0,
+            'simulation_authorised':False,'physical_events':0}
+    with Path(sys.argv[1]).open('x',encoding='utf-8') as stream: json.dump(output,stream,indent=2,allow_nan=False);stream.write('\n')
+
+if __name__=='__main__': main()
