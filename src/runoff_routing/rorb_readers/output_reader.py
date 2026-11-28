@@ -377,6 +377,130 @@ def _reported_scalars(doc: RorbDocument) -> None:
     section.completeness = "observed_scalar_lines"
 
 
+def _rainfall_header_start(doc: RorbDocument, index: int) -> int | None:
+    """Recognise the observed catchment/subarea and uniform catchment header forms."""
+    labels = doc.lines[index].split()
+    if labels in (["Incs", "ment"], ["incs", "ment"]):
+        if index >= 1 and doc.lines[index - 1].split() == ["Time", "Catch"]:
+            return index - 1
+        if index >= 2 and doc.lines[index - 2].split() == ["Time"] and doc.lines[index - 1].split() == ["Catch"]:
+            return index - 2
+        return None
+    if (
+        labels[:2] == ["Incs", "ment"]
+        and len(labels) > 2
+        and index >= 2
+        and doc.lines[index - 2].split() == ["Time", "Sub-"]
+        and doc.lines[index - 1].split() == ["Catch", "Area"]
+    ):
+        return index - 2
+    return None
+
+
+def _rainfall_columns(doc: RorbDocument, index: int) -> list[str] | None:
+    labels = doc.lines[index].split()
+    if len(labels) == 2:
+        return ["Inc", "Catchment_mm"] if _rainfall_header_start(doc, index) is not None else None
+    if labels[:2] != ["Incs", "ment"]:
+        return None
+    areas = labels[2:]
+    if any(re.fullmatch(r"[A-Za-z]+", a) is None for a in areas) or len(set(areas)) != len(areas):
+        return None
+    return ["Inc", "Catchment_mm", *[f"Subarea_{a}_mm" for a in areas]]
+
+
+def _next_nonblank(doc: RorbDocument, index: int) -> int:
+    while index < len(doc.lines) and not doc.lines[index].strip():
+        index += 1
+    return index
+
+
+def _rainfall_page_end(doc: RorbDocument, table: Section) -> int | None:
+    """Bind the printed total separately from interval tokens and find the next page."""
+    if not table.valid or not table.rows:
+        return None
+    index = _next_nonblank(doc, int(str(table.rows[-1]["line"])))
+    if index >= len(doc.lines):
+        return None
+    footer = doc.lines[index].strip()
+    if not footer.startswith("Tot."):
+        return None
+    # RORB may fill the catchment field completely, e.g. Tot.105.0.
+    tokens = footer.removeprefix("Tot.").split()
+    if len(tokens) != len(table.columns) - 2:
+        return None
+    try:
+        if any(number(token) < 0 for token in tokens):
+            return None
+    except ValueError:
+        return None
+    for column, token in zip(table.columns[2:], tokens, strict=True):
+        doc.metadata[f"{table.name}_reported_total_{column}"] = token
+    doc.metadata[f"{table.name}_total_line"] = index + 1
+    index = _next_nonblank(doc, index + 1)
+    if index < len(doc.lines) and doc.lines[index].split()[:3] == ["Pluvi.", "ref.", "no."]:
+        index = _next_nonblank(doc, index + 1)
+    return index
+
+
+def _read_rainfall_table(doc: RorbDocument, header: int, name: str) -> Section | None:
+    columns = _rainfall_columns(doc, header)
+    if columns is None:
+        return None
+    table = _numeric_table(doc, header + 1, columns, name)
+    if table.rows:
+        validate_series(doc, table, "Inc")
+    return table
+
+
+def _read_rainfall_pages(doc: RorbDocument, index: int, name: str) -> None:
+    """Retain existing numbered first pages; add separately named continuation pages."""
+    doc.metadata[f"{name}_meaning"] = doc.lines[index].strip()
+    candidates = [
+        j
+        for j in range(index + 1, min(index + 7, len(doc.lines)))
+        if doc.lines[j].split()[:2] == ["Incs", "ment"] or doc.lines[j].split() == ["incs", "ment"]
+    ]
+    table = _read_rainfall_table(doc, candidates[0], name) if len(candidates) == 1 else None
+    if table is None:
+        doc.issue("unsupported_rainfall", "Rainfall header layout unsupported; raw block preserved.", index + 1)
+        return
+    header = candidates[0]
+    if _rainfall_header_start(doc, header) != _next_nonblank(doc, index + 1):
+        return
+    pages = 1
+    while True:
+        boundary = _rainfall_page_end(doc, table)
+        if boundary is None or boundary >= len(doc.lines):
+            return
+        next_line = doc.lines[boundary].strip()
+        if next_line.startswith(("Rainfall, mm, in time inc.", "Rainfall-excess, mm, in time inc.")) or (
+            next_line == "Routing results:"
+        ):
+            doc.metadata[f"{name}_page_count"] = pages
+            return
+        header = boundary + 2
+        if len(table.columns) <= 3 or header >= len(doc.lines) or _rainfall_header_start(doc, header) != boundary:
+            return
+        pages += 1
+        next_table = _read_rainfall_table(doc, header, f"{name}_page_{pages}")
+        if next_table is None or len(next_table.columns) <= 3:
+            return
+        table = next_table
+
+
+def _record_rainfall_clock(doc: RorbDocument) -> None:
+    """Admit only a unique global printed rainfall horizon and time increment."""
+    times = [line.strip() for line in doc.lines if line.lstrip().startswith("Rainfall times:")]
+    steps = [line for line in doc.lines if line.lstrip().startswith("Time increment (hours)")]
+    if len(times) != 1 or len(steps) != 1:
+        return
+    match = re.fullmatch(r"Rainfall times:\s*(\d+)\s+(\d+)", times[0])
+    if match is not None and isinstance(doc.metadata.get("time_increment_raw"), str):
+        doc.metadata["rainfall_start_increment"] = int(match[1])
+        doc.metadata["rainfall_finish_increment"] = int(match[2])
+
+
 def read_output(doc: RorbDocument) -> None:  # noqa: C901 - preserve ordered format state and diagnostic scope
     """Read named hydrographs and supported rainfall tables; retain all other source lines."""
     report_metadata(doc)
@@ -482,22 +606,8 @@ def read_output(doc: RorbDocument) -> None:  # noqa: C901 - preserve ordered for
                 doc.issue("completion_unverified", "No calculation count to verify hydrograph completion.", i + 1)
         if line.strip().startswith(("Rainfall, mm, in time inc.", "Rainfall-excess, mm, in time inc.")):
             rainfall_count += 1
-            candidates = [
-                (j, doc.lines[j].split())
-                for j in range(i + 1, min(i + 7, len(doc.lines)))
-                if doc.lines[j].split()[:2] == ["Incs", "ment"]
-            ]
-            if len(candidates) == 1:
-                j, labels = candidates[0]
-                areas = labels[2:]
-                if areas and all(re.fullmatch(r"[A-Za-z]+", a) for a in areas) and len(set(areas)) == len(areas):
-                    columns = ["Inc", "Catchment_mm", *[f"Subarea_{a}_mm" for a in areas]]
-                    table = _numeric_table(doc, j + 1, columns, f"rainfall_{rainfall_count}")
-                    if table.rows:
-                        validate_series(doc, table, "Inc")
-                    doc.metadata[f"rainfall_{rainfall_count}_meaning"] = line.strip()
-                    continue
-            doc.issue("unsupported_rainfall", "Rainfall header layout unsupported; raw block preserved.", i + 1)
+            _read_rainfall_pages(doc, i, f"rainfall_{rainfall_count}")
+    _record_rainfall_clock(doc)
     if timestep_text is not None:
         for table in hydrograph_summaries:
             _validate_reported_time_increment(doc, table, timestep_text)
