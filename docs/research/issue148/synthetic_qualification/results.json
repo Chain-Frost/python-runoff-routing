@@ -1,0 +1,408 @@
+{
+  "seed": 14820261128,
+  "studies_per_case": 1000,
+  "confirmation": 300,
+  "source_sha256": "4dcc8d4a85ad772546c74e4499483d670359746f8682e329dc0f29c1e16ac6c4",
+  "python": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "numpy": "2.3.5",
+  "scipy": "1.17.0",
+  "elapsed_seconds": 60.031596851,
+  "max_rss_kib": 147088,
+  "cases": {
+    "1": {
+      "metrics": {
+        "reference_coverage": {
+          "count": 1000,
+          "lo": 0.9924684250633673,
+          "hi": 1
+        },
+        "inverse_coverage": {
+          "count": 1000,
+          "lo": 0.9924684250633673,
+          "hi": 1
+        },
+        "equivalence": {
+          "count": 1000,
+          "lo": 0.9924684250633673,
+          "hi": 1
+        },
+        "false_equivalence": {
+          "count": 0,
+          "lo": 0,
+          "hi": 0.007531574936632705
+        },
+        "joint_reliability_coverage": {
+          "count": 1000,
+          "lo": 0.9924684250633673,
+          "hi": 1
+        },
+        "false_reliability_verdict": {
+          "count": 0,
+          "lo": 0,
+          "hi": 0.007531574936632705
+        }
+      },
+      "true_equivalence": 1000,
+      "adequate": [
+        1000,
+        1000
+      ],
+      "inadequate": [
+        0,
+        0
+      ],
+      "definite_mean": [
+        300,
+        300
+      ],
+      "possible_mean": [
+        300,
+        300
+      ]
+    },
+    "2": {
+      "metrics": {
+        "reference_coverage": {
+          "count": 1000,
+          "lo": 0.9924684250633673,
+          "hi": 1
+        },
+        "inverse_coverage": {
+          "count": 1000,
+          "lo": 0.9924684250633673,
+          "hi": 1
+        },
+        "equivalence": {
+          "count": 1000,
+          "lo": 0.9924684250633673,
+          "hi": 1
+        },
+        "false_equivalence": {
+          "count": 0,
+          "lo": 0,
+          "hi": 0.007531574936632705
+        },
+        "joint_reliability_coverage": {
+          "count": 1000,
+          "lo": 0.9924684250633673,
+          "hi": 1
+        },
+        "false_reliability_verdict": {
+          "count": 0,
+          "lo": 0,
+          "hi": 0.007531574936632705
+        }
+      },
+      "true_equivalence": 1000,
+      "adequate": [
+        0,
+        0
+      ],
+      "inadequate": [
+        1000,
+        1000
+      ],
+      "definite_mean": [
+        102.186,
+        102.46
+      ],
+      "possible_mean": [
+        176.082,
+        176.645
+      ]
+    },
+    "3": {
+      "metrics": {
+        "reference_coverage": {
+          "count": 1000,
+          "lo": 0.9924684250633673,
+          "hi": 1
+        },
+        "inverse_coverage": {
+          "count": 1000,
+          "lo": 0.9924684250633673,
+          "hi": 1
+        },
+        "equivalence": {
+          "count": 0,
+          "lo": 0,
+          "hi": 0.007531574936632705
+        },
+        "false_equivalence": {
+          "count": 0,
+          "lo": 0,
+          "hi": 0.007531574936632705
+        },
+        "joint_reliability_coverage": null,
+        "false_reliability_verdict": null
+      },
+      "true_equivalence": 1000,
+      "adequate": [
+        0,
+        0
+      ],
+      "inadequate": [
+        600,
+        612
+      ],
+      "definite_mean": [
+        0,
+        0
+      ],
+      "possible_mean": [
+        273.141,
+        272.907
+      ]
+    },
+    "4": {
+      "metrics": {
+        "reference_coverage": {
+          "count": 1000,
+          "lo": 0.9924684250633673,
+          "hi": 1
+        },
+        "inverse_coverage": {
+          "count": 1000,
+          "lo": 0.9924684250633673,
+          "hi": 1
+        },
+        "equivalence": {
+          "count": 993,
+          "lo": 0.9795454476765304,
+          "hi": 0.9986390170698629
+        },
+        "false_equivalence": {
+          "count": 0,
+          "lo": 0,
+          "hi": 0.007531574936632705
+        },
+        "joint_reliability_coverage": null,
+        "false_reliability_verdict": null
+      },
+      "true_equivalence": 1000,
+      "adequate": [
+        0,
+        0
+      ],
+      "inadequate": [
+        1000,
+        1000
+      ],
+      "definite_mean": [
+        56.841,
+        57.146
+      ],
+      "possible_mean": [
+        164.073,
+        164.453
+      ]
+    },
+    "5": {
+      "metrics": {
+        "reference_coverage": {
+          "count": 1000,
+          "lo": 0.9924684250633673,
+          "hi": 1
+        },
+        "inverse_coverage": {
+          "count": 1000,
+          "lo": 0.9924684250633673,
+          "hi": 1
+        },
+        "equivalence": {
+          "count": 0,
+          "lo": 0,
+          "hi": 0.007531574936632705
+        },
+        "false_equivalence": {
+          "count": 0,
+          "lo": 0,
+          "hi": 0.007531574936632705
+        },
+        "joint_reliability_coverage": {
+          "count": 1000,
+          "lo": 0.9924684250633673,
+          "hi": 1
+        },
+        "false_reliability_verdict": {
+          "count": 0,
+          "lo": 0,
+          "hi": 0.007531574936632705
+        }
+      },
+      "true_equivalence": 0,
+      "adequate": [
+        1000,
+        0
+      ],
+      "inadequate": [
+        0,
+        0
+      ],
+      "definite_mean": [
+        300,
+        0
+      ],
+      "possible_mean": [
+        300,
+        300
+      ]
+    },
+    "6": {
+      "metrics": {
+        "reference_coverage": {
+          "count": 999,
+          "lo": 0.9900906758115198,
+          "hi": 0.9999994790311216
+        },
+        "inverse_coverage": {
+          "count": 1000,
+          "lo": 0.9924684250633673,
+          "hi": 1
+        },
+        "equivalence": {
+          "count": 0,
+          "lo": 0,
+          "hi": 0.007531574936632705
+        },
+        "false_equivalence": {
+          "count": 0,
+          "lo": 0,
+          "hi": 0.007531574936632705
+        },
+        "joint_reliability_coverage": {
+          "count": 999,
+          "lo": 0.9900906758115198,
+          "hi": 0.9999994790311216
+        },
+        "false_reliability_verdict": {
+          "count": 0,
+          "lo": 0,
+          "hi": 0.007531574936632705
+        }
+      },
+      "true_equivalence": 0,
+      "adequate": [
+        0,
+        0
+      ],
+      "inadequate": [
+        1000,
+        1000
+      ],
+      "definite_mean": [
+        102.83,
+        102.637
+      ],
+      "possible_mean": [
+        176.314,
+        177.025
+      ]
+    },
+    "7": {
+      "metrics": {
+        "reference_coverage": {
+          "count": 1000,
+          "lo": 0.9924684250633673,
+          "hi": 1
+        },
+        "inverse_coverage": {
+          "count": 1000,
+          "lo": 0.9924684250633673,
+          "hi": 1
+        },
+        "equivalence": {
+          "count": 0,
+          "lo": 0,
+          "hi": 0.007531574936632705
+        },
+        "false_equivalence": {
+          "count": 0,
+          "lo": 0,
+          "hi": 0.007531574936632705
+        },
+        "joint_reliability_coverage": {
+          "count": 1000,
+          "lo": 0.9924684250633673,
+          "hi": 1
+        },
+        "false_reliability_verdict": {
+          "count": 0,
+          "lo": 0,
+          "hi": 0.007531574936632705
+        }
+      },
+      "true_equivalence": 1000,
+      "adequate": [
+        0,
+        0
+      ],
+      "inadequate": [
+        1000,
+        0
+      ],
+      "definite_mean": [
+        102.505,
+        0
+      ],
+      "possible_mean": [
+        176.896,
+        300
+      ]
+    },
+    "8": {
+      "metrics": {
+        "reference_coverage": {
+          "count": 999,
+          "lo": 0.9900906758115198,
+          "hi": 0.9999994790311216
+        },
+        "inverse_coverage": {
+          "count": 1000,
+          "lo": 0.9924684250633673,
+          "hi": 1
+        },
+        "equivalence": {
+          "count": 154,
+          "lo": 0.11877122933546362,
+          "hi": 0.1944964714509384
+        },
+        "false_equivalence": {
+          "count": 0,
+          "lo": 0,
+          "hi": 0.007531574936632705
+        },
+        "joint_reliability_coverage": {
+          "count": 999,
+          "lo": 0.9900906758115198,
+          "hi": 0.9999994790311216
+        },
+        "false_reliability_verdict": {
+          "count": 0,
+          "lo": 0,
+          "hi": 0.007531574936632705
+        }
+      },
+      "true_equivalence": 1000,
+      "adequate": [
+        0,
+        0
+      ],
+      "inadequate": [
+        1000,
+        1000
+      ],
+      "definite_mean": [
+        102.081,
+        102.643
+      ],
+      "possible_mean": [
+        176.103,
+        176.363
+      ]
+    }
+  },
+  "enclosure_violations": 0,
+  "simulation_authorised": false
+}

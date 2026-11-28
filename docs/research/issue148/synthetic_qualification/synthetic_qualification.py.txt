@@ -1,0 +1,209 @@
+"""Bounded finite-law #148 statistical experiment, not a routing/product sampler."""
+from __future__ import annotations
+
+import hashlib
+import json
+import math
+import platform
+import resource
+import sys
+import time
+from pathlib import Path
+
+import numpy as np
+from scipy import __version__ as scipy_version
+from scipy.stats import beta, binom
+
+REPS = 1000
+CONF = 300
+SEED = 14820261128
+TICKS = 10000
+TARGETS = np.array([99, 98, 95])
+ALPHA = 0.0075
+REF_ALPHA = 0.01
+LIMIT = 14400
+CAP = 272000000
+METRICS = ('reference_coverage', 'inverse_coverage', 'equivalence', 'false_equivalence',
+           'joint_reliability_coverage', 'false_reliability_verdict')
+
+
+def law(case: int, engine: int):
+    """Integer peak ticks; rows are joint outcomes; rational law via float probabilities."""
+    if case in (1, 5):
+        return np.array([[11000, 22000] if case == 5 and engine else [10000, 20000]]), np.ones((1, 1)), np.array([1])
+    if case in (3, 4):
+        q = np.array([[0, 0], [10000, 20000], [20000, 10000], [1000000, 1000000]])
+        p = np.array([.95, .03, .01, .01])
+        if case == 4:
+            r = np.arange(50)[:, None] / 49
+            return q, (1-r)*p + r*np.array([.20, .50, .25, .05]), np.arange(1, 51)
+        return q, p[None, :], np.array([1])
+    p0 = .53 if case == 6 and engine else .505 if case == 8 and engine else .5
+    return np.array([[0, 0], [10000, 20000]]), np.array([[p0, 1-p0]]), np.array([1])
+
+
+def draw(rng, p, w, n: int, cohorts: int):
+    """Pool identical equal-weight strata, otherwise retain weighted stratum counts."""
+    if len(w) == 1:
+        return rng.multinomial(n, p[0], size=cohorts), n
+    counts = rng.multinomial(n//50, p, size=(cohorts, 50))
+    return (counts*w[None, :, None]).sum(axis=1), n//50*int(w.sum())
+
+
+def quant(counts, q, den, targets=TARGETS):
+    result = []
+    for s in range(2):
+        order = np.argsort(q[:, s], kind='stable')
+        cum = np.cumsum(counts[..., order], axis=-1)
+        result.append(q[order, s][np.argmax(cum[..., None, :]*100 >= den*np.asarray(targets)[..., None], axis=-1)])
+    return np.stack(result, axis=-2)
+
+
+def cdf(counts, q, den, s, grid):
+    return (counts @ (q[:, s, None] <= grid).astype(np.int64))/den
+
+
+def vector(counts, q, den, thresholds):
+    peaks = quant(counts, q, den)
+    return np.concatenate([peaks, np.stack([cdf(counts, q, den, s, thresholds[s]) for s in range(2)], axis=-2)], axis=-1)
+
+
+def truth(q, p, w, thresholds):
+    # Exact laws have denominators dividing 1000*49*sum(weights).
+    den = 1000*(49 if len(w)>1 else 1)*int(w.sum())
+    masses = np.rint((w @ p)/w.sum()*den).astype(np.int64)
+    if masses.sum() != den:
+        raise ValueError('oracle mass')
+    return vector(masses, q, den, thresholds), masses, den
+
+
+def bounds(lo, hi, counts, den, grids, radius):
+    lowers, uppers = [], []
+    for s, g in enumerate(grids):
+        l = np.maximum.accumulate(np.maximum(0, cdf(counts, hi, den, s, g)-radius))
+        u = np.minimum.accumulate(np.minimum(1, cdf(counts, lo, den, s, g)+radius)[::-1])[::-1]
+        if np.any(l > u+1e-12):
+            raise ValueError('inconsistent region')
+        lowers.append(l)
+        uppers.append(u)
+    return lowers, uppers
+
+
+def region(grids, ls, us, thresholds):
+    lows, highs = [], []
+    for s, g in enumerate(grids):
+        t = TARGETS/100
+        lq = np.array([max([0, *g[us[s]<v]]) for v in t])
+        uq = np.array([min([math.inf, *g[ls[s]>=v]]) for v in t])
+        ix = np.searchsorted(g, thresholds[s])
+        lows.append(np.r_[lq, ls[s][ix]])
+        highs.append(np.r_[uq, us[s][ix]])
+    return np.array(lows), np.array(highs)
+
+
+def compare(a, b, c, d, margin):
+    """Conservative definite and possible simultaneous pass of two rectangles."""
+    worst = np.maximum(abs(a-d), abs(b-c))
+    distance = np.maximum(a-d, c-b)
+    # Infinite endpoints cannot establish definite pass; same infinities mean unknown.
+    return np.all(worst <= margin+1e-12, axis=(-2,-1)), np.all(distance <= margin+1e-12, axis=(-2,-1))
+
+
+def experiment(case: int, seed):
+    streams = iter(np.random.SeedSequence(seed).spawn(6))
+    q, p, w = law(case, 0)
+    pilot, pd = draw(np.random.default_rng(next(streams)), p, w, 1000, 30)
+    scales = np.median(quant(pilot, q, pd), axis=0)
+    delta = np.maximum(200, .02*scales)
+    thresholds = np.column_stack([np.zeros(2), scales])
+    pooled = quant(pilot.sum(axis=0), q, pd*30, np.arange(1,101))
+    grids = [np.unique(np.r_[0, pooled[s], np.maximum(0, scales[s,:,None]+delta[s,:,None]*np.array([-2,-1,-.5,-.25,0,.25,.5,1,2])).ravel()]) for s in range(2)]
+    margin = np.column_stack([delta, np.full((2,4),.01)])
+    k = 2*sum(map(len,grids))
+    if k>512: raise ValueError('grid cap')
+    records = []
+    for e in range(2):
+        q,p,w = law(case,e)
+        true,mass,td = truth(q,p,w,thresholds)
+        # Independent pooled reference and confirmation count vectors.
+        rrng, crng = (np.random.default_rng(next(streams)) for _ in range(2))
+        if e==0: next(streams)
+        # Six streams: pilot, reference0, confirmation0, spare, reference1, confirmation1.
+        ref,rd = draw(rrng,p,w,500000,1); ref=ref[0]
+        complete,cd = draw(crng,p,w,1000,CONF)
+        lowerq=upperq=q
+        obsref=ref
+        obs=complete
+        if case==7 and e:
+            # Independently censor a subset of positive draws; preserve latent count.
+            refmiss=rrng.binomial(ref[1],.02)
+            miss=crng.binomial(complete[:,1],.02)
+            obsref=np.array([ref[0],ref[1]-refmiss,refmiss])
+            obs=np.column_stack([complete[:,0],complete[:,1]-miss,miss])
+            lowerq=np.array([[0,0],[10000,20000],[0,0]])
+            upperq=np.array([[50,50],[10000,20000],[math.inf,math.inf]])
+        radius=math.sqrt(.5*float(np.sum((w/w.sum())**2))/(500000/len(w))*math.log(2*k/REF_ALPHA))
+        ls,us=bounds(lowerq,upperq,obsref,rd,grids,radius)
+        cover=all(np.all((ls[s]-1e-12<=cdf(mass,q,td,s,g)) & (cdf(mass,q,td,s,g)<=us[s]+1e-12)) for s,g in enumerate(grids))
+        a,b=region(grids,ls,us,thresholds)
+        inverse=bool(np.all((a[:,:3]-1e-12<=true[:,:3])&(true[:,:3]<=b[:,:3]+1e-12)))
+        latent=vector(complete,q,cd,thresholds)
+        # Endpoint empirical quantiles/CDFs: lower-Q yields upper CDF and lower quantile.
+        low=vector(obs,lowerq,cd,thresholds); high=vector(obs,upperq,cd,thresholds)
+        cl=np.concatenate([low[...,:3],high[...,3:]],axis=-1)
+        cu=np.concatenate([high[...,:3],low[...,3:]],axis=-1)
+        if case==7 and e:
+            cl[240:]=0; cu[240:,:,:3]=math.inf; cu[240:,:,3:]=1
+        contained=bool(np.all((cl-1e-12<=latent)&(latent<=cu+1e-12)))
+        definite,possible=compare(cl,cu,a,b,margin)
+        latentpass=np.all(abs(latent-true)<=margin+1e-12,axis=(-2,-1))
+        if cover and inverse and (np.any(definite & ~latentpass) or np.any(latentpass & ~possible)):
+            raise ValueError('classification enclosure')
+        if not contained: raise ValueError('latent observation enclosure')
+        ndef,npos=int(definite.sum()),int(possible.sum())
+        lower=0 if ndef==0 else float(beta.ppf(ALPHA,ndef,CONF-ndef+1))
+        upper=1 if npos==CONF else float(beta.ppf(1-ALPHA,npos+1,CONF-npos))
+        verdict=1 if lower>=.95 else -1 if upper<.95 else 0
+        exact=None
+        if len(w)==1 and len(q)<=2:
+            if len(q)==1: exact=1.
+            else:
+                zeros=np.arange(1001)
+                v=vector(np.column_stack([zeros,1000-zeros]),q,1000,thresholds)
+                valid=np.all(abs(v-true)<=margin+1e-12,axis=(-2,-1))
+                exact=float(binom.pmf(zeros,1000,p[0,0])[valid].sum())
+        records.append((true,a,b,cover,inverse,lower,upper,verdict,exact,ndef,npos))
+    t,a,b,cov,inv,*_=records[0]; u,c,d,cov2,inv2,*_=records[1]
+    equiv,_=compare(a,b,c,d,margin)
+    actual=bool(np.all(abs(t-u)<=margin+1e-12))
+    known=all(r[8] is not None for r in records)
+    joint=all(r[5]-1e-12<=r[8]<=r[6]+1e-12 for r in records) and cov and cov2 and inv and inv2 if known else None
+    false=any((r[7]==1 and r[8]<.95-1e-12) or (r[7]==-1 and r[8]>=.95-1e-12) for r in records) if known else None
+    return [bool(cov and cov2),bool(inv and inv2),bool(equiv),bool(equiv and not actual),joint,false], [int(actual),*[r[7] for r in records],*[r[9] for r in records],*[r[10] for r in records]]
+
+
+def main():
+    start=time.monotonic()
+    # All 8,000 studies are fixed before examining any output.
+    seeds=np.random.SeedSequence(SEED).spawn(8*REPS)
+    results={}
+    for case in range(1,9):
+        rows=[]; diag=[]
+        for i in range(REPS):
+            if time.monotonic()-start>=LIMIT: raise TimeoutError('fixed cap')
+            m,d=experiment(case,seeds[(case-1)*REPS+i].generate_state(4))
+            rows.append(m); diag.append(d)
+        metrics={}
+        a=.05/(2*8*len(METRICS))
+        for j,name in enumerate(METRICS):
+            if rows[0][j] is None: metrics[name]=None; continue
+            x=sum(r[j] for r in rows)
+            metrics[name]={'count':x,'lo':0 if x==0 else float(beta.ppf(a,x,REPS-x+1)), 'hi':1 if x==REPS else float(beta.ppf(1-a,x+1,REPS-x))}
+        arr=np.asarray(diag)
+        results[str(case)]={'metrics':metrics,'true_equivalence':int(arr[:,0].sum()),'adequate':(arr[:,1:3]==1).sum(axis=0).tolist(),'inadequate':(arr[:,1:3]==-1).sum(axis=0).tolist(),'definite_mean':arr[:,3:5].mean(axis=0).tolist(),'possible_mean':arr[:,5:7].mean(axis=0).tolist()}
+        print(f'case {case}: {results[str(case)]}',flush=True)
+    result={'seed':SEED,'studies_per_case':REPS,'confirmation':CONF,'source_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'python':sys.version,'platform':platform.platform(),'numpy':np.__version__,'scipy':scipy_version,'elapsed_seconds':time.monotonic()-start,'max_rss_kib':resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,'cases':results,'enclosure_violations':0,'simulation_authorised':False}
+    Path(sys.argv[1]).write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8')
+
+
+if __name__=='__main__': main()
